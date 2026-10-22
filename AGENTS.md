@@ -11,7 +11,7 @@ anything.
 
 ## Where we are
 
-Nothing is scaffolded yet. The build goes spine first, fan-out second
+The build goes spine first, fan-out second
 (SPEC §6): the spine is a plan of steps, then an orchestrator (`/run-steps`)
 runs each later phase as parallel lanes, with the owner's hardware gates in
 between.
@@ -35,7 +35,7 @@ to continue plan work without naming the plan, ask which one.**
 | Going over a retro with the owner | the **`/retro`** skill |
 | Writing or changing a plan, a step, a lane or a "Done when" list | [`.agents/writing-a-plan.md`](.agents/writing-a-plan.md) |
 | Any audio, MIDI, clock or input-timing code | SPEC §3, all of it |
-| Anything touching OP-1 Field behaviour or file formats | SPEC §2 and §8, then `docs/HARDWARE_NOTES.md` once it exists |
+| Anything touching OP-1 Field behaviour or file formats | SPEC §2 and §8, then [`docs/HARDWARE_NOTES.md`](docs/HARDWARE_NOTES.md) |
 | Work in a module lane | SPEC §5.5 and §6.5, then `docs/MODULE_CONTRACT.md` once it exists |
 | Adding a dependency, a vendored file, or installing a program | [Dependencies](#dependencies) below, and **ask the owner first** |
 | Shell scripts, regexes, paths or commit messages on this machine | [`.agents/windows-tool-pitfalls.md`](.agents/windows-tool-pitfalls.md) |
@@ -70,11 +70,22 @@ Push back before breaking one.
 - The committed `.npmrc` turns off install scripts, saves exact versions,
   skips releases younger than 7 days and blocks git dependencies. Don't loosen
   it. If a package can't work without its install script, ask. Install with
-  `npm ci` once a lockfile exists.
+  `npm ci`.
 
 ## Repo conventions
 
 - Vite's `base` is `/op-1-school/`, the repo name.
+- `npm run check` runs typecheck (`tsc -b`, every project), Vitest, then the
+  build; it must exit 0 before a step is done. CI runs the same on Node 24.
+- Type projects: `tsconfig.app.json` (`src`, browser types),
+  `tsconfig.test.json` (`src/**/__tests__`, adds Node types) and
+  `tsconfig.node.json` (the Vite and Vitest configs). App code that imports
+  `node:*` fails typecheck on purpose.
+- Tests are `src/**/__tests__/**/*.test.ts`, in Vitest's node environment.
+- Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,
+  port 5173). The app is at `http://localhost:5173/op-1-school/`.
+- The build copies `dist/index.html` to `dist/404.html` so GitHub Pages serves
+  the app shell for deep links.
 - `docs/` holds owner docs; `.agents/` holds agent notes. Every change updates
   the docs it affects in the same commit, written as what's true now, with no
   "was X, now Y".

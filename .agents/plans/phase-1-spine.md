@@ -5,8 +5,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 
 | Row | Name | Status | Commit |
 | --- | --- | --- | --- |
-| 1 | Scaffold (**attended**) | **Next** | |
-| 2 | Types | | |
+| 1 | Scaffold (**attended**) | done 2026-10-22 | |
+| 2 | Types | **Next** | |
 | 3 | Theory | | |
 | 4 | Clock and transport | | |
 | 5 | Backing synth | | |
@@ -19,7 +19,32 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 
 ### Carried forward
 
+- (1) `src/__tests__/scaffold.test.ts` is the trivial test; row 2 deletes it.
+- (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
+  manifest's theme and background colour. Row 8 sets it equal to the dark
+  background token in `tokens.css`.
+- (1) `index.html` has no `color-scheme` meta and no theme script; row 8 adds
+  both before the module script.
+- (1) The service worker registers through the plugin's injected
+  `registerSW.js` with `registerType: 'autoUpdate'`: a new deploy takes over
+  on the next load, with no update prompt. Fine while everything is in one
+  bundle.
+- (1) OWNER: GitHub **Settings → Pages → Source** = "GitHub Actions" before
+  row 11's push.
+
 ### Process notes
+
+- (1) The row says typecheck is `tsc --noEmit` over every project. With a
+  solution `tsconfig.json` (`files: []` plus references) that checks nothing;
+  the script is `tsc -b --noEmit`, which builds each referenced project.
+- (1) Latest-allowed versions are TypeScript 7.0 (the native compiler) and
+  Vite 8 (Rolldown). Both work with this setup; nothing needed an install
+  script (only `fsevents`, macOS-only, declares one).
+- (1) `gh` isn't on Git Bash's `PATH` here. Action SHAs came from
+  `git ls-remote --tags https://github.com/actions/<name>.git`.
+- (1) `AGENTS.md` says to ask which plan when the owner doesn't name one;
+  with exactly one open plan, this step went ahead with it. Worth saying so
+  in that line.
 
 ## How this plan runs
 
