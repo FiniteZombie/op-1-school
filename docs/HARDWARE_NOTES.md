@@ -60,7 +60,7 @@ interface, waiting on a result) or `resolved`.
 | V5 | Web MIDI clock jitter on the target phone (p95 ≤ 3 ms, loopback) | §8.5 | open | | |
 | V6 | Whether the Field needs clock pulses before `0xFA` to lock tempo on bar 1 | §8.6 | stubbed | `WebMidiBridge.clockOut` in `src/input/MidiBridge.ts`: as SPEC §3.4, no pulses before `FA` on a transport start | |
 | V7 | The Field's MIDI input port name | §2.1 | stubbed | `WebMidiBridge` in `src/input/MidiBridge.ts`: no port is picked by name; the user picks, and the choice is remembered by id, then name | |
-| V8 | MIDI note number of the Field's lowest key at the default octave | §2.1 | open | | |
+| V8 | MIDI note number of the Field's lowest key at the default octave | §2.1 | stubbed | `DEFAULT_SETTINGS.keyboardBaseNote` in `src/state/settings.ts`: 53 (F3) | |
 
 ## Platform measurements
 

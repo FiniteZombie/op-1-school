@@ -10,9 +10,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 3 | Theory | done 2026-10-22 | 88aa382 |
 | 4 | Clock and transport | done 2026-10-22 | da45254 |
 | 5 | Backing synth | done 2026-10-22 | b82c7ca |
-| 6 | Input and MIDI | done 2026-10-22 | |
-| 7 | State | **Next** | |
-| 8 | UI primitives and registry | | |
+| 6 | Input and MIDI | done 2026-10-22 | 4a067d9 |
+| 7 | State | done 2026-10-22 | |
+| 8 | UI primitives and registry | **Next** | |
 | 9 | `/dev/spine` | | |
 | 10 | Fan-out docs | | |
 | 11 | Exit gate (**attended**) | | |
@@ -209,6 +209,29 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (6) Nothing in `src/input` has touched a real Web MIDI port (no browser or
   hardware here): row 9's browser checks and row 11's `[field]` checks are
   its first run.
+- (7) `src/state/` API. `db.ts`: `openAppDb()` (rejects `IndexedDB is not
+  available…` with no global), `upgradeDb(target, oldVersion)` over the
+  `UpgradeTarget` slice, `newId()`, the record types (`Session`, `Attempt`,
+  `Sample`, `Kit`, `CalibrationRecord`), `exportData(db)`, `importData(db,
+  json)`, `parseExport`. Exports leave out `samples`; import replaces only the
+  stores the envelope names among `sessions`, `attempts`, `kits`,
+  `calibration` and ignores the rest. Add a DB version as a new `case` after
+  case 0's block (the tsconfig forbids a fallthrough into `default`).
+- (7) `settings.ts`: `settings` (the app's store: `get`, `save(patch)`,
+  `subscribe`), `createSettings(storage)`, `SETTINGS_KEY`, `DEFAULT_SETTINGS`.
+  Row 8's theme script in `index.html` reads `localStorage['op-1-school.settings']`
+  as flat JSON and takes `.theme` (`'dark'` unless it is `'light'`).
+  `portMemory(settings)` is the `PortMemory` for `new WebMidiBridge({ memory })`
+  (row 8 wires it). `save` notifies only when a value changed; there is no
+  cross-tab `storage` listener.
+- (7) `keyboardBaseNote` 53 is VERIFY V8's stub; `keyboardOctave` accepts any
+  integer (row 8 decides the range it uses). Add-ons to the plan: calibration
+  `computeCalibration(offsets, { source, device, outputLatencyMs,
+  measuredAt? })` returns the record; `getCalibration`, `putCalibration` and
+  `listCalibrations` take an optional `AppDB` and open their own otherwise.
+- (7) The IndexedDB round trip (`openAppDb`, `importData`, `exportData`,
+  calibration get/put against a real database) has only run against fakes:
+  row 9's `db ok` check is its first real run.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -292,6 +315,12 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   (`RealMidiFits`) proves the DOM's `MIDIAccess`, `MIDIInput` and
   `MIDIOutput` fit the structural types. Scripted edits ran from scratchpad
   files.
+- (7) Linux cloud container again. `noFallthroughCasesInSwitch` rejects the
+  plan's "switch that falls through" ending in `default`; case 0 stands alone
+  until version 2. The row says calibration has "get, put, list" without a
+  signature, and `computeCalibration(offsets)` needs source, device and output
+  latency to make a record, so it takes a `meta` argument. Scripted edits ran
+  from scratchpad files.
 
 ## How this plan runs
 
