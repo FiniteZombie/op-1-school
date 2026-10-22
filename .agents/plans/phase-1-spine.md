@@ -7,9 +7,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | --- | --- | --- | --- |
 | 1 | Scaffold (**attended**) | done 2026-10-22 | 92ea236 |
 | 2 | Types | done 2026-10-22 | e9ff2eb |
-| 3 | Theory | done 2026-10-22 | |
-| 4 | Clock and transport | **Next** | |
-| 5 | Backing synth | | |
+| 3 | Theory | done 2026-10-22 | 88aa382 |
+| 4 | Clock and transport | done 2026-10-22 | |
+| 5 | Backing synth | **Next** | |
 | 6 | Input and MIDI | | |
 | 7 | State | | |
 | 8 | UI primitives and registry | | |
@@ -70,6 +70,53 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (3) SPEC §5.3's four progressions are `ProgressionSpec`s in
   `src/theory/__tests__/fixtures.ts` (`SPEC_FIXTURES`); row 5's voicing test
   imports them from there.
+- (4) Tone is reached only through `getAudioContext()` / `initAudio()` /
+  `isAudioInitialised()` in `src/audio/TransportEngine.ts`. Importing `tone`
+  already makes a default context (Tone's index calls `getContext()` at
+  load), so `getAudioContext()` replaces it with `Tone.setContext(ctx, true)`.
+  Row 5 makes its synths after that (any Tone node made earlier binds to the
+  disposed context); row 8 builds the clock as
+  `new WebAudioClockBridge(getAudioContext().rawContext)`.
+- (4) Names: interface `ClockBridge`, class `WebAudioClockBridge` (the
+  pre-flight names no class; a same-named class would block structural
+  fakes). `ToneTransport` is `TransportCore` (Tone-free, in `timing.ts`, the
+  tested logic) plus a Tone driver and the wake lock. Fakes for rows 5 and 6:
+  `new TransportCore(fakeDriver)` gives a real engine over a hand-stepped
+  `TransportDriver` (see `src/audio/__tests__/timing.test.ts`'s `FakeDriver`).
+- (4) Tone's transport runs **unlooped** with swing 0: Tone ticks are
+  `absTick`, and the `bars` loop is `absTick % loopTicks`. Row 5 schedules
+  from `onSixteenth` (straight `audioTime` + `swingOffsetSec(e.sixteenth,
+  cfg.swing, bpm)`), not with a looping `Tone.Part`/`Sequence`.
+- (4) Interface additions beyond SPEC §3.2 (fields gained, none changed):
+  `config()`, `state()`, `audioTimeOfAbsTick`, `absTickOfAudioTime`,
+  `onStateChange`, `BeatEvent.absTick`; `onMidiPulse(cb(audioTime,
+  absTick))`, `onLoop(cb(iteration, audioTime))`. `onLoop` fires at the start
+  of every iteration, 0 included. Per-tick order: `onLoop`, `onBeat`,
+  `onSixteenth`, `onMidiPulse`; `started` comes before all of them, `stopped`
+  carries Tone's stop time (`now()`, after every pulse already dispatched).
+  `bpm()` is the configured BPM, ahead of the audible one for up to a beat
+  after a change. `position()` is at `currentTime`; bar 1 beat 1 while
+  stopped. A subscriber that throws is logged and skipped.
+- (4) `configure` with an unchanged BPM while running schedules nothing;
+  `start()` while running restarts (emits `stopped` then `started`). Default
+  config before `configure`: 120 BPM, swing 0, 4 bars, 4/4.
+- (4) Anchor pruning keeps the anchor in effect at `currentTime − 2 s`
+  (`ANCHOR_PRUNE_MARGIN_SEC`), not at `currentTime`: an input event or target
+  tick just behind a tempo change would otherwise map through the new tempo
+  (≈40 ms off for a sixteenth at 120 → 90).
+- (4) `validateTransportConfig` returns a list of strings like the lesson
+  validators; `assertTransportConfig` throws the `RangeError`. Row 5's
+  `transportConfigFor` can use either.
+- (4) `ClockBridge` gained `snapshot()` (decision 7's readout: `currentTime`,
+  `outputContextTime`, `gapMs`, `outputLatencyMs`, `baseLatencyMs`, `path`
+  `'output-timestamp' | 'fit'`, `hasGetOutputTimestamp`, `hasOutputLatency`,
+  `fitPairs`). Once `getOutputTimestamp` gives non-zero values, that path
+  wins for good; fit pairs taken while the context wasn't running are dropped
+  when it runs again. `offsetMs(perfTs, tAudio, clock, calibrationMs?)`
+  returns `{ offsetMs, calibrated }`.
+- (4) `ToneTransport` and its Tone driver haven't run anywhere yet (no
+  browser in this container, and nothing imports them): row 9's browser
+  checks are their first run.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -110,6 +157,21 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `.agents/windows-tool-pitfalls.md`'s Git Bash path, PowerShell and CRLF
   advice didn't apply. The one scripted edit (the status table) was still a
   file, and the new files are LF.
+
+- (4) SPEC §3.1 declares `ClockBridge` as a class and the pre-flight says
+  "an interface plus the class" without naming the class; it is
+  `WebAudioClockBridge`. SPEC §3.2's "Swing is applied by Tone" is overridden
+  by decision 1. The pre-flight's "anchors before the current one are pruned"
+  would mis-map events just behind a tempo change, so pruning keeps a 2 s
+  margin (Carried forward).
+- (4) The row's Owns has no room for a Tone-free engine file, so
+  `TransportCore` (the testable part of the transport) lives in `timing.ts`
+  next to the maths.
+- (4) "Nothing else touches `Tone.getContext()` first" can't hold literally:
+  `import 'tone'` calls it at module load. `getAudioContext()` replaces and
+  disposes that context.
+- (4) Linux cloud container again; no browser here, so the Tone wrapper is
+  only type-checked. Scripted edits ran from scratchpad files.
 
 ## How this plan runs
 
