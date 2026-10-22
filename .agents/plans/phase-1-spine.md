@@ -9,9 +9,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 2 | Types | done 2026-10-22 | e9ff2eb |
 | 3 | Theory | done 2026-10-22 | 88aa382 |
 | 4 | Clock and transport | done 2026-10-22 | da45254 |
-| 5 | Backing synth | done 2026-10-22 | |
-| 6 | Input and MIDI | **Next** | |
-| 7 | State | | |
+| 5 | Backing synth | done 2026-10-22 | b82c7ca |
+| 6 | Input and MIDI | done 2026-10-22 | |
+| 7 | State | **Next** | |
 | 8 | UI primitives and registry | | |
 | 9 | `/dev/spine` | | |
 | 10 | Fan-out docs | | |
@@ -39,11 +39,6 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   empty; every other string field must be non-blank.
 - (2) `ModuleDefinition.component` is `LazyExoticComponent<ComponentType>`
   (SPEC §5.5's `lazy(() => import('./View'))`); a view takes no props.
-- (2) `BeatEvent`, `TransportConfig`, `ClockBridge`/`ClockCorrelation`,
-  `ExternalClockFollower` and `MidiBridge` stay in their `src/audio` and
-  `src/input` files, as SPEC §3 and §5.3 place them; `src/types` adds none of
-  them, so rows 4 and 6 define them (with R4's `absTick` and
-  `'started' | 'stopped'`).
 - (2) `NotImplementedError(what, replacedBy)`: message `<what> is not
   implemented yet (<replacedBy>)`; row 6's stubs pass e.g. `'MicInput.start',
   'Phase 3, Module 3 lane'`.
@@ -157,6 +152,63 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   levels, kick pitch, note velocities, hat accent 0.7 / normal 0.35) is a
   placeholder; `ToneBackingSynth` has never made a sound (no browser here):
   row 9 is its first run.
+- (6) Input lives in `src/input/`: `NoteInput.ts` (`NoteInputSource`,
+  `NoteBus`, and `Listeners`, the throw-safe subscriber set),
+  `TouchInput.ts`, `MidiBridge.ts` (interface `MidiBridge`, class
+  `WebMidiBridge`), `ClockFollower.ts` (`ExternalClockFollower`,
+  `PulseClockFollower`, re-exported from `MidiBridge.ts`), `MicInput.ts`
+  (stub). Every `off`, from any source, carries velocity 0; touch `on` is 1.
+  A source emits only while started and `stop()` releases its held notes;
+  `NoteBus` forwards only from started sources, so row 8 starts `touch`
+  (and `midi`) through `bus.start(id)` or no key lights.
+- (6) `MidiBridge` beyond SPEC §5.3: `accessState()` (`unrequested` /
+  `pending` / `granted` / `denied` / `unsupported`), `selected()`,
+  `follow(enabled, transport)`, `clockMode()` (`'internal' | 'clock out' |
+  'follow'`, the StatusBar copy as is), `onClockModeChange`, `clockStats()`,
+  `onClockIn(perfTs)`, `dispose()`. Construct it as `new WebMidiBridge({
+  memory })`; `PortMemory` is `load(): { input?, output? }` and
+  `save({ input, output })` with `{ id, name } | null` per side (row 7's
+  settings shape). `select(input?, output?)` takes port ids and sets both
+  sides: `undefined` clears one, so row 9's pickers pass the other side's
+  current id.
+- (6) `onConnectionChange` events are `{ type: 'port', kind, port, state }`
+  or `{ type: 'selection', input, output }`. Every port present when access
+  is granted also fires a `port`/`connected` event, so a Field plugged in
+  before the app opened still raises row 8's power warning (filter on
+  `type === 'port' && kind === 'input' && state === 'connected'`). Chrome's
+  open/closed `statechange`s are dropped.
+- (6) Selecting a different output (or none) while clock out is on turns it
+  off, with `FC` to the old output if the transport is running; the output
+  disconnecting turns it off with no `FC`. Selecting a different input, or
+  the input disconnecting, turns follow off (with `off`s for held notes).
+  Clock out and follow switch each other off; the mode event fires once, with
+  the new mode.
+- (6) Clock out records every send's headroom (`F2`, `FA`, `F8`, `FC`),
+  not only `F8`; `clockStats()` covers the last 1000 sends. Loopback pairs
+  each incoming `F8` with the oldest sent one (lost after 250 ms, an echo
+  more than 5 ms early isn't ours) and gives `absErrorP50Ms`,
+  `absErrorP95Ms` and `jitterP95Ms` (|error − median error|); SPEC §8.5's
+  3 ms p95 reads best against the jitter number. Percentiles are nearest-rank.
+- (6) Follow applies the estimate unrounded (any change above 1e-6 BPM), so
+  every beat with a drifting estimate adds a tempo anchor. `0xFB` (continue)
+  restarts the follower's beat count like `0xFA` (SPEC §3.5's interface
+  lumps them); SPP is ignored on input.
+- (6) Fakes for later rows and Module 3: `src/input/__fakes__/FakeMidiPort.ts`
+  (`FakeMidiOutput` records `[data, timestamp]`, `FakeMidiInput.emit`,
+  `FakeMidiAccess` with `plug`/`unplug`, `fakeMidiNavigator(access |
+  null)`) and `FakeTransport.ts` (`createFakeTransport()`: a real
+  `TransportCore` over `FakeTransportDriver.advanceTo(t)`, which hands out
+  every pulse due by `t + lookAhead` like Tone; `FakeClockBridge(originMs,
+  latencySec)`). They live under `src/` outside `__tests__`, so they're
+  app-typed (no Node types) and must stay Tone-free.
+- (6) `PitchWorklet.ts` (`detectPitch`, class `PitchWorklet` with
+  `start(input)`, `stop`, `onPitch`) and `KeyEstimate.ts`
+  (`chromagram(samples, sampleRate)`, `estimateKey(chroma)` →
+  `{ key, confidence }`) are stubs whose signatures are provisional: the
+  Module 3 lane and the Phase 4 plan's first row own them by name.
+- (6) Nothing in `src/input` has touched a real Web MIDI port (no browser or
+  hardware here): row 9's browser checks and row 11's `[field]` checks are
+  its first run.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -227,6 +279,19 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (5) Linux cloud container, no browser: `ToneBackingSynth` is only
   type-checked and built; all its sound is row 9's to hear. Scripted edits
   ran from scratchpad files.
+- (6) The row's "`0xFC` with no timestamp" and its ≈100 ms caveat are
+  overridden by the pre-flight (`FC` at `audioToPerf(stopped.audioTime)`,
+  never earlier than the last `F8`'s stamp). The plan doesn't say how
+  `select(input?, output?)` treats an omitted side, what happens to clock
+  out when the output changes, whether ports present at grant raise the power
+  warning, or what velocity an `off` carries; see Carried forward. SPEC
+  §3.5's `ExternalClockFollower` went in its own `ClockFollower.ts` (still
+  in `src/input`), re-exported from `MidiBridge.ts`.
+- (6) Linux cloud container, no browser or MIDI: everything Web MIDI is
+  tested through fakes only. A compile-time check in `MidiBridge.ts`
+  (`RealMidiFits`) proves the DOM's `MIDIAccess`, `MIDIInput` and
+  `MIDIOutput` fit the structural types. Scripted edits ran from scratchpad
+  files.
 
 ## How this plan runs
 
