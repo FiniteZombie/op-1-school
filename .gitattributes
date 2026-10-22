@@ -1,2 +1,8 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# LF everywhere, in the repo and on disk, on every machine. Node, Vite, Chrome
+# and every editor here handle LF, and cloud/Linux agents write LF.
+# `eol=lf` wins over a machine's core.autocrlf setting.
+* text=auto eol=lf
+
+# cmd.exe needs CRLF in batch files.
+*.bat text eol=crlf
+*.cmd text eol=crlf

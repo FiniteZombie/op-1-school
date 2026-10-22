@@ -1,0 +1,56 @@
+# --- Node ---
+node_modules/
+npm-debug.log*
+*.tgz
+
+# --- Build, test and PWA output ---
+dist/
+dist-ssr/
+# vite-plugin-pwa writes the dev service worker here.
+dev-dist/
+.vite/
+*.tsbuildinfo
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# --- Local config & secrets ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Audio ---
+# No third-party audio in the repo (SPEC §0): backing is procedural, user
+# samples come in through the file picker, and factory kits dumped off the
+# Field for the format spike are TE's. Tests generate the audio they need.
+*.aif
+*.aiff
+*.aifc
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.aac
+*.opus
+
+# --- Logs ---
+*.log
+
+# --- Editors & OS ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Claude Code ---
+.claude/settings.local.json
+.claude/worktrees/
