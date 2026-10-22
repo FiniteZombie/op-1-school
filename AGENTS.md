@@ -11,10 +11,15 @@ anything.
 
 ## Where we are
 
-Only the spec exists; nothing is scaffolded and no plan is written yet. The
-build goes spine first, fan-out second (SPEC §6): one agent builds the spine
-as a plan of steps, then an orchestrator (`/run-steps`) runs each later phase
-as parallel lanes, with the owner's hardware gates in between.
+Nothing is scaffolded yet. The build goes spine first, fan-out second
+(SPEC §6): the spine is a plan of steps, then an orchestrator (`/run-steps`)
+runs each later phase as parallel lanes, with the owner's hardware gates in
+between.
+
+Open plans:
+
+- [`phase-1-spine.md`](.agents/plans/phase-1-spine.md): Phase 1, the spine
+  (SPEC §6.1) and the `/dev/spine` smoke page.
 
 Plans live in `.agents/plans/`, one per phase or spike; retros in
 `.agents/retros/`. Name each open plan here with a link and what it's for,
