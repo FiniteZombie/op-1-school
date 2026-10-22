@@ -6,9 +6,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | Row | Name | Status | Commit |
 | --- | --- | --- | --- |
 | 1 | Scaffold (**attended**) | done 2026-10-22 | 92ea236 |
-| 2 | Types | done 2026-10-22 | |
-| 3 | Theory | **Next** | |
-| 4 | Clock and transport | | |
+| 2 | Types | done 2026-10-22 | e9ff2eb |
+| 3 | Theory | done 2026-10-22 | |
+| 4 | Clock and transport | **Next** | |
 | 5 | Backing synth | | |
 | 6 | Input and MIDI | | |
 | 7 | State | | |
@@ -47,6 +47,29 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (2) `NotImplementedError(what, replacedBy)`: message `<what> is not
   implemented yet (<replacedBy>)`; row 6's stubs pass e.g. `'MicInput.start',
   'Phase 3, Module 3 lane'`.
+- (3) Import theory from `src/theory` (the `index.ts` barrel re-exports
+  `pitch`, `scales`, `chords`, `progressions`). Beyond SPEC §5.3's list it
+  exports `pitchClass`, `transpose`, `intervalUp`, `noteName`, `usesFlats`,
+  `scale`, `inScale`, `degreeInterval`, `parentMajorTonic`, `hasMinorThird`,
+  `MODE_INTERVALS`, `QUALITY_INTERVALS`, `chordName`, `loadProgression`,
+  `RomanNumeralError` and `ProgressionError`.
+- (3) `chordTones` comes from the quality only: `extensions` and a slash
+  `bass` are not chord tones, so `classify` treats a slash bass like any other
+  note (A under G/A in A minor is a tension). Row 8's keyboard marks follow.
+- (3) `loadProgression` runs `validateProgressionSpec` first, assumes 4/4
+  (`bars × 4` beats), and throws `ProgressionError` naming `slots[i] "<roman>"`
+  or the beats sum. `realize` throws `RomanNumeralError`; it accepts `♭`/`♯`
+  as well as `b`/`#`, allows no spaces, and drops a `/<degree>` bass equal to
+  the root.
+- (3) `chordName(chord, key?)` takes an optional key: with one it spells as
+  `noteName(pc, key)`, without one black keys are flats (`D♭`, `G♭`). Row 9
+  passes the progression's key. mMaj7 prints `mMaj7` (placeholder; the plan's
+  list has none). Parent-major G♭/F♯ keys spell with flats.
+- (3) Per the pre-flight suffix table, `maj7` ignores case (`imaj7` is maj7,
+  not decision 3's mMaj7), so no numeral spells mMaj7. Owner question.
+- (3) SPEC §5.3's four progressions are `ProgressionSpec`s in
+  `src/theory/__tests__/fixtures.ts` (`SPEC_FIXTURES`); row 5's voicing test
+  imports them from there.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -77,6 +100,16 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `':!src/types/__tests__'` is the one that can pass. SPEC §5.2 lists only
   `music.ts` and `lessons.ts` under `src/types/`; `modules.ts` and
   `errors.ts` come from this plan.
+- (3) Decision 3 says `maj7` gives mMaj7 on lower case; the pre-flight's
+  suffix table says only bare, `7` and `6` follow case. The pre-flight won;
+  it leaves mMaj7 without a numeral. The pre-flight's `chordName(chord)` has
+  no key to spell with, so it gained an optional `key`.
+- (3) SPEC §5.2 puts degree naming in `scales.ts`; the row puts `degreeName`
+  in `progressions.ts`. The row won.
+- (3) This row ran in a Linux cloud container, not the owner's Windows PC:
+  `.agents/windows-tool-pitfalls.md`'s Git Bash path, PowerShell and CRLF
+  advice didn't apply. The one scripted edit (the status table) was still a
+  file, and the new files are LF.
 
 ## How this plan runs
 
