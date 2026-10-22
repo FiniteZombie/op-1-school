@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { listCalibrations } from '../state/calibration';
 import { COPY } from './copy';
 import { useSpine } from './spine';
-import { calibrationDevices, calibrationText, midiPortText, type CalibrationKey } from './statusBar';
+import { calibrationDevices, calibrationText, midiPortText, type CalibrationKey } from './statusBarText';
 
 const POLL_MS = 250;
 

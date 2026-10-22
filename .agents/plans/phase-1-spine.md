@@ -164,7 +164,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   or `{ type: 'selection', input, output }`. Every port present when access
   is granted also fires a `port`/`connected` event, so a Field plugged in
   before the app opened still raises the power warning (`raisesPowerWarning`
-  in `src/ui/powerWarning.ts`). Chrome's
+  in `src/ui/powerWarningLogic.ts`). Chrome's
   open/closed `statechange`s are dropped.
 - (6) Selecting a different output (or none) while clock out is on turns it
   off, with `FC` to the old output if the transport is running; the output

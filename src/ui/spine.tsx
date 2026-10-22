@@ -23,7 +23,7 @@ import { NoteBus } from '../input/NoteInput';
 import { TouchInput } from '../input/TouchInput';
 import { portMemory, settings as appSettings, type SettingsStore } from '../state/settings';
 import type { Unsubscribe } from '../types/music';
-import { audioStateOf, type AudioState } from './audioGate';
+import { audioStateOf, type AudioState } from './audioGateLogic';
 import { clockContextOf } from './clockContext';
 import { applyTheme } from './theme';
 

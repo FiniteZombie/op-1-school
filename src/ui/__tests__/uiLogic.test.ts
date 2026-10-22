@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { audioStateOf } from '../audioGate';
-import { raisesPowerWarning } from '../powerWarning';
+import { audioStateOf } from '../audioGateLogic';
+import { raisesPowerWarning } from '../powerWarningLogic';
 import { clockContextOf } from '../clockContext';
-import { calibrationDevices, calibrationText, midiPortText } from '../statusBar';
+import { calibrationDevices, calibrationText, midiPortText } from '../statusBarText';
 
 describe('audio gate', () => {
   it('is off until initialised, then running or paused by the context state', () => {

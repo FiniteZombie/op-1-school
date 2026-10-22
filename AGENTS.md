@@ -92,7 +92,9 @@ Push back before breaking one.
   wrappers stay thin and are checked on `/dev/spine`. Only
   `getAudioContext()` / `initAudio()` in `src/audio/TransportEngine.ts` reach
   Tone's context. No jsdom: UI logic that needs a test lives in a pure `.ts`
-  file next to its component.
+  file next to its component, named apart from it and not by case alone
+  (`audioGateLogic.ts` beside `AudioGate.tsx`): Windows resolves imports
+  case-insensitively, and `src/__tests__/fileNames.test.ts` fails on a clash.
 - Fakes for tests are in `src/input/__fakes__/` (fake MIDI ports, a fake
   transport over the real `TransportCore`, a fake clock bridge). They stay
   Tone-free. Settled copy is `COPY` in `src/ui/copy.ts`; anything else a page

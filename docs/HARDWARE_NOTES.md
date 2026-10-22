@@ -55,7 +55,7 @@ interface, waiting on a result) or `resolved`.
 | --- | --- | --- | --- | --- | --- |
 | V1 | Field drum-kit AIFF format: `start`/`end` units, AIFF vs AIFF-C `sowt`, key → index order, required fields | §8.1 | open | | |
 | V2 | Factory drum key layout (which key is kick, snare, hat) | §8.2 | open | | |
-| V3 | Whether the Field can decline charging from the phone, and drain per hour | §2.2.3, §8.3 | stubbed | `PowerWarning` in `src/ui/PowerWarning.tsx` (`raisesPowerWarning` in `src/ui/powerWarning.ts`): every MIDI input connect shows `the field may charge from this phone`, dismissible, again on the next connect | |
+| V3 | Whether the Field can decline charging from the phone, and drain per hour | §2.2.3, §8.3 | stubbed | `PowerWarning` in `src/ui/PowerWarning.tsx` (`raisesPowerWarning` in `src/ui/powerWarningLogic.ts`): every MIDI input connect shows `the field may charge from this phone`, dismissible, again on the next connect | |
 | V4 | Whether Field velocity comes from the accelerometer | §8.4 | open | | |
 | V5 | Web MIDI clock jitter on the target phone (p95 ≤ 3 ms, loopback) | §8.5 | open | | |
 | V6 | Whether the Field needs clock pulses before `0xFA` to lock tempo on bar 1 | §8.6 | stubbed | `WebMidiBridge.clockOut` in `src/input/MidiBridge.ts`: as SPEC §3.4, no pulses before `FA` on a transport start | |

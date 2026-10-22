@@ -1,12 +1,12 @@
 /**
  * SPEC §2.2.3's one-line warning, app-wide: shown whenever a MIDI input
  * connects, dismissible, shown again on the next connect. VERIFY V3 stub (see
- * `powerWarning.ts`). Yellow = warning, with a `!` mark so it never relies on
+ * `powerWarningLogic.ts`). Yellow = warning, with a `!` mark so it never relies on
  * hue alone.
  */
 import { useEffect, useState } from 'react';
 import { COPY } from './copy';
-import { raisesPowerWarning } from './powerWarning';
+import { raisesPowerWarning } from './powerWarningLogic';
 import { useSpine } from './spine';
 
 export function PowerWarning() {

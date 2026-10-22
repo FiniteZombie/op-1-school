@@ -136,7 +136,7 @@ Other spine pieces a module uses:
   reimplement it. `clockMode()` is `internal`, `clock out` or `follow`.
 - **The power warning** is the shell's: `PowerWarning` in
   `src/ui/PowerWarning.tsx`, driven by `raisesPowerWarning` in
-  `src/ui/powerWarning.ts` from `MidiBridge.onConnectionChange`. A module
+  `src/ui/powerWarningLogic.ts` from `MidiBridge.onConnectionChange`. A module
   shows nothing of its own for it.
 
 ## Fakes for Module 3
