@@ -178,7 +178,8 @@ owner decides. The `/run-steps` pre-flight asks about them.
   alone: chord tone = blue, solid fill; tension = cyan, outline; avoid =
   yellow, striped; outside = red, with a ×. Unclassified lit keys are gray.
 - **Backing pattern** for `chillhop-rhodes`, one bar of 16 steps: kick on
-  0, 7, 10; snare on 4, 12; closed hat on every even step. Bass plays
+  0, 7, 10; snare on 4, 12; closed hat on all 16 steps, even steps
+  accented (so swing moves the odd ones). Bass plays
   `chord.bass ?? chord.root` at each slot start, held to one sixteenth before
   the next slot. Chords are held for the whole slot.
 - **Theme toggle**: a button at the end of the nav labelled `light` in dark
@@ -188,6 +189,206 @@ owner decides. The `/run-steps` pre-flight asks about them.
 - **Theme colour** in the manifest: the dark placeholder background. The icon's
   encoder hexes match the placeholder encoder colours; if the owner changes
   those, the icon follows.
+
+## Pre-flight answers (2026-10-22)
+
+From the `/run-steps` pre-flight for rows 2–10. **This section wins over
+anything else in the plan, or in SPEC, that reads differently.** "Rn" is row n.
+
+### The owner's calls
+
+- **Hats**: closed hat on all 16 steps, even steps accented (placeholder).
+  Decision 1 swings odd sixteenths only, so eighth-note hats never moved.
+- **Keyboard look**: OP-1 style, two offset rows (naturals below, sharps above,
+  offset by half a key), every key one full key width, so all keys are ≥ 40 px.
+  `keyboardLayout` takes the *container* width; only the 700 px nav
+  breakpoint reads the viewport. At 360 px, one octave = 7 natural-key columns
+  of ≥ 40 px with the five sharps above them; "12 keys ≥ 40 px" in R8's
+  Done-when means every one of the 12 is ≥ 40 px wide.
+- **Power warning**: app-wide, in R8's shell (not R9), shown whenever a MIDI
+  input connects, on any device, driven by `onConnectionChange`. Copy as
+  settled. Dismissible; it shows again on the next connect. It is VERIFY V3's
+  stub (log it `stubbed`, R8).
+- **R9 labels**, all lowercase, all marked `placeholder` in a comment:
+  transport button `start` / `stop`; encoders `bpm` and `swing`; mask toggles
+  `drums`, `bass`, `chords`; MIDI request button `request midi`; port
+  pickers `input` / `output` with empty option `none`; toggles `clock out`,
+  `follow`; database results `db ok` / `db failed: <error>`; log heading
+  `log`; each panel heading is its topic in one or two words (`transport`,
+  `chord`, `keyboard`, `midi`, `clock`, `midi timing`, `database`).
+  Encoders: `bpm` blue, `swing` ochre.
+- Anything else a row needs that isn't written here: override (b), a neutral
+  placeholder listed under "Questions for the owner".
+
+### Models
+
+R2–R7 and R9 as the rows say. **R8 runs on Opus 5.5**, not Sonnet: it
+carries the audio init, provider, router, theme and keyboard, and the grill
+found it the most underspecified row. R7 and R10 stay on Sonnet 5.5.
+
+### Ownership fixes
+
+- R2 deletes `src/__tests__/scaffold.test.ts` (now in its Owns).
+- R6 also owns `src/input/__tests__/` and puts the stub tests for
+  `PitchWorklet` and `KeyEstimate` there.
+- R8 owns `themeColor` in `vite.config.ts` (now in its Owns).
+- R10 also owns `.claude/skills/step/SKILL.md`, to drop its stale "once it
+  exists" and "the spine adds it" qualifiers.
+
+### Technical answers
+
+**Types (R2)**
+- `Lesson.level` is a number. `SequencerRecipe.sequencer` is
+  `'finger' | 'endless' | 'tombola'`. Drill `params` is
+  `Record<string, unknown>`. A drill step's `module` is any `ModuleId` except
+  `dev-spine` and `runner`.
+- R2's grep excludes its own tests: `git grep -n --untracked "from '\.\./" --
+  src/types ':!src/types/__tests__'`.
+
+**Theory (R3)**
+- `classify`: "b9 and b13 are tensions anyway" overrides the avoid rule for
+  scale notes only; notes outside the scale stay outside. The Done-when lists
+  are complete over 12 pitch classes:
+  - G7 in C major: chord 2 5 7 11; tension 4 9; avoid 0; outside 1 3 6 8 10.
+  - C7 in F minor: chord 0 4 7 10; tension 1 3 8; avoid 5; outside 2 6 9 11.
+- Suffix case: `7` and `6` follow case (lower case gives m7 / m6), as do bare
+  triads. Every other suffix ignores case. R3's tests carry that table.
+- `/<degree>` is a degree of the key's *mode* (1–7, `b`/`#` allowed), unlike
+  decision 4's major-relative degree names. Both doc comments say so.
+- `pentatonic` on locrian uses minor pentatonic as written (its 5 is outside
+  the mode; accepted).
+- R3 exports `noteName(pc, key)` (flats in flat keys and minor keys with flat
+  signatures, sharps otherwise, Unicode ♭/♯) and `chordName(chord)` (`dim`,
+  `m`, `7`, `maj7`, `m7`, `m7♭5`, `dim7`, `sus2`, `sus4`, `6`, `m6`,
+  `/<bass>`), with tests. R9's check reads `Gdim`, `C7`, `Fm`, `D♭`.
+
+**Clock and transport (R4)**
+- Class names: the SPEC interface keeps its name; implementations are
+  `ToneTransport`, `WebMidiBridge` (R6), `PulseClockFollower` (R6),
+  `ToneBackingSynth` (R5). Internal names, not owner copy.
+- `ClockBridge` is exported as an interface plus the class, so fakes are
+  structural. It seeds one `(currentTime, performance.now())` pair at
+  construction. R9's readout shows whether `getOutputTimestamp` and
+  `outputLatency` exist on the raw context (record it, don't guess).
+- R4 exports `getAudioContext()` (idempotent: `latencyHint: 'interactive'`,
+  `lookAhead: 0.1`, worker ticker, `Tone.setContext`) and `initAudio()`
+  (`Tone.start()` on that context). Nothing else touches `Tone.getContext()`
+  first.
+- `BeatEvent` carries `tick` (in-loop, per SPEC) and `absTick`. The engine
+  exposes `audioTimeOfAbsTick`, `absTickOfAudioTime` and `config()`. Tick ↔
+  time maps throw while stopped. Bar and beat count from 1; `sixteenth` is
+  0–15 within the bar, odd = off-beat.
+- Ticks round to the nearest integer. The fallback-fit test spaces its 20
+  pairs 250 ms apart.
+- A BPM change while running applies at the first beat boundary after
+  `currentTime + lookAhead` (`bpm.setValueAtTime`), anchored there; anchors
+  before the current one are pruned. `configure()` while running applies
+  `bpm` and `swing` only; changing `bars` or `timeSig` while running throws.
+- Validation lives in `validateTransportConfig` in `timing.ts`, with tests
+  (BPM 30–300, swing 0–1, bars ≥ 1, `[n, 4]`).
+- `onStateChange` states are `'started' | 'stopped'`; `started` fires before
+  the tick-0 `onBeat` and `onMidiPulse`.
+- Wake lock has no unattended check: it is R11's `[phone]` lock-screen item.
+- The Tone-free grep, used in R4 and again in R5 and R6:
+  `git grep -n --untracked -e "from 'tone'" -e 'from "tone"' -e "import 'tone'"
+  -- 'src/*/__tests__' src/audio/Clock.ts src/audio/timing.ts
+  src/audio/voicing.ts src/audio/drumPatterns.ts src/input` finds nothing
+  (paths a row hasn't created yet are dropped from its run). Tests import
+  `TransportEngine.ts` and `VirtualPushSynth.ts` as types only.
+
+**Backing synth (R5)**
+- Voicing is root position: the root at the lowest MIDI note ≥ 52 with that
+  pitch class, chord tones stacked upward.
+- `slotIndexAtTick` lives in `voicing.ts` (pure) and carries the slot test.
+- `currentSlot` throws before `load`, is 0 while stopped; `chordChangeTimes`
+  covers the current loop iteration and is empty when stopped.
+- Synth instances belong to the module that creates them; it disposes them.
+
+**Input and MIDI (R6)**
+- `NoteBus` owns `start(id)` / `stop(id)`; `active()` lists the started ones.
+- No default port: with nothing remembered, nothing is selected. A remembered
+  port that reappears is reselected (id, then name).
+- `0xFC` is stamped `audioToPerf(stopped.audioTime)`; Tone's stop lands after
+  every queued pulse, so the test is "no `F8` timestamp after `FC`'s". The
+  ≈100 ms caveat goes.
+- `clockOut(true)` while running: pulses from the next pulse, `F2`/`FA` at
+  the next bar-1 downbeat. `clockOut(false)` while running sends `FC`. Clock
+  out with no output selected is a no-op. VERIFY V6 (clock before `FA`) is
+  built as SPEC says and logged `stubbed` in `clockOut`.
+- Follow mode lives in the spine, R6: `MidiBridge.follow(enabled, transport)`
+  sets the transport BPM when confidence ≥ 0.8, at most once a beat, clamped
+  to 30–300; clock out and follow are mutually exclusive; a mode getter and
+  change event (`internal` / `clock out` / `follow`) feed R8's StatusBar. R9
+  only toggles it.
+- Follower: history clears on `0xFA`; BPM is 0 before 24 intervals; the EMA
+  seeds from the first median. Its test feeds 100 pulses. `phasePerfMs`
+  before any `FA` counts from the first pulse.
+- Feeds for R9: `clockStats()` (headroom min / p5 / p50, late count, last
+  1000 sends) and `onClockIn(perfTs)` for incoming `F8`; the access state is
+  readable.
+- `MicInput` is a class whose methods throw; it isn't registered on the bus.
+- `MidiBridge.ts` imports only types from `TransportEngine.ts`. R6's fake
+  transport is built on R4's real `timing.ts`, so its swing test isn't a
+  tautology.
+
+**State (R7)**
+- Records: `Session { id, lessonId, startedAt, finishedAt?, scores }`,
+  `Attempt { id, sessionId, module, mode, at, score?, offsets?:
+  TimingOffset[], data? }`, `Sample { id, name, createdAt, key?, root? }`,
+  `Kit { id, name, createdAt, sliceCount }`. Ids from
+  `crypto.randomUUID()`. DB name `op-1-school`.
+- Import replaces the named stores in one transaction and ignores unknown
+  stores. The median of an even count is the mean of the middle two.
+- Settings are stored flat: `{ version: 1, theme, … }`; a wrong-typed field
+  falls back to its own default only. API: `get`, `save`, `subscribe`.
+- Extra Done-when: opening with no `indexedDB` global rejects with the
+  readable error (Vitest, node).
+
+**UI (R8)**
+- Exports the audio gate (start / resume button with the settled copy); R9
+  uses it.
+- `devOnly` modules: without `?dev`, both the nav entry and the route are
+  hidden (the route shows `no page here`).
+- StatusBar calibration is per active source: e.g. `touch ✓ · midi needs
+  calibration`.
+- `Keyboard24` takes `onOutOfRange(note)`. In one-octave mode a note in the
+  hidden octave lights its equivalent in the visible one and is not counted.
+  `keyboardOctave` transposes the base note by 12 × octave; the toggle only
+  picks the visible half. Lit unclassified keys are gray *and* brighter
+  (filled) than unlit keys.
+- Pointer tracking is a pure tracker in `keyboardLayout.ts` with a test.
+  `setPointerCapture` is wrapped so a scripted event can't throw.
+- The theme script also updates `<meta name="theme-color">`.
+- The import-rule test allows `src/curriculum/**` as a data path (Phase 2
+  creates it).
+
+**`/dev/spine` (R9)**
+- BPM encoder 60–160, integers; full range is a 200 px drag, up increases.
+- The database check writes id `dev-spine-check` to `attempts`, reads it,
+  then deletes it.
+- MIDI access is requested from the `request midi` button. The
+  `ProgressionSpec`'s `id` is `dev-spine-fminor`, `family` a placeholder.
+- State colours follow the rule (blue ok, red failed, yellow warning, gray
+  neutral) and never by hue alone (each also has a word).
+
+**Fan-out docs (R10)**
+- `MODULE_CONTRACT.md` follows `AGENTS.md` on dependencies (ask the owner
+  first), not SPEC §5.5's "list in your PR". It names `src/curriculum/` as
+  created in Phase 2; the "nothing that doesn't exist" check skips that one
+  path. It lists the fakes in `src/input/__fakes__` for Module 3, and where
+  follow mode and the power warning live.
+
+### Check notes
+
+- **The OP-1 Field is plugged into this PC over USB during the run.** Agents
+  never count it as a check and send nothing to a real port: no notes, no
+  clock. R9's "no MIDI" check uses the refused-permission path (`midi
+  permission denied`), which holds whether or not the Field is visible. If an
+  agent does see a port, it reports the name under VERIFY items and doesn't
+  write it into the log as a result; the owner confirms it in R11. If the
+  browser pane's permission prompt blocks, that item is OWNER.
+- The orchestrator runs `git add -N .` before `git diff --check`, so new
+  files are checked too.
 
 ## Rows
 
@@ -257,7 +458,8 @@ Done when:
 
 ### 2. Types
 
-Model: Opus 5.5. Owns: `src/types/`.
+Model: Opus 5.5. Owns: `src/types/`, and deletes
+`src/__tests__/scaffold.test.ts`.
 
 - `music.ts`: SPEC §5.3 as written, plus decision 5 (`'dim'`, `bass?`).
 - `lessons.ts`: `VectorId` (`'A'|'B'|'C'|'D'`); `Lesson { id, vector, level,
@@ -361,7 +563,7 @@ Done when:
 - [ ] Vitest: the fallback fit over 20 pairs with ±1 ms noise recovers a
       slope within 0.5 % of 1000 ms/s.
 - [ ] Vitest: at 90 BPM a sixteenth is 166.7 ms; `swingOffsetSec` at swing
-      0.5 is 27.8 ms (±0.1) on odd sixteenths and 0 on even ones.
+      0.5 is 0.02778 s (±0.0001) on odd sixteenths and 0 on even ones.
 - [ ] Vitest: start at 2.0 s, 120 BPM, BPM → 90 at the bar-2 downbeat (tick
       768, 4.0 s): tick 960 maps to 4.667 s and back to 960.
 - [ ] Vitest: at 120 BPM, 4 beats hold 96 pulse ticks (0, 8, …, 760), the
@@ -502,9 +704,9 @@ Done when:
 
 ### 8. UI primitives and registry
 
-Model: Sonnet 5.5. Owns: `src/ui/`, `src/modules/registry.ts`,
+Model: Opus 5.5. Owns: `src/ui/`, `src/modules/registry.ts`,
 `src/modules/__tests__/`, `src/App.tsx`, `src/main.tsx`, `src/index.css`,
-`index.html`. Read SPEC §5.4 and §5.5.
+`index.html`, and `themeColor` in `vite.config.ts`. Read SPEC §5.4 and §5.5.
 
 - `tokens.css`: the placeholder palette as Tailwind v4 theme variables,
   including the four encoder colours and the classification colours, with a
@@ -584,7 +786,8 @@ Model: Opus 5.5. Owns: `src/modules/dev-spine/`. Read SPEC §3, §6.1 item 8.
   `no loopback`); a database panel (DB version, store names, a write-then-read
   button on `attempts`, or the open error); a scrolling log of raw
   `NoteEvent`s (source, note, velocity, `perfTs`) capped at 200 lines.
-- The SPEC §2.2.3 power warning shows when a MIDI input connects.
+- The SPEC §2.2.3 power warning is row 8's, in the shell; this page shows it
+  like every other page.
 
 Done when:
 
