@@ -5,9 +5,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 
 | Row | Name | Status | Commit |
 | --- | --- | --- | --- |
-| 1 | Scaffold (**attended**) | done 2026-10-22 | |
-| 2 | Types | **Next** | |
-| 3 | Theory | | |
+| 1 | Scaffold (**attended**) | done 2026-10-22 | 92ea236 |
+| 2 | Types | done 2026-10-22 | |
+| 3 | Theory | **Next** | |
 | 4 | Clock and transport | | |
 | 5 | Backing synth | | |
 | 6 | Input and MIDI | | |
@@ -19,7 +19,34 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 
 ### Carried forward
 
-- (1) `src/__tests__/scaffold.test.ts` is the trivial test; row 2 deletes it.
+- (2) `Unsubscribe` (`() => void`) lives in `src/types/music.ts`. SPEC uses it
+  in §3.2 and §5.3 without defining it; rows 4, 5 and 6 import it from there
+  rather than declaring their own.
+- (2) Enum-like types are derived from `as const` lists exported next to them
+  (`CHORD_QUALITIES`, `MODES`, `STYLE_IDS`, `MODULE_IDS`, `VECTOR_IDS`,
+  `SEQUENCERS`, `DRILL_MODULE_IDS`). Adding a member means adding it to the
+  list; theory and validators can iterate them.
+- (2) The lesson validators reject unknown fields (so curriculum typos fail
+  the schema test). Whoever adds a field to `Lesson`, `LessonStep`,
+  `ProgressionSpec` or `SequencerRecipe` adds it to that validator's
+  `known([...])` list in the same change.
+- (2) `ProgressionSpec` checks: `bpm` > 0, `swing` 0–1, `bars` a positive
+  integer, `beats` > 0 (fractions allowed), `key.tonic` an integer 0–11.
+  Ranges the transport enforces (BPM 30–300) are row 4's
+  `validateTransportConfig`; numerals and the beats-sum are row 3's
+  `loadProgression`.
+- (2) `Lesson.level` is an integer ≥ 0 (A0 is 0). A card's `body` may be
+  empty; every other string field must be non-blank.
+- (2) `ModuleDefinition.component` is `LazyExoticComponent<ComponentType>`
+  (SPEC §5.5's `lazy(() => import('./View'))`); a view takes no props.
+- (2) `BeatEvent`, `TransportConfig`, `ClockBridge`/`ClockCorrelation`,
+  `ExternalClockFollower` and `MidiBridge` stay in their `src/audio` and
+  `src/input` files, as SPEC §3 and §5.3 place them; `src/types` adds none of
+  them, so rows 4 and 6 define them (with R4's `absTick` and
+  `'started' | 'stopped'`).
+- (2) `NotImplementedError(what, replacedBy)`: message `<what> is not
+  implemented yet (<replacedBy>)`; row 6's stubs pass e.g. `'MicInput.start',
+  'Phase 3, Module 3 lane'`.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -45,6 +72,11 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (1) `AGENTS.md` says to ask which plan when the owner doesn't name one;
   with exactly one open plan, this step went ahead with it. Worth saying so
   in that line.
+- (2) Row 2's Done-when grep (`"from '\.\./" -- src/types`) matches its own
+  tests, which import `../lessons`; the pre-flight's version with
+  `':!src/types/__tests__'` is the one that can pass. SPEC §5.2 lists only
+  `music.ts` and `lessons.ts` under `src/types/`; `modules.ts` and
+  `errors.ts` come from this plan.
 
 ## How this plan runs
 
