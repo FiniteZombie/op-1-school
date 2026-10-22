@@ -149,18 +149,36 @@ No MIDI port was visible in this run, and nothing was sent to any port.
 | Lane | Change | Why |
 | --- | --- | --- |
 | 8 | `getAudioContext()` (`src/audio/TransportEngine.ts`): make a native `AudioContext` and pass it to `new Tone.Context({ context, lookAhead: 0.1, clockSource: 'worker' })`; then drop `src/ui/clockContext.ts` | `clockContextOf` reads a private field of standardized-audio-context; a Tone upgrade could silently put the clock back on the fit path |
+| Laptop checks | `ClockFollower` (`src/input/ClockFollower.ts`): estimate BPM from the span of the kept pulses, (last − first) / (n − 1), not the median interval; keep the median for confidence | On Windows Chrome the Field's echoed clock arrives bunched (12.9–42 ms apart at 90 BPM). The median read 83 BPM at a true 90.01 and 155 at a true 120.04; the span gives 90.01 and 120.04. Follow would lock to the wrong tempo |
 | 9 | Import-rule checker (`src/modules/__tests__/importRule.ts`, `areaOf`): accept a bare spine directory (`'../../theory'`) or resolve it to `<dir>/index`; then update `MODULE_CONTRACT.md` and `AGENTS.md` | Carried forward (3) says to import the barrel; the checker rejects it |
+
+## Owner checks on the laptop (2026-10-22)
+
+Windows 11 laptop, Chrome 155, the Field on USB-C, dev server, `/dev/spine?dev`.
+
+- **Windows build:** `npm run check` failed typecheck. Three pure-logic files
+  differed from their components only in case (`audioGate.ts` /
+  `AudioGate.tsx`, `powerWarning.ts`, `statusBar.ts`), which Linux allows and
+  Windows resolves to the wrong file. Renamed to `audioGateLogic.ts`,
+  `powerWarningLogic.ts`, `statusBarText.ts`, with
+  `src/__tests__/fileNames.test.ts` guarding it (1b3bbea). Check exits 0.
+- **R9 `[ear]` desktop: pass.** No clicks; hats swung at 0.50 and straight at
+  0.00 (at 120 BPM); unticking `bass` left drums and chords; no stray hat on
+  three stop→start cycles 150 ms apart.
+- **Field:**
+  - The power warning shows on MIDI grant.
+  - The port is `OP-1` (V7).
+  - The lowest key is 53 (V8, resolved).
+  - Field keys light the same on-screen key as touch.
+  - Clock out with the Field in sync: the Field follows 90 and 120 BPM, with
+    0 late sends.
+  - Numbers are in `docs/HARDWARE_NOTES.md`.
+- **Found:** the clock follower misreads bunched clock (spine request above).
+- **Still open from the list below:** the R9 no-ports path (needs the Field
+  unplugged), and all of R11.
 
 ## Checks only the owner can do
 
-- **R9 `[ear]` desktop**
-  - The loop plays without clicks.
-  - Off-beat hats lag at swing 0.5 and sit straight at 0.
-  - Unticking `bass` leaves drums and chords.
-  - Listen for a stray hat on a quick stop→start (R5's known edge).
-  - Fake twin: Vitest checks the swing offsets (0.02778 s at 90 BPM), the
-    mask plan and the drum data; headless Chromium ran the loop and stepped
-    the chords with no console errors. No one has heard it.
 - **R9 no-ports path:** with MIDI allowed and nothing plugged in, the panel
   shows `! no midi` and the toggles are disabled. Headless Chromium only
   reached `midi permission denied`; the no-ports path ran in Vitest only.

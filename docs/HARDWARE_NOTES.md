@@ -59,8 +59,8 @@ interface, waiting on a result) or `resolved`.
 | V4 | Whether Field velocity comes from the accelerometer | §8.4 | open | | |
 | V5 | Web MIDI clock jitter on the target phone (p95 ≤ 3 ms, loopback) | §8.5 | open | | |
 | V6 | Whether the Field needs clock pulses before `0xFA` to lock tempo on bar 1 | §8.6 | stubbed | `WebMidiBridge.clockOut` in `src/input/MidiBridge.ts`: as SPEC §3.4, no pulses before `FA` on a transport start | |
-| V7 | The Field's MIDI input port name | §2.1 | stubbed | `WebMidiBridge` in `src/input/MidiBridge.ts`: no port is picked by name; the user picks, and the choice is remembered by id, then name | |
-| V8 | MIDI note number of the Field's lowest key at the default octave | §2.1 | stubbed | `DEFAULT_SETTINGS.keyboardBaseNote` in `src/state/settings.ts`: 53 (F3) | |
+| V7 | The Field's MIDI input port name | §2.1 | stubbed | `WebMidiBridge` in `src/input/MidiBridge.ts`: no port is picked by name; the user picks, and the choice is remembered by id, then name | `OP-1`, manufacturer `Teenage Engineering`, for input and output (Chrome 155, Windows 11, 2026-10-22). The name doesn't say Field, so it can't tell a Field from an original OP-1. Android's name not seen yet |
+| V8 | MIDI note number of the Field's lowest key at the default octave | §2.1 | resolved | `DEFAULT_SETTINGS.keyboardBaseNote` in `src/state/settings.ts`: 53 (F3) | 53 (F3): the leftmost F at the default octave, pressed alone (2026-10-22). Velocity off sends 127; release sends `80 nn 00` |
 
 ## Platform measurements
 
@@ -73,11 +73,19 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 
 | Device and browser | Active path | `currentTime` − `contextTime` gap (ms) | `outputLatency` (ms) | `baseLatency` (ms) | Date |
 | --- | --- | --- | --- | --- | --- |
+| Windows 11 laptop, Chrome 155, built-in speakers | `output-timestamp` | 49.8–52.6 | 40.0 | 10.0 | 2026-10-22 |
 
 ### MIDI clock out
 
 | Device and browser | Headroom min / p5 / p50 (ms) | Late sends | Loopback \|error\| p50 / p95 (ms) | Date |
 | --- | --- | --- | --- | --- |
+| Windows 11 laptop, Chrome 155, Field in sync at 120 BPM (1000 sends) | 81.2 / 92.1 / 119.6 | 0 | 7.51 / 15.30 (the Field echoes clock; includes its echo and Windows MIDI-in delivery) | 2026-10-22 |
+
+On that laptop the Field, in **sync**, echoes the app's clock back at
+90.01 and 120.04 BPM (20 s and 15 s averages) and its play bpm reads the
+app's tempo ±1. The echoed pulses arrive bunched: 12.9–42 ms apart at 90 BPM
+(27.8 ms nominal), median 30.1 ms. Song bpm stays at the tape's 110; whether
+tape speed follows is checklist item 2 below.
 
 ## Phase 3 hardware checklist
 
