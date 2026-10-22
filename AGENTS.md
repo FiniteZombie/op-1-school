@@ -36,9 +36,9 @@ to continue plan work without naming the plan, ask which one.**
 | Writing or changing a plan, a step, a lane or a "Done when" list | [`.agents/writing-a-plan.md`](.agents/writing-a-plan.md) |
 | Any audio, MIDI, clock or input-timing code | SPEC §3, all of it |
 | Anything touching OP-1 Field behaviour or file formats | SPEC §2 and §8, then [`docs/HARDWARE_NOTES.md`](docs/HARDWARE_NOTES.md) |
-| Work in a module lane | SPEC §5.5 and §6.5, then `docs/MODULE_CONTRACT.md` once it exists |
+| Work in a module lane | SPEC §5.5 and §6.5, then [`docs/MODULE_CONTRACT.md`](docs/MODULE_CONTRACT.md) |
 | Adding a dependency, a vendored file, or installing a program | [Dependencies](#dependencies) below, and **ask the owner first** |
-| Shell scripts, regexes, paths or commit messages on this machine | [`.agents/windows-tool-pitfalls.md`](.agents/windows-tool-pitfalls.md) |
+| Shell scripts, regexes, paths or commit messages on the owner's Windows PC (a cloud container is Linux: ignore its Git Bash, PowerShell and CRLF advice, but still write scripted edits to a file) | [`.agents/windows-tool-pitfalls.md`](.agents/windows-tool-pitfalls.md) |
 
 ## Load-bearing rules
 
@@ -85,6 +85,27 @@ Push back before breaking one.
 - `src/modules/__tests__/importRule.test.ts` enforces the import rule: a
   module imports only the spine, its own directory and `src/curriculum/`;
   only `src/ui/AppShell.tsx` imports `src/modules/registry.ts`.
+- A module imports theory as `'../../theory/index'`: the checker rejects the
+  bare `'../../theory'` barrel (see `docs/MODULE_CONTRACT.md`).
+- Test files never import `tone`. Pure maths lives in Tone-free files
+  (`timing.ts`, `Clock.ts`, `voicing.ts`, `drumPatterns.ts`); the Tone
+  wrappers stay thin and are checked on `/dev/spine`. Only
+  `getAudioContext()` / `initAudio()` in `src/audio/TransportEngine.ts` reach
+  Tone's context. No jsdom: UI logic that needs a test lives in a pure `.ts`
+  file next to its component.
+- Fakes for tests are in `src/input/__fakes__/` (fake MIDI ports, a fake
+  transport over the real `TransportCore`, a fake clock bridge). They stay
+  Tone-free. Settled copy is `COPY` in `src/ui/copy.ts`; anything else a page
+  shows is a labelled placeholder until the owner decides.
+- Enum-like types come from `as const` lists next to them (`MODULE_IDS`,
+  `STYLE_IDS`, …); adding a member means adding it to the list. The lesson
+  validators reject unknown fields, so a field added to `Lesson`,
+  `LessonStep`, `ProgressionSpec` or `SequencerRecipe` also goes in that
+  validator's `known([...])` list.
+- A DB version is a new `case` in `upgradeDb` (`src/state/db.ts`) after case
+  0's block; the tsconfig forbids falling through into `default`.
+- The VERIFY log is in `docs/HARDWARE_NOTES.md`; a VERIFY item you hit gets a
+  row there (status `open` or `stubbed`, and where).
 - Colours come from the theme tokens in `src/ui/tokens.css` (a dark and a
   light value each; dark is a `dark` class on `<html>`), never raw hexes.
 - Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,

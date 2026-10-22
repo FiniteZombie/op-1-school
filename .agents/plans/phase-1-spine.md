@@ -13,23 +13,15 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 6 | Input and MIDI | done 2026-10-22 | 4a067d9 |
 | 7 | State | done 2026-10-22 | 47e6252 |
 | 8 | UI primitives and registry | done 2026-10-22 | 39b01e5 |
-| 9 | `/dev/spine` | done 2026-10-22 | |
-| 10 | Fan-out docs | **Next** | |
-| 11 | Exit gate (**attended**) | | |
+| 9 | `/dev/spine` | done 2026-10-22 | ad0c090 |
+| 10 | Fan-out docs | done 2026-10-22 | |
+| 11 | Exit gate (**attended**) | **Next** | |
 
 ### Carried forward
 
 - (2) `Unsubscribe` (`() => void`) lives in `src/types/music.ts`. SPEC uses it
   in §3.2 and §5.3 without defining it; rows 4, 5 and 6 import it from there
   rather than declaring their own.
-- (2) Enum-like types are derived from `as const` lists exported next to them
-  (`CHORD_QUALITIES`, `MODES`, `STYLE_IDS`, `MODULE_IDS`, `VECTOR_IDS`,
-  `SEQUENCERS`, `DRILL_MODULE_IDS`). Adding a member means adding it to the
-  list; theory and validators can iterate them.
-- (2) The lesson validators reject unknown fields (so curriculum typos fail
-  the schema test). Whoever adds a field to `Lesson`, `LessonStep`,
-  `ProgressionSpec` or `SequencerRecipe` adds it to that validator's
-  `known([...])` list in the same change.
 - (2) `ProgressionSpec` checks: `bpm` > 0, `swing` 0–1, `bars` a positive
   integer, `beats` > 0 (fractions allowed), `key.tonic` an integer 0–11.
   Ranges the transport enforces (BPM 30–300) are row 4's
@@ -312,15 +304,23 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   follow can move the BPM under it (the encoder shows the configured BPM,
   clamped to 60–160; a turn is overwritten by the next estimate). The current chord is `currentSlot(currentTime)` polled every
   250 ms, so it can lag a change by up to 250 ms.
-- (9) The import-rule checker (`src/modules/__tests__/importRule.ts`, row 8)
-  rejects a bare barrel import like `'../../theory'` from a module (a
-  one-segment target isn't classed as spine), so `dev-spine` imports
-  `'../../theory/index'`. Phase 2 modules must do the same until the checker
-  is fixed (spine request in row 9's report).
+- (9) OWNER, /retro: the import-rule checker rejects a bare `'../../theory'`
+  barrel import from a module, so modules import `'../../theory/index'`
+  (stated in `docs/MODULE_CONTRACT.md` and `AGENTS.md`). A checker fix is a
+  spine request for the owner to settle; when it lands, update both docs.
 - (9) Headless Chromium refused `requestMIDIAccess` (the page shows `midi
   permission denied`); the no-ports `no midi` path and the pickers, clock out
   and follow with real ports have only run in Vitest (`midiPanelView`) and
   are row 11's `[field]` checks.
+- (10) `docs/MODULE_CONTRACT.md` is written and `docs/HARDWARE_NOTES.md` has the
+  Phase 3 checklist and row 11's checks as numbered steps with blanks (all
+  open: this run had no MIDI hardware and no phone). Row 11 fills the blanks,
+  the VERIFY log and **Platform measurements** there.
+- (10) Placeholders for the owner: the contract's wording and the checklist
+  figures (a 30-minute drain test in Phase 3 step 5) are mine, not settled.
+- (10) The contract says `src/curriculum/` is created in Phase 2; the
+  Phase 2 curriculum lane should add it to the contract's import list as
+  existing and drop the "doesn't exist yet" sentence.
 
 ### Process notes
 
@@ -434,6 +434,12 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `pending`, `granted`), the follower readout, the out-of-range count, the
   readout row labels or the empty log; all are placeholders in `LABELS`.
   The row's "no loopback" is used as written.
+- (10) The row's grep for `once it exists` covers `AGENTS.md` only; the `step`
+  skill had the same qualifiers (and "once the scaffold step has created it"),
+  now dropped under the pre-flight's ownership fix. SPEC §5.5 says to list
+  dependencies in a PR; the contract follows `AGENTS.md` (ask first).
+  `AGENTS.md`'s windows-pitfalls row now says cloud containers are Linux. No
+  `src/` edits; scripted edits ran from scratchpad files.
 
 ## How this plan runs
 

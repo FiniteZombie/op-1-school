@@ -22,8 +22,7 @@ message). If an orchestrator spawned you, also read
    - the plan's overview and any **Pre-flight answers** (they win over the row
      text);
    - the plan's **Carried forward** list;
-   - for a lane, its owned paths and `docs/MODULE_CONTRACT.md` (the spine
-     writes it).
+   - for a lane, its owned paths and `docs/MODULE_CONTRACT.md`.
 
    Then rename this session so the sidebar says what's being built: call
    `set_session_title` (load it with ToolSearch, `session_id: "self"`) with
@@ -45,17 +44,16 @@ message). If an orchestrator spawned you, also read
    - A creative decision the plan doesn't make (copy, a name, a look): stop
      and ask.
    - A VERIFY item: stub behind the interface, never guess, and log it (the
-     VERIFY log in `docs/HARDWARE_NOTES.md` once it exists, and your report).
+     VERIFY log in `docs/HARDWARE_NOTES.md`, and your report).
    - A lane touches only its owned paths. If it needs a spine change, don't
      make it: work around it inside your paths and describe the smallest
      spine change that would help.
    - Scripted edits and probes go in a file you write with the Write tool
      ([windows-tool-pitfalls.md](../../../.agents/windows-tool-pitfalls.md)).
 4. **Check it yourself**, and fix what you find before handing it back.
-   - `npm run check` (tsc, Vitest, build) exits 0, once the scaffold step has
-     created it.
+   - `npm run check` (tsc, Vitest, build) exits 0.
    - Run each Done-when item's check. Browser checks use the dev server from
-     `.claude/launch.json` (the spine adds it) and `/dev/spine?dev`; read the
+     `.claude/launch.json` and `/dev/spine?dev`; read the
      page as text and read the console.
    - `[phone]`, `[field]` and `[ear]` items are the owner's. Write their test
      steps; don't call them done.

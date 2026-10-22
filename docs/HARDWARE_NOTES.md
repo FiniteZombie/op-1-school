@@ -78,3 +78,61 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 
 | Device and browser | Headroom min / p5 / p50 (ms) | Late sends | Loopback \|error\| p50 / p95 (ms) | Date |
 | --- | --- | --- | --- | --- |
+
+## Phase 3 hardware checklist
+
+From SPEC §6.3. The owner runs it before Module 3 starts, with the Field
+plugged into the phone, and writes each result in the blank.
+
+1. Field in **sync** mode, app clock out on: the Field follows the app's tempo.
+   Result: ______
+2. Same setup, tape running: tape speed matches the app's tempo. Result: ______
+3. Velocity off (Shift+Tempo): notes arrive at velocity 127. Result: ______
+4. Velocity on (soft, then hard): velocity varies. Result: ______
+5. The phone doesn't drain over a 30-minute session with the Field attached
+   (battery % before and after). Result: ______
+6. Audio routing behaves as "Android USB-C" above says: the backing loop
+   reaches the Field's USB input, and the phone's own speaker is silent.
+   Result: ______
+
+## Exit gate checks (Phase 1, row 11)
+
+The owner runs these from the Pages URL
+(`https://finitezombie.github.io/op-1-school/`) after merging `phase-1-spine`
+into `main`. The run that built the spine had no MIDI hardware and no phone,
+so every blank is open. Page: `/op-1-school/dev/spine?dev`.
+
+1. `npm run check` exits 0 on `main`. Result: ______
+2. After pushing `main`, the Actions run is green and the Pages URL serves the
+   shell. (Settings, Pages, Source must be "GitHub Actions" first.)
+   Result: ______
+3. Phone, Chrome: open the page from the Pages URL, tap `tap to start audio`,
+   press `start`. Read the clock panel and copy gap, `outputLatency`,
+   `baseLatency` and the active path into **Clock readout** below.
+   Result: ______
+4. Phone, by ear: the loop is swung (off-beat hats lag at swing 0.5, straight
+   at 0) and has no clicks. Tap keys: they light, and the log shows touch `on`
+   and `off` events. Result: ______
+5. Phone: the app opens dark. Switch to light and back. Every panel, the
+   keyboard's lit and classified keys and the encoders are readable in both,
+   indoors at night and in daylight. Result: ______
+6. Phone: lock and unlock the screen while the loop runs. Write down whether
+   it keeps time and what it does. Result: ______
+7. Field plugged in: the power warning shows. Request MIDI, grant it, pick the
+   port. Record its name (V7) and the note number of the lowest key (V8)
+   in the VERIFY log. Play keys: the same keys light as for touch.
+   Result: ______
+8. Field in **sync**, clock out on: the Field follows the app's tempo. Copy
+   the headroom stats (and loopback numbers, if the Field echoes clock) into
+   **MIDI clock out** below. Result: ______
+9. Firefox desktop: the loop plays and keys light. Accept the MIDI add-on
+   prompt, pick the Field's port, and see its notes light. Copy the clock
+   readout into **Clock readout** next to the phone's. Result: ______
+10. Firefox for Android: the loop plays, touch lights keys, and the MIDI panel
+    shows `web midi isn't available in this browser`. Result: ______
+11. Decision 7: compare the gap with `outputLatency + baseLatency` on the
+    phone and write down whether `getOutputTimestamp` already includes output
+    latency. If it does, the fix to `audibleAt` is a spine request for
+    Phase 2 pre-work, not a guess. Result: ______
+12. Every VERIFY item above that moved is updated in the VERIFY log.
+    Result: ______
