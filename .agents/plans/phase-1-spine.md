@@ -12,9 +12,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 5 | Backing synth | done 2026-10-22 | b82c7ca |
 | 6 | Input and MIDI | done 2026-10-22 | 4a067d9 |
 | 7 | State | done 2026-10-22 | 47e6252 |
-| 8 | UI primitives and registry | done 2026-10-22 | |
-| 9 | `/dev/spine` | **Next** | |
-| 10 | Fan-out docs | | |
+| 8 | UI primitives and registry | done 2026-10-22 | 39b01e5 |
+| 9 | `/dev/spine` | done 2026-10-22 | |
+| 10 | Fan-out docs | **Next** | |
 | 11 | Exit gate (**attended**) | | |
 
 ### Carried forward
@@ -109,9 +109,6 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   wins for good; fit pairs taken while the context wasn't running are dropped
   when it runs again. `offsetMs(perfTs, tAudio, clock, calibrationMs?)`
   returns `{ offsetMs, calibrated }`.
-- (4) `ToneTransport` and its Tone driver haven't run anywhere yet (no
-  browser in this container, and nothing imports them): row 9's browser
-  checks are their first run.
 - (5) The backing synth is `new ToneBackingSynth(transport)` from
   `src/audio/VirtualPushSynth.ts`, which also re-exports `transportConfigFor`
   and the `PartMask` type. Its constructor calls `getAudioContext()` before
@@ -206,9 +203,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   (`chromagram(samples, sampleRate)`, `estimateKey(chroma)` →
   `{ key, confidence }`) are stubs whose signatures are provisional: the
   Module 3 lane and the Phase 4 plan's first row own them by name.
-- (6) Nothing in `src/input` has touched a real Web MIDI port (no browser or
-  hardware here): row 9's browser checks and row 11's `[field]` checks are
-  its first run.
+- (6) Nothing in `src/input` has touched a real Web MIDI port: row 9's
+  headless run only reached the refused-permission path (`denied`). Row 11's
+  `[field]` checks are the first run with ports.
 - (7) `src/state/` API. `db.ts`: `openAppDb()` (rejects `IndexedDB is not
   available…` with no global), `upgradeDb(target, oldVersion)` over the
   `UpgradeTarget` slice, `newId()`, the record types (`Session`, `Attempt`,
@@ -226,9 +223,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `computeCalibration(offsets, { source, device, outputLatencyMs,
   measuredAt? })` returns the record; `getCalibration`, `putCalibration` and
   `listCalibrations` take an optional `AppDB` and open their own otherwise.
-- (7) The IndexedDB round trip (`openAppDb`, `importData`, `exportData`,
-  calibration get/put against a real database) has only run against fakes:
-  row 9's `db ok` check is its first real run.
+- (7) `importData`, `exportData` and calibration get/put have still only run
+  against fakes; row 9's `db ok` check ran `openAppDb` and a put/get/delete
+  on `attempts` in headless Chromium.
 - (1) The service worker registers through the plugin's injected
   `registerSW.js` with `registerType: 'autoUpdate'`: a new deploy takes over
   on the next load, with no update prompt. Fine while everything is in one
@@ -298,7 +295,32 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   in `importRule.ts` next to it). Packages aren't its business; it skips its
   own file, whose fixtures look like broken imports.
 - (8) `settings.clockOut` isn't applied by anything: clock out starts off
-  every load. Row 9 (or a later row) decides whether its toggle saves it.
+  every load. Row 9's toggle doesn't save it either (sending clock to a
+  device on load, unasked, seemed wrong; owner question), so the setting is
+  unused.
+- (9) `/dev/spine` is `src/modules/dev-spine/`: `module.ts`, `View.tsx`, and
+  the pure `devSpine.ts` (`DEV_PROGRESSION`, `LABELS`, `bpmFromEncoder`,
+  `midiPanelView`, `clockRows`, `timingRows`, `appendCapped`, `runDbCheck`)
+  with its test. Every label is in `LABELS`, marked `placeholder`; settled
+  MIDI copy comes from `COPY`. Panels carry `data-panel` and readouts
+  `data-*` hooks (`data-current-chord`, `data-readout="clock"`,
+  `data-midi-status`, `data-db-result`, `data-log`, `data-toggle=…`,
+  `data-transport`) for scripted checks.
+- (9) The page builds one `ToneBackingSynth` per mount, configures the
+  transport from `DEV_PROGRESSION` only if it is stopped, and stops the
+  transport on unmount. The BPM encoder stays enabled in follow mode, where
+  follow can move the BPM under it (the encoder shows the configured BPM,
+  clamped to 60–160; a turn is overwritten by the next estimate). The current chord is `currentSlot(currentTime)` polled every
+  250 ms, so it can lag a change by up to 250 ms.
+- (9) The import-rule checker (`src/modules/__tests__/importRule.ts`, row 8)
+  rejects a bare barrel import like `'../../theory'` from a module (a
+  one-segment target isn't classed as spine), so `dev-spine` imports
+  `'../../theory/index'`. Phase 2 modules must do the same until the checker
+  is fixed (spine request in row 9's report).
+- (9) Headless Chromium refused `requestMIDIAccess` (the page shows `midi
+  permission denied`); the no-ports `no midi` path and the pickers, clock out
+  and follow with real ports have only run in Vitest (`midiPanelView`) and
+  are row 11's `[field]` checks.
 
 ### Process notes
 
@@ -399,6 +421,19 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   the clock over it, which would have pinned decision 7's readout to the fit
   path and SPEC §3.3's latency to `baseLatency`. Worked around in row 8's
   files; the spine fix is in Carried forward.
+- (9) Linux cloud container. Browser checks ran in headless Chromium via a
+  Playwright script in the scratchpad against the dev server; Chromium
+  refused MIDI permission without a prompt, which gave the `denied` path.
+  Headless clock readings (path `output-timestamp`, gap 39.4 ms,
+  `outputLatency` 32 ms, `baseLatency` 10 ms) are not device measurements
+  and aren't recorded.
+- (9) Carried forward (3) says to import theory from the `src/theory` barrel,
+  but row 8's import-rule checker rejects `'../../theory'` from a module;
+  `'../../theory/index'` passes. The plan's R9 labels don't cover the
+  database button, the MIDI states without settled copy (`unrequested`,
+  `pending`, `granted`), the follower readout, the out-of-range count, the
+  readout row labels or the empty log; all are placeholders in `LABELS`.
+  The row's "no loopback" is used as written.
 
 ## How this plan runs
 
