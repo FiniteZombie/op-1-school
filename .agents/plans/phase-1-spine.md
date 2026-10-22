@@ -8,9 +8,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 1 | Scaffold (**attended**) | done 2026-10-22 | 92ea236 |
 | 2 | Types | done 2026-10-22 | e9ff2eb |
 | 3 | Theory | done 2026-10-22 | 88aa382 |
-| 4 | Clock and transport | done 2026-10-22 | |
-| 5 | Backing synth | **Next** | |
-| 6 | Input and MIDI | | |
+| 4 | Clock and transport | done 2026-10-22 | da45254 |
+| 5 | Backing synth | done 2026-10-22 | |
+| 6 | Input and MIDI | **Next** | |
 | 7 | State | | |
 | 8 | UI primitives and registry | | |
 | 9 | `/dev/spine` | | |
@@ -68,8 +68,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (3) Per the pre-flight suffix table, `maj7` ignores case (`imaj7` is maj7,
   not decision 3's mMaj7), so no numeral spells mMaj7. Owner question.
 - (3) SPEC §5.3's four progressions are `ProgressionSpec`s in
-  `src/theory/__tests__/fixtures.ts` (`SPEC_FIXTURES`); row 5's voicing test
-  imports them from there.
+  `src/theory/__tests__/fixtures.ts` (`SPEC_FIXTURES`); later tests import
+  them from there, as `src/audio/__tests__/voicing.test.ts` does.
 - (4) Tone is reached only through `getAudioContext()` / `initAudio()` /
   `isAudioInitialised()` in `src/audio/TransportEngine.ts`. Importing `tone`
   already makes a default context (Tone's index calls `getContext()` at
@@ -84,9 +84,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `new TransportCore(fakeDriver)` gives a real engine over a hand-stepped
   `TransportDriver` (see `src/audio/__tests__/timing.test.ts`'s `FakeDriver`).
 - (4) Tone's transport runs **unlooped** with swing 0: Tone ticks are
-  `absTick`, and the `bars` loop is `absTick % loopTicks`. Row 5 schedules
-  from `onSixteenth` (straight `audioTime` + `swingOffsetSec(e.sixteenth,
-  cfg.swing, bpm)`), not with a looping `Tone.Part`/`Sequence`.
+  `absTick`, and the `bars` loop is `absTick % loopTicks`. Nothing uses a
+  looping `Tone.Part`/`Sequence`; the backing synth schedules from
+  `onSixteenth`.
 - (4) Interface additions beyond SPEC §3.2 (fields gained, none changed):
   `config()`, `state()`, `audioTimeOfAbsTick`, `absTickOfAudioTime`,
   `onStateChange`, `BeatEvent.absTick`; `onMidiPulse(cb(audioTime,
@@ -117,6 +117,46 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (4) `ToneTransport` and its Tone driver haven't run anywhere yet (no
   browser in this container, and nothing imports them): row 9's browser
   checks are their first run.
+- (5) The backing synth is `new ToneBackingSynth(transport)` from
+  `src/audio/VirtualPushSynth.ts`, which also re-exports `transportConfigFor`
+  and the `PartMask` type. Its constructor calls `getAudioContext()` before
+  making any Tone node, so it can be built before the audio gate is tapped.
+  Whoever builds one disposes it (row 9: one per page, disposed on unmount).
+  The caller runs `transport.configure(transportConfigFor(p))` before
+  `synth.load(p)`; `load` while running takes effect from the next sixteenth.
+- (5) The maths is Tone-free in `src/audio/voicing.ts`: `bassNote`,
+  `voiceChord`, `midiToHz`, `slotStartTicks`, `slotIndexAtTick(slots, tick)`,
+  `prepareProgression`, `planSixteenth` (what to play on one sixteenth),
+  `swungTimeOfAbsTick`, `slotAtAudioTime`, `chordChangeTimesFor`,
+  `assertProgressionFits`. Drum data is `src/audio/drumPatterns.ts`
+  (`drumPatternFor(style)` warns once per style that falls back).
+- (5) Swing is measured from the transport's maps: an onset on an odd
+  sixteenth is delayed `swing / 3` of *that* sixteenth's length
+  (`audioTimeOfAbsTick(t + 48) − audioTimeOfAbsTick(t)`), which equals
+  `swingOffsetSec` at a steady tempo. `config().swing` is read on every
+  sixteenth, so the swing encoder applies live. Note ends are swung too: the
+  bass's release on the slot's last sixteenth (odd) lands at its swung time.
+- (5) `chordChangeTimes()` gives when each chord is *heard* in the current
+  loop iteration (swing included for a slot starting on an odd sixteenth;
+  one-bar slots are on the downbeat, so straight). It returns `[]` before
+  `load` as well as while stopped. `currentSlot` maps through the transport's
+  rounded `absTickOfAudioTime`, so within half a tick (≈1.7 ms at 90 BPM)
+  before a change it already reports the new slot.
+- (5) Masking: masked parts aren't triggered, and each part's gain fades
+  (10 ms) to its new level from the next sixteenth's grid time, so a held
+  chord or bass stops there. Unmasking bass or chords mid-slot brings them
+  back at the next slot start. A master gain is 0 while stopped (10 ms fade
+  from the `stopped` time) and is set at `started`, which also applies a mask
+  set while stopped.
+- (5) Known edge, unverified: `start()` while running restarts at Tone's
+  `now()`, and a note queued just after that time (a swung hat) from before
+  the restart may still sound. Row 9's `[ear]` check would hear it as a
+  stray hat on restart.
+- (5) A bass in a slot of two sixteenths or less holds half the slot (no rule
+  in the plan; owner question). Every sound parameter (envelopes, filters,
+  levels, kick pitch, note velocities, hat accent 0.7 / normal 0.35) is a
+  placeholder; `ToneBackingSynth` has never made a sound (no browser here):
+  row 9 is its first run.
 - (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
   manifest's theme and background colour. Row 8 sets it equal to the dark
   background token in `tokens.css`.
@@ -172,6 +212,21 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   disposes that context.
 - (4) Linux cloud container again; no browser here, so the Tone wrapper is
   only type-checked. Scripted edits ran from scratchpad files.
+- (5) The row says "close position upward from MIDI 52"; the pre-flight says
+  root position from the lowest root ≥ 52. The pre-flight won. SPEC §5.3's
+  "Swing from Transport" is overridden by decision 1. The row's Done-when
+  slot test names 90 BPM, which ticks don't depend on; the test also runs
+  the lookups through a real `TransportCore` at 90 BPM and across a 90 → 120
+  change. The plan doesn't say what `chordChangeTimes` returns before `load`
+  (it returns `[]`) or whether its times are swung (they are, see Carried
+  forward).
+- (5) `timing.test.ts`'s `FakeDriver` isn't exported (test files aren't
+  shared), so `voicing.test.ts` has its own small copy. A shared fake under
+  `src/audio/__fakes__/` would stop the copies multiplying; row 6 plans fakes
+  under `src/input/__fakes__/`.
+- (5) Linux cloud container, no browser: `ToneBackingSynth` is only
+  type-checked and built; all its sound is row 9's to hear. Scripted edits
+  ran from scratchpad files.
 
 ## How this plan runs
 
