@@ -1,10 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#111111" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <title>op-1-school</title>
+    <script>
+      // Theme before first paint: dark unless settings say light. A copy of
+      // themeFromStored + applyTheme in src/ui/theme.ts (a test keeps them in
+      // step); the colours are THEME_COLORS there (placeholder).
+      (function () {
+        var theme = 'dark';
+        try {
+          var s = JSON.parse(localStorage.getItem('op-1-school.settings') || 'null');
+          if (s && s.theme === 'light') theme = 'light';
+        } catch (e) {}
+        var colors = { dark: '#111111', light: '#dcdcd7' };
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        var scheme = document.querySelector('meta[name="color-scheme"]');
+        if (scheme) scheme.setAttribute('content', theme);
+        var themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', colors[theme]);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

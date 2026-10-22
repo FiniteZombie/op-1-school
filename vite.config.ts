@@ -21,7 +21,8 @@ function spaFallback404(): Plugin {
   };
 }
 
-// placeholder: the dark theme's background, until the owner picks the palette.
+// placeholder: the dark theme's background (`THEME_COLORS.dark` in src/ui/theme.ts,
+// `--op-bg` in src/ui/tokens.css), until the owner picks the palette.
 const themeColor = '#111111';
 
 export default defineConfig({

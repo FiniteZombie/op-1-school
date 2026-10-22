@@ -1,1 +1,14 @@
 @import 'tailwindcss';
+@import './ui/tokens.css';
+
+html,
+body {
+  background-color: var(--op-bg);
+  color: var(--op-text);
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}

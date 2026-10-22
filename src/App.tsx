@@ -1,3 +1,10 @@
+import { AppShell } from './ui/AppShell';
+import { SpineProvider } from './ui/spine';
+
 export default function App() {
-  return <p>op-1-school</p>;
+  return (
+    <SpineProvider>
+      <AppShell />
+    </SpineProvider>
+  );
 }

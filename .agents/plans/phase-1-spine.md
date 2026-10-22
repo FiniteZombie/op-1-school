@@ -11,9 +11,9 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 4 | Clock and transport | done 2026-10-22 | da45254 |
 | 5 | Backing synth | done 2026-10-22 | b82c7ca |
 | 6 | Input and MIDI | done 2026-10-22 | 4a067d9 |
-| 7 | State | done 2026-10-22 | |
-| 8 | UI primitives and registry | **Next** | |
-| 9 | `/dev/spine` | | |
+| 7 | State | done 2026-10-22 | 47e6252 |
+| 8 | UI primitives and registry | done 2026-10-22 | |
+| 9 | `/dev/spine` | **Next** | |
 | 10 | Fan-out docs | | |
 | 11 | Exit gate (**attended**) | | |
 
@@ -70,8 +70,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   already makes a default context (Tone's index calls `getContext()` at
   load), so `getAudioContext()` replaces it with `Tone.setContext(ctx, true)`.
   Row 5 makes its synths after that (any Tone node made earlier binds to the
-  disposed context); row 8 builds the clock as
-  `new WebAudioClockBridge(getAudioContext().rawContext)`.
+  disposed context). The spine's clock is built over the native context
+  under Tone's, not `rawContext` itself (see row 8's `clockContextOf`).
 - (4) Names: interface `ClockBridge`, class `WebAudioClockBridge` (the
   pre-flight names no class; a same-named class would block structural
   fakes). `ToneTransport` is `TransportCore` (Tone-free, in `timing.ts`, the
@@ -159,8 +159,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `PulseClockFollower`, re-exported from `MidiBridge.ts`), `MicInput.ts`
   (stub). Every `off`, from any source, carries velocity 0; touch `on` is 1.
   A source emits only while started and `stop()` releases its held notes;
-  `NoteBus` forwards only from started sources, so row 8 starts `touch`
-  (and `midi`) through `bus.start(id)` or no key lights.
+  `NoteBus` forwards only from started sources, so a source is started
+  through `bus.start(id)` or no key lights (row 8's spine does it).
 - (6) `MidiBridge` beyond SPEC §5.3: `accessState()` (`unrequested` /
   `pending` / `granted` / `denied` / `unsupported`), `selected()`,
   `follow(enabled, transport)`, `clockMode()` (`'internal' | 'clock out' |
@@ -174,8 +174,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (6) `onConnectionChange` events are `{ type: 'port', kind, port, state }`
   or `{ type: 'selection', input, output }`. Every port present when access
   is granted also fires a `port`/`connected` event, so a Field plugged in
-  before the app opened still raises row 8's power warning (filter on
-  `type === 'port' && kind === 'input' && state === 'connected'`). Chrome's
+  before the app opened still raises the power warning (`raisesPowerWarning`
+  in `src/ui/powerWarning.ts`). Chrome's
   open/closed `statechange`s are dropped.
 - (6) Selecting a different output (or none) while clock out is on turns it
   off, with `FC` to the old output if the transport is running; the output
@@ -219,30 +219,86 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   case 0's block (the tsconfig forbids a fallthrough into `default`).
 - (7) `settings.ts`: `settings` (the app's store: `get`, `save(patch)`,
   `subscribe`), `createSettings(storage)`, `SETTINGS_KEY`, `DEFAULT_SETTINGS`.
-  Row 8's theme script in `index.html` reads `localStorage['op-1-school.settings']`
-  as flat JSON and takes `.theme` (`'dark'` unless it is `'light'`).
-  `portMemory(settings)` is the `PortMemory` for `new WebMidiBridge({ memory })`
-  (row 8 wires it). `save` notifies only when a value changed; there is no
-  cross-tab `storage` listener.
+  The theme script in `index.html` reads the same key. `save` notifies only
+  when a value changed; there is no cross-tab `storage` listener.
 - (7) `keyboardBaseNote` 53 is VERIFY V8's stub; `keyboardOctave` accepts any
-  integer (row 8 decides the range it uses). Add-ons to the plan: calibration
+  integer, and `Keyboard24` applies it unclamped (nothing sets it yet). Add-ons to the plan: calibration
   `computeCalibration(offsets, { source, device, outputLatencyMs,
   measuredAt? })` returns the record; `getCalibration`, `putCalibration` and
   `listCalibrations` take an optional `AppDB` and open their own otherwise.
 - (7) The IndexedDB round trip (`openAppDb`, `importData`, `exportData`,
   calibration get/put against a real database) has only run against fakes:
   row 9's `db ok` check is its first real run.
-- (1) `themeColor` in `vite.config.ts` (`#111111`, marked placeholder) is the
-  manifest's theme and background colour. Row 8 sets it equal to the dark
-  background token in `tokens.css`.
-- (1) `index.html` has no `color-scheme` meta and no theme script; row 8 adds
-  both before the module script.
 - (1) The service worker registers through the plugin's injected
   `registerSW.js` with `registerType: 'autoUpdate'`: a new deploy takes over
   on the next load, with no update prompt. Fine while everything is in one
   bundle.
 - (1) OWNER: GitHub **Settings → Pages → Source** = "GitHub Actions" before
   row 11's push.
+
+- (8) `useSpine()` (`src/ui/spine.tsx`, inside `<SpineProvider>`, which
+  `App.tsx` puts around the shell) gives `{ clock, transport, bus, midi, touch,
+  settings, audio }`, one each per page (`getSpine()`, never disposed). The
+  transport is a `ToneTransport`, the bridge a `WebMidiBridge` with
+  `portMemory(settings)`. `touch` is started on the bus at once; `midi` is
+  started while an input is selected and stopped when none is, so
+  `bus.active()` is what can play. Row 9 builds its synth as
+  `new ToneBackingSynth(spine.transport)` and disposes it on unmount.
+- (8) Audio: `<AudioGate />` (`src/ui/AudioGate.tsx`) is the start / resume
+  button (`tap to start audio` / `audio paused, tap to resume`) and renders
+  nothing while audio runs; the shell doesn't show it, so every page that
+  plays sound puts it at the top. `audio.state()` is `off` / `running` /
+  `paused`; `audio.start()` runs `initAudio()`, then refreshes the clock
+  every 250 ms. `useAudioState()` and `useSetting(key)` are the hooks.
+- (8) The clock is `new WebAudioClockBridge(clockContextOf(rawContext))`:
+  Tone's `rawContext` is a standardized-audio-context wrapper with no
+  `outputLatency` and no `getOutputTimestamp()`, so `clockContextOf`
+  (`src/ui/clockContext.ts`) unwraps its private `_nativeAudioContext`.
+  It reaches into a library internal; the clean fix is a spine change in
+  `getAudioContext()` (make a native `AudioContext` and pass it to
+  `new Tone.Context({ context, … })`), not made here (row 4's file). Headless
+  Chromium read path `output-timestamp`, `outputLatency` 32 ms,
+  `baseLatency` 10 ms, gap 42.4 ms: not a device measurement, not recorded.
+- (8) Copy lives in `src/ui/copy.ts` (`COPY`): every settled string, plus
+  placeholders `dismiss` (power warning), `octave 1` / `octave 2` (keyboard
+  toggle, naming the octave shown), `<n> bpm` (StatusBar) and the theme
+  toggle's `light` / `dark`. Row 9 imports its MIDI-state copy from there.
+- (8) Theme: a `dark` class on `<html>` (static in `index.html`, so dark
+  even without script), the inline script before the module script, and
+  `applyTheme` in `src/ui/theme.ts` on every settings change.
+  `THEME_COLORS`, `--op-bg` in `tokens.css`, the inline script and
+  `themeColor` in `vite.config.ts` must agree; `theme.test.ts` checks it.
+  Colours are the `--op-*` tokens (Tailwind `bg-surface`, `text-muted`,
+  `border-warn`, … or `var(--op-…)` in inline styles); state tokens are
+  `ok` / `bad` / `warn` / `neutral`; the nav breakpoint is the `nav:`
+  variant (700 px).
+- (8) Router: `Link`, `navigate(path)` and `useLocation()` in
+  `src/ui/navigation.tsx` take app paths (`/dev/spine`) and keep `?dev`;
+  the pure part is `src/ui/router.ts`. The nav's `op-1-school` title is the
+  home link (no `home` entry, so no new copy). A route matches a module's
+  `route` exactly, after trailing slashes are dropped.
+- (8) `Keyboard24` props: `chord`, `musicKey` (`key` is React's), and
+  `onOutOfRange(note)`. Keys carry `data-note`, `data-key-index`,
+  `data-lit` (`true`/`false`) and `data-class` (`off`, `lit`,
+  `chord-tone`, `tension`, `avoid`, `outside`), and the toggle
+  `data-octave-toggle`, for row 9's scripted checks. One or two octaves is
+  decided by the container (14 natural columns at ≥ 40 px, so 560 px for an F
+  base); keys stop growing at 72 px (placeholder). The octave toggle is
+  component state, not a setting.
+- (8) `Encoder` props: `value` (0..1), `onChange`, `color` (`blue` /
+  `ochre` / `gray` / `orange`), `label`, `valueText`, `rangePx`
+  (default 200, up increases), `step` (arrow keys, 0.01), `disabled`. The
+  caller maps 0..1 to its units; it is `role="slider"` with `data-encoder`.
+- (8) The StatusBar polls the spine every 250 ms (no BPM event) and shows
+  `<n> bpm`, the clock mode, the selected input's name or `no midi`, and
+  calibration per active source; the calibration item is also the "active
+  input source" readout. Unsupported or denied MIDI shows `no midi` there;
+  the long copy is row 9's MIDI panel.
+- (8) The import rule is `src/modules/__tests__/importRule.test.ts` (checker
+  in `importRule.ts` next to it). Packages aren't its business; it skips its
+  own file, whose fixtures look like broken imports.
+- (8) `settings.clockOut` isn't applied by anything: clock out starts off
+  every load. Row 9 (or a later row) decides whether its toggle saves it.
 
 ### Process notes
 
@@ -321,6 +377,28 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   signature, and `computeCalibration(offsets)` needs source, device and output
   latency to make a record, so it takes a `meta` argument. Scripted edits ran
   from scratchpad files.
+
+- (8) Linux cloud container. Browser checks ran in headless Chromium via
+  Playwright from scratchpad scripts against the dev server; ESM ignores
+  `NODE_PATH`, so the script imports Playwright by absolute path. Keyboard24,
+  Encoder and AudioGate aren't on any page until row 9, so the probe mounted
+  them into the live page with the app's own React (the optimized-deps URLs
+  read from the served `main.tsx` / `App.tsx`). Chromium logs "The
+  AudioContext was not allowed to start" as a warning on load (Tone's import
+  and `getAudioContext()` each make a context before any gesture); no errors.
+- (8) The row's "under 700 px wide, one octave" is overridden by the
+  pre-flight (container width, ≥ 40 px keys). The row names a `key` prop,
+  which React reserves; it is `musicKey`. "Lit unclassified keys are gray
+  and brighter than unlit keys" can't hold literally in light mode (unlit
+  keys are near-white): lit gray is a solid mid-gray fill, unlit keys a pale
+  outline. The plan doesn't say whether the shell shows the audio gate, what
+  the power warning's dismiss button says, or how the StatusBar shows the
+  active sources (see Carried forward).
+- (8) Tone's `rawContext` hides `outputLatency` and `getOutputTimestamp`
+  (standardized-audio-context): row 4's Carried forward told row 8 to build
+  the clock over it, which would have pinned decision 7's readout to the fit
+  path and SPEC §3.3's latency to `baseLatency`. Worked around in row 8's
+  files; the spine fix is in Carried forward.
 
 ## How this plan runs
 

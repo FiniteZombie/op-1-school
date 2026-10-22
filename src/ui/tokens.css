@@ -1,0 +1,118 @@
+/*
+ * Design tokens. placeholder: every colour here is the plan's placeholder
+ * palette until the owner picks one (.agents/plans/phase-1-spine.md,
+ * "Placeholders").
+ *
+ * The theme is a `dark` class on <html> (set before first paint by the inline
+ * script in index.html; `src/ui/theme.ts` keeps it in step afterwards). Each
+ * token has a light value on :root and a dark value under :root.dark, and
+ * `@theme inline` turns them into Tailwind colours (`bg-bg`, `text-muted`,
+ * `bg-chord-tone`, …), so components use tokens and rarely need `dark:`.
+ *
+ * Colour rule (AGENTS.md): good = blue or cyan, bad = red, warning = yellow,
+ * neutral = gray, and nothing differs by hue alone.
+ *
+ * `--op-bg` in both sets must equal `THEME_COLORS` in `src/ui/theme.ts`, the
+ * inline script in index.html and `themeColor` in vite.config.ts (dark); a
+ * test checks it.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  /* placeholder: the TE-style light gray body from public/icon.svg, dark text */
+  --op-bg: #dcdcd7;
+  --op-surface: #c9c9c3;
+  --op-text: #26262a;
+  --op-muted: #55555a;
+  --op-line: #a9a9a3;
+  --op-key: #f4f4f1;
+  --op-key-line: #a9a9a3;
+  --op-key-lit: #6b6b6b;
+  --op-on-fill: #ffffff;
+
+  /* placeholder: the four TE encoder colours, as in public/icon.svg */
+  --op-encoder-blue: #2f6fd6;
+  --op-encoder-ochre: #c9a227;
+  --op-encoder-gray: #8e8e8e;
+  --op-encoder-orange: #e8682a;
+  --op-encoder-mark: #ffffff;
+
+  /* placeholder: note classification (chord tone, tension, avoid, outside) */
+  --op-chord-tone: #2f6fd6;
+  --op-tension: #0b8fa6;
+  --op-avoid: #b88a00;
+  --op-outside: #c8322a;
+
+  /* placeholder: states (ok = blue, bad = red, warn = yellow, neutral = gray) */
+  --op-ok: #2f6fd6;
+  --op-bad: #c8322a;
+  --op-warn: #b88a00;
+  --op-neutral: #6b6b6b;
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  /* placeholder: near-black background, light gray text */
+  --op-bg: #111111;
+  --op-surface: #1c1c1e;
+  --op-text: #d8d8d4;
+  --op-muted: #8d8d8a;
+  --op-line: #343437;
+  --op-key: #2a2a2d;
+  --op-key-line: #3c3c40;
+  --op-key-lit: #a6a6a6;
+  --op-on-fill: #111111;
+
+  --op-encoder-blue: #2f6fd6;
+  --op-encoder-ochre: #c9a227;
+  --op-encoder-gray: #8e8e8e;
+  --op-encoder-orange: #e8682a;
+  --op-encoder-mark: #ffffff;
+
+  --op-chord-tone: #4d8ff0;
+  --op-tension: #35c4da;
+  --op-avoid: #e6c440;
+  --op-outside: #f05a50;
+
+  --op-ok: #4d8ff0;
+  --op-bad: #f05a50;
+  --op-warn: #e6c440;
+  --op-neutral: #9a9a9a;
+}
+
+@theme inline {
+  --color-bg: var(--op-bg);
+  --color-surface: var(--op-surface);
+  --color-text: var(--op-text);
+  --color-muted: var(--op-muted);
+  --color-line: var(--op-line);
+  --color-key: var(--op-key);
+  --color-key-line: var(--op-key-line);
+  --color-key-lit: var(--op-key-lit);
+  --color-on-fill: var(--op-on-fill);
+
+  --color-encoder-blue: var(--op-encoder-blue);
+  --color-encoder-ochre: var(--op-encoder-ochre);
+  --color-encoder-gray: var(--op-encoder-gray);
+  --color-encoder-orange: var(--op-encoder-orange);
+  --color-encoder-mark: var(--op-encoder-mark);
+
+  --color-chord-tone: var(--op-chord-tone);
+  --color-tension: var(--op-tension);
+  --color-avoid: var(--op-avoid);
+  --color-outside: var(--op-outside);
+
+  --color-ok: var(--op-ok);
+  --color-bad: var(--op-bad);
+  --color-warn: var(--op-warn);
+  --color-neutral: var(--op-neutral);
+}
+
+@theme {
+  /* The nav switches from bottom to side at this viewport width (SPEC §5.4): `nav:` */
+  --breakpoint-nav: 700px;
+}

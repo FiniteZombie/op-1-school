@@ -82,6 +82,11 @@ Push back before breaking one.
   `tsconfig.node.json` (the Vite and Vitest configs). App code that imports
   `node:*` fails typecheck on purpose.
 - Tests are `src/**/__tests__/**/*.test.ts`, in Vitest's node environment.
+- `src/modules/__tests__/importRule.test.ts` enforces the import rule: a
+  module imports only the spine, its own directory and `src/curriculum/`;
+  only `src/ui/AppShell.tsx` imports `src/modules/registry.ts`.
+- Colours come from the theme tokens in `src/ui/tokens.css` (a dark and a
+  light value each; dark is a `dark` class on `<html>`), never raw hexes.
 - Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,
   port 5173). The app is at `http://localhost:5173/op-1-school/`.
 - The build copies `dist/index.html` to `dist/404.html` so GitHub Pages serves
