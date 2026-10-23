@@ -57,9 +57,9 @@ interface, waiting on a result) or `resolved`.
 | V2 | Factory drum key layout (which key is kick, snare, hat) | §8.2 | open | | |
 | V3 | Whether the Field can decline charging from the phone, and drain per hour | §2.2.3, §8.3 | stubbed | `PowerWarning` in `src/ui/PowerWarning.tsx` (`raisesPowerWarning` in `src/ui/powerWarningLogic.ts`): every MIDI input connect shows `the field may charge from this phone`, dismissible, again on the next connect | |
 | V4 | Whether Field velocity comes from the accelerometer | §8.4 | open | | |
-| V5 | Web MIDI clock jitter on the target phone (p95 ≤ 3 ms, loopback) | §8.5 | open | | |
+| V5 | Web MIDI clock jitter on the target phone (p95 ≤ 3 ms, loopback) | §8.5 | resolved | | Loopback jitter p95 1.92 ms over 876 pulses, through the Field's clock echo (Android 10, Chrome 155, 90 BPM, 2026-10-23). The echo adds its own jitter, so the send path is at most that |
 | V6 | Whether the Field needs clock pulses before `0xFA` to lock tempo on bar 1 | §8.6 | stubbed | `WebMidiBridge.clockOut` in `src/input/MidiBridge.ts`: as SPEC §3.4, no pulses before `FA` on a transport start | |
-| V7 | The Field's MIDI input port name | §2.1 | stubbed | `WebMidiBridge` in `src/input/MidiBridge.ts`: no port is picked by name; the user picks, and the choice is remembered by id, then name | `OP-1`, manufacturer `Teenage Engineering`, for input and output (Chrome 155, Windows 11, 2026-10-22). The name doesn't say Field, so it can't tell a Field from an original OP-1. Android's name not seen yet |
+| V7 | The Field's MIDI input port name | §2.1 | stubbed | `WebMidiBridge` in `src/input/MidiBridge.ts`: no port is picked by name; the user picks, and the choice is remembered by id, then name | `OP-1`, manufacturer `Teenage Engineering`, for input and output (Chrome 155, Windows 11, 2026-10-22). The name doesn't say Field, so it can't tell a Field from an original OP-1. On Android 10, Chrome 155: `USB Peripheral Port`, manufacturer `Android`, ids `native:port-in-1` / `native:port-out-1`, listed after other apps' ports (`FlipSampler`, `zerodebug`) (2026-10-23). Nothing in it names the Field, so the picker can't label it |
 | V8 | MIDI note number of the Field's lowest key at the default octave | §2.1 | resolved | `DEFAULT_SETTINGS.keyboardBaseNote` in `src/state/settings.ts`: 53 (F3) | 53 (F3): the leftmost F at the default octave, pressed alone (2026-10-22). Velocity off sends 127; release sends `80 nn 00` |
 
 ## Platform measurements
@@ -81,7 +81,7 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 | Device and browser | Headroom min / p5 / p50 (ms) | Late sends | Loopback \|error\| p50 / p95 (ms) | Date |
 | --- | --- | --- | --- | --- |
 | Windows 11 laptop, Chrome 155, Field in sync at 120 BPM (1000 sends) | 81.2 / 92.1 / 119.6 | 0 | 7.51 / 15.30 (the Field echoes clock; includes its echo and Windows MIDI-in delivery) | 2026-10-22 |
-| Android phone, Chrome, Pages URL (1000 sends) | 72.04 / 77.76 / 100.38 | 0 | no loopback: no `F8` came back, unlike the laptop | 2026-10-23 |
+| Android 10, Chrome 155, Pages URL, Field in midi sync at 90 BPM (879 sends) | −15.74 / 75.92 / 98.53 | 2 | 3.15 / 5.07, jitter p95 1.92 (876 echoed pulses; includes the Field's echo) | 2026-10-23 |
 
 On that laptop the Field, in **sync**, echoes the app's clock back at
 90.01 and 120.04 BPM (20 s and 15 s averages) and its play bpm reads the
@@ -95,7 +95,8 @@ From SPEC §6.3. The owner runs it before Module 3 starts, with the Field
 plugged into the phone, and writes each result in the blank.
 
 1. Field in **sync** mode, app clock out on: the Field follows the app's tempo.
-   Result: ______
+   Result: yes; `start` starts the Field's tape at the app's tempo (exit
+   gate check 8, 2026-10-23).
 2. Same setup, tape running: tape speed matches the app's tempo. Result: ______
 3. Velocity off (Shift+Tempo): notes arrive at velocity 127. Result: ______
 4. Velocity on (soft, then hard): velocity varies. Result: ______
@@ -130,9 +131,9 @@ into a chat when a check fails.
    at 0) and has no clicks. Tap keys: they light, and the log shows touch `on`
    and `off` events. Result: swing audible, no clicks with the screen on;
    tapped keys light and log events (they make no sound: Phase 1 has no
-   touch synth). Often the first `start` is silent while the chord readout
-   still steps; stop and start again and it plays, though not always
-   (2026-10-23).
+   touch synth). After a fresh load, with the Field plugged in, the first
+   `start` was sometimes silent while the chord readout stepped; later
+   tries didn't reproduce it (2026-10-23).
 5. Phone: the app opens dark. Switch to light and back. Every panel, the
    keyboard's lit and classified keys and the encoders are readable in both,
    indoors at night and in daylight. Result: the toggle works both ways
@@ -143,15 +144,23 @@ into a chat when a check fails.
 7. Field plugged in: the power warning shows. Request MIDI, grant it, pick the
    port. Record its name (V7) and the note number of the lowest key (V8)
    in the VERIFY log. Play keys: the same keys light as for touch.
-   Result: the power warning shows (2026-10-23). Port name and keys: ______
+   Result: the power warning shows; the port is `USB Peripheral Port` (V7);
+   Field keys light the same keys as touch (2026-10-23). The phone also lists
+   other apps' MIDI ports, and the first try failed with one of those picked.
 8. Field in **sync**, clock out on: the Field follows the app's tempo. Copy
    the headroom stats (and loopback numbers, if the Field echoes clock) into
-   **MIDI clock out** below. Result: ______
+   **MIDI clock out** below. Result: `start` starts the Field's tape at the
+   app's tempo, and the Field echoes the clock (in **MIDI clock out**). The
+   Field also sends `FB` (continue) and `FC` with the same timestamp, which
+   the app never sends (2026-10-23).
 9. Firefox desktop: the loop plays and keys light. Accept the MIDI add-on
    prompt, pick the Field's port, and see its notes light. Copy the clock
-   readout into **Clock readout** next to the phone's. Result: ______
+   readout into **Clock readout** next to the phone's. Result: the app shows
+   for a moment, then the page goes blank. Not diagnosed: the owner sticks to
+   Chrome for this app (2026-10-23).
 10. Firefox for Android: the loop plays, touch lights keys, and the MIDI panel
-    shows `web midi isn't available in this browser`. Result: ______
+    shows `web midi isn't available in this browser`. Result: blank page,
+    as on desktop (2026-10-23).
 11. Decision 7: compare the gap with `outputLatency + baseLatency` on the
     phone and write down whether `getOutputTimestamp` already includes output
     latency. If it does, the fix to `audibleAt` is a spine request for
@@ -165,8 +174,12 @@ into a chat when a check fails.
 12. The Field sending clock, the app's clock out off, `follow` on: the
     follower reads the Field's tempo within 0.5 BPM with confidence ≥ 0.8,
     and the transport BPM follows it (the `bpm` encoder is greyed out).
-    Result: fails on the phone. With the Field playing tape and its clock
-    setting on `both`, the follower reads `– bpm, confidence 0.00`, so it got
-    fewer than 24 pulses (2026-10-23).
+    Result: the follower reads the Field's tempo and tracks changes to it,
+    with the Field's tempo on **beat match** and the tape stopped: the Field
+    sends clock from the tempo screen alone. In **midi sync** it sends no
+    clock of its own, only an echo of what it receives. Report: follower
+    75.0 BPM at confidence 0.99, transport BPM 74.99, probe clock rate 75.01
+    over 2531 pulses (2026-10-23).
 13. Every VERIFY item above that moved is updated in the VERIFY log.
-    Result: ______
+    Result: V5 resolved and V7 has the Android name (2026-10-23). V3 and V6
+    stay stubbed: no drain measurement yet, and bar-1 lock wasn't watched.

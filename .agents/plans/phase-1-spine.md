@@ -16,7 +16,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 9 | `/dev/spine` | done 2026-10-22 | ad0c090 |
 | 10 | Fan-out docs | done 2026-10-22 | 16df9cd |
 | 11 | Retro fixes | done 2026-10-22 | ee59677 |
-| 12 | Exit gate (**attended**) | **Next** | |
+| 12 | Exit gate (**attended**) | done 2026-10-23 | |
 
 ### Carried forward
 
@@ -326,16 +326,29 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   owner locks the phone, Chrome throttles the page. Phase 2 needs a decision
   (warn, stop the transport on `visibilitychange`, or accept it) before
   drills run on the phone.
-- (12) On the phone the first `start` is often silent while the chord readout
-  steps (so the audio clock runs); stop and start again usually plays. Not
-  reproduced or diagnosed yet. Unknowns: whether the Field was plugged in at
-  the time (Android routes all audio to it), and whether the master gain or
-  the output device is what's silent.
-- (12) On the phone no `F8` seems to reach the app: the follower never gets
-  24 pulses and clock out shows no loopback, though the laptop got both.
-  The Field's notes don't light keys on the phone either, and in **midi
-  sync** it doesn't follow the app's clock out. Being diagnosed with the
-  probe below.
+- (12) After a fresh load on the phone, with the Field plugged in (Android
+  routes all audio to it), the first `start` was sometimes silent while the
+  chord readout stepped; later tries didn't reproduce it. Not diagnosed:
+  watch for it when Phase 2 runs on the phone.
+- (12) Android lists other apps' MIDI ports beside the Field's, and the
+  Field's is `USB Peripheral Port` / `Android` (V7), so nothing can tell
+  the user which one is the Field. The owner's first try had another app's
+  port picked, and every MIDI check failed. Phase 2's MIDI setup copy (the
+  owner's call) should say what to pick.
+- (12) The Field sends `FB` (continue) and `FC` with the same timestamp.
+  The follower clears its history on `FA`/`FB`. It still locked in check 12,
+  with the Field's tempo on **beat match** and the tape stopped (that mode
+  sends clock from the tempo screen; **midi sync** only echoes). Whether
+  starting the tape mid-follow costs a window refill isn't checked.
+- (12) Firefox, desktop and Android, shows the app for a moment and then a
+  blank page. The owner's call (2026-10-23): this app is Chrome-only, and
+  the Firefox crash isn't diagnosed. Decision 14 and SPEC §2.3 (Firefox
+  "degrades to Unplugged mode") don't match that; the SPEC line is the
+  owner's to change.
+- (12) A blank page means an uncaught error unmounted the whole React tree:
+  the shell has no error boundary, so any module that throws while rendering
+  blanks the app in Chrome too. Phase 2 pre-work should add one in the shell
+  that keeps the nav and shows the error.
 - (12) `/dev/spine` has a `probe` panel (`probeReport.ts` pure and tested,
   `liveProbe.ts` the Web MIDI side). It opens its own `MIDIAccess` once the
   bridge has access, and counts what every input delivers by kind, whichever
@@ -343,9 +356,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   a test note to the selected output. `copy report` puts the whole page's
   state on the clipboard as text for the owner to paste into a chat; the
   report text also shows below the button. Its labels are placeholders. The
-  bridge never calls `port.open()` and listens with `addEventListener`,
-  which the Web MIDI spec doesn't count as an implicit open; the report's
-  `connection` field shows whether that matters on Android.
+  bridge never calls `port.open()`; on Android Chrome 155 the ports read
+  `connected/open` anyway.
 
 ### Process notes
 
