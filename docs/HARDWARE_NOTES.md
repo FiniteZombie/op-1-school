@@ -74,12 +74,14 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 | Device and browser | Active path | `currentTime` − `contextTime` gap (ms) | `outputLatency` (ms) | `baseLatency` (ms) | Date |
 | --- | --- | --- | --- | --- | --- |
 | Windows 11 laptop, Chrome 155, built-in speakers | `output-timestamp` | 49.8–52.6 | 40.0 | 10.0 | 2026-10-22 |
+| Android phone, Chrome, Pages URL, phone speaker | `output-timestamp` | 28.8 | 24.0 | 5.0 | 2026-10-23 |
 
 ### MIDI clock out
 
 | Device and browser | Headroom min / p5 / p50 (ms) | Late sends | Loopback \|error\| p50 / p95 (ms) | Date |
 | --- | --- | --- | --- | --- |
 | Windows 11 laptop, Chrome 155, Field in sync at 120 BPM (1000 sends) | 81.2 / 92.1 / 119.6 | 0 | 7.51 / 15.30 (the Field echoes clock; includes its echo and Windows MIDI-in delivery) | 2026-10-22 |
+| Android phone, Chrome, Pages URL (1000 sends) | 72.04 / 77.76 / 100.38 | 0 | no loopback: no `F8` came back, unlike the laptop | 2026-10-23 |
 
 On that laptop the Field, in **sync**, echoes the app's clock back at
 90.01 and 120.04 BPM (20 s and 15 s averages) and its play bpm reads the
@@ -108,28 +110,40 @@ plugged into the phone, and writes each result in the blank.
 The owner runs these from the Pages URL
 (`https://finitezombie.github.io/op-1-school/`) after merging `phase-1-spine`
 into `main`. The run that built the spine had no MIDI hardware and no phone,
-so every blank is open. Page: `/op-1-school/dev/spine?dev`.
+so every blank is open. Page: `/op-1-school/dev/spine?dev`. The `probe`
+panel's `copy report` button copies the page's state as text, for pasting
+into a chat when a check fails.
 
-1. `npm run check` exits 0 on `main`. Result: ______
+1. `npm run check` exits 0 on `main`. Result: exit 0 at `f34df89`, 290 tests
+   (2026-10-23).
 2. After pushing `main`, the Actions run is green and the Pages URL serves the
    shell. (Settings, Pages, Source must be "GitHub Actions" first.)
-   Result: ______
+   Result: run 39921987353 green, `check` and `deploy`. `/op-1-school/` and
+   `/op-1-school/dev/spine` both return the shell (the deep link through
+   `404.html`, HTTP status 404). Seen with curl, not yet in a browser
+   (2026-10-23).
 3. Phone, Chrome: open the page from the Pages URL, tap `tap to start audio`,
    press `start`. Read the clock panel and copy gap, `outputLatency`,
    `baseLatency` and the active path into **Clock readout** below.
-   Result: ______
+   Result: in **Clock readout**: gap 28.8 ms, `output-timestamp` (2026-10-23).
 4. Phone, by ear: the loop is swung (off-beat hats lag at swing 0.5, straight
    at 0) and has no clicks. Tap keys: they light, and the log shows touch `on`
-   and `off` events. Result: ______
+   and `off` events. Result: swing audible, no clicks with the screen on;
+   tapped keys light and log events (they make no sound: Phase 1 has no
+   touch synth). Often the first `start` is silent while the chord readout
+   still steps; stop and start again and it plays, though not always
+   (2026-10-23).
 5. Phone: the app opens dark. Switch to light and back. Every panel, the
    keyboard's lit and classified keys and the encoders are readable in both,
-   indoors at night and in daylight. Result: ______
+   indoors at night and in daylight. Result: the toggle works both ways
+   (2026-10-23).
 6. Phone: lock and unlock the screen while the loop runs. Write down whether
-   it keeps time and what it does. Result: ______
+   it keeps time and what it does. Result: it doesn't keep time: with the
+   screen locked the loop crackles a lot and slows down (2026-10-23).
 7. Field plugged in: the power warning shows. Request MIDI, grant it, pick the
    port. Record its name (V7) and the note number of the lowest key (V8)
    in the VERIFY log. Play keys: the same keys light as for touch.
-   Result: ______
+   Result: the power warning shows (2026-10-23). Port name and keys: ______
 8. Field in **sync**, clock out on: the Field follows the app's tempo. Copy
    the headroom stats (and loopback numbers, if the Field echoes clock) into
    **MIDI clock out** below. Result: ______
@@ -141,10 +155,18 @@ so every blank is open. Page: `/op-1-school/dev/spine?dev`.
 11. Decision 7: compare the gap with `outputLatency + baseLatency` on the
     phone and write down whether `getOutputTimestamp` already includes output
     latency. If it does, the fix to `audibleAt` is a spine request for
-    Phase 2 pre-work, not a guess. Result: ______
+    Phase 2 pre-work, not a guess. Result: it does. The gap is
+    `outputLatency + baseLatency` within 0.2 ms on the phone (28.8 vs 29.0)
+    and within 2.6 ms on the laptop (49.8–52.6 vs 50), so `contextTime` is
+    the frame leaving the device and `audioToPerf` is already audible time on
+    the `output-timestamp` path. `audibleAt` adds `outputLatency` again: 24 ms
+    too late on this phone, 40 ms on the laptop. Spine request for Phase 2
+    pre-work (2026-10-23).
 12. The Field sending clock, the app's clock out off, `follow` on: the
     follower reads the Field's tempo within 0.5 BPM with confidence ≥ 0.8,
     and the transport BPM follows it (the `bpm` encoder is greyed out).
-    Result: ______
+    Result: fails on the phone. With the Field playing tape and its clock
+    setting on `both`, the follower reads `– bpm, confidence 0.00`, so it got
+    fewer than 24 pulses (2026-10-23).
 13. Every VERIFY item above that moved is updated in the VERIFY log.
     Result: ______

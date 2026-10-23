@@ -3,8 +3,10 @@
  * `?dev`. Top to bottom: the audio gate; transport (start/stop, BPM and swing
  * encoders, part masks) playing `DEV_PROGRESSION`; the current chord; the
  * keyboard, classified against it; MIDI access, ports, clock out and follow;
- * decision 7's clock readout; decision 8's MIDI timing; the database check;
- * and a log of raw `NoteEvent`s.
+ * decision 7's clock readout; decision 8's MIDI timing; the probe (what
+ * every MIDI input delivers, and a `copy report` button that puts the whole
+ * page's state on the clipboard as text); the database check; and a log of
+ * raw `NoteEvent`s.
  *
  * The page owns one `ToneBackingSynth`, disposed on unmount, and stops the
  * transport when it unmounts. Clock out isn't saved to settings: it starts
@@ -45,6 +47,8 @@ import {
   type Status,
   type StatusTone,
 } from './devSpine';
+import { openLiveProbe, type LiveProbe } from './liveProbe';
+import { PROBE_LABELS, formatProbeReport, tallyLine } from './probeReport';
 
 const REFRESH_MS = 250;
 
@@ -191,6 +195,7 @@ export default function DevSpineView() {
   const slot = progression.slots[slotIndex] ?? progression.slots[0];
   if (!slot) throw new Error('DEV_PROGRESSION has no slots');
   const currentChordName = chordName(slot.chord, progression.key);
+  const currentRoman = slot.roman;
 
   // ----------------------------------------------------------- keyboard
   const [outOfRange, setOutOfRange] = useState(0);
@@ -235,6 +240,108 @@ export default function DevSpineView() {
     bump();
     await pending;
     bump();
+  }
+
+  // -------------------------------------------------------------- probe
+  const accessState = midi.accessState();
+  const [probe, setProbe] = useState<{ kind: 'off' } | { kind: 'open'; probe: LiveProbe } | { kind: 'error'; message: string }>({
+    kind: 'off',
+  });
+  useEffect(() => {
+    if (accessState !== 'granted') return;
+    let live = true;
+    let opened: LiveProbe | null = null;
+    openLiveProbe().then(
+      (p) => {
+        opened = p;
+        if (live) setProbe({ kind: 'open', probe: p });
+        else p.dispose();
+      },
+      (err: unknown) => {
+        if (live) setProbe({ kind: 'error', message: errorText(err) });
+      },
+    );
+    return () => {
+      live = false;
+      opened?.dispose();
+      setProbe({ kind: 'off' });
+    };
+  }, [accessState]);
+
+  const bridgeCounts = useRef({ clockIn: 0, midiNotes: 0 });
+  useEffect(() => {
+    const offs = [
+      midi.onClockIn(() => {
+        bridgeCounts.current.clockIn += 1;
+      }),
+      bus.onNote((e) => {
+        if (e.source === 'midi') bridgeCounts.current.midiNotes += 1;
+      }),
+    ];
+    return () => offs.forEach((off) => off());
+  }, [midi, bus]);
+
+  const [testNote, setTestNote] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<Status | null>(null);
+  const [reportText, setReportText] = useState('');
+
+  function buildReport(): string {
+    const ctx = getAudioContext();
+    const stats = midi.clockStats();
+    return formatProbeReport({
+      at: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      sections: [
+        ['audio', [['gate', audioState], ['context state', ctx.state], ['sampleRate', String(ctx.sampleRate)], ...clockRows(clock.snapshot())]],
+        [
+          'transport',
+          [
+            ['state', transportState],
+            ['bpm', String(cfg.bpm)],
+            ['swing', String(cfg.swing)],
+            ['chord', `${currentChordName} (${currentRoman})`],
+            ['masks', (['drums', 'bass', 'chords'] as const).filter((p) => mask[p]).join(', ') || 'none'],
+          ],
+        ],
+        [
+          'midi',
+          [
+            ['access', accessState],
+            ['status', midiView.status.text],
+            ['mode', midi.clockMode()],
+            ['selected input', sel.input ? `${sel.input.name} (${sel.input.id})` : 'none'],
+            ['selected output', sel.output ? `${sel.output.name} (${sel.output.id})` : 'none'],
+            ['bridge clock-in pulses', String(bridgeCounts.current.clockIn)],
+            ['bridge midi note events', String(bridgeCounts.current.midiNotes)],
+            ['follower', LABELS.follower(estimate.bpm, estimate.confidence)],
+            ['test note', testNote ?? 'not sent'],
+          ],
+        ],
+        ['midi timing', timingRows(stats)],
+      ],
+      ports:
+        probe.kind === 'open'
+          ? probe.probe.ports()
+          : probe.kind === 'error'
+            ? PROBE_LABELS.probeFailed(probe.message)
+            : PROBE_LABELS.probeOff,
+      recent: probe.kind === 'open' ? probe.probe.recent() : [],
+    });
+  }
+
+  function copyReport(): void {
+    const text = buildReport();
+    setReportText(text);
+    // writeText must start inside the click, before any await.
+    navigator.clipboard.writeText(text).then(
+      () => setCopyStatus({ tone: 'ok', text: PROBE_LABELS.copied }),
+      (err: unknown) => setCopyStatus({ tone: 'warn', text: PROBE_LABELS.copyFailed(errorText(err)) }),
+    );
+  }
+
+  function sendTestNote(): void {
+    if (probe.kind !== 'open' || !sel.output) return;
+    setTestNote(probe.probe.sendTestNote(sel.output.id));
   }
 
   // ----------------------------------------------------------- database
@@ -401,6 +508,52 @@ export default function DevSpineView() {
 
       <Panel id="midi-timing" title={LABELS.panels.midiTiming}>
         <Rows hook="midi-timing" rows={timingRows(midi.clockStats())} />
+      </Panel>
+
+      <Panel id="probe" title={PROBE_LABELS.panel}>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" data-copy-report onClick={copyReport} className={buttonClass}>
+            {PROBE_LABELS.copy}
+          </button>
+          <button
+            type="button"
+            data-test-note
+            disabled={probe.kind !== 'open' || !sel.output}
+            onClick={sendTestNote}
+            className={buttonClass}
+          >
+            {PROBE_LABELS.testNote}
+          </button>
+        </div>
+        {copyStatus && <StatusText status={copyStatus} hook="copy-status" />}
+        <ul data-probe-ports className="flex flex-col gap-1 text-xs tabular-nums text-text">
+          {probe.kind === 'open' ? (
+            probe.probe
+              .ports()
+              .filter((p) => p.type === 'input')
+              .map((p) => (
+                <li key={p.id}>
+                  {p.name} ({p.connection}): {p.tally ? tallyLine(p.tally) : ''}
+                </li>
+              ))
+          ) : (
+            <li className="text-muted">
+              {probe.kind === 'error' ? PROBE_LABELS.probeFailed(probe.message) : PROBE_LABELS.probeOff}
+            </li>
+          )}
+        </ul>
+        {reportText && (
+          <details open={copyStatus?.tone === 'warn'}>
+            <summary className="text-sm text-muted">{PROBE_LABELS.reportText}</summary>
+            <textarea
+              readOnly
+              data-report-text
+              value={reportText}
+              onFocus={(e) => e.currentTarget.select()}
+              className="mt-2 h-64 w-full rounded-md border border-line bg-bg p-2 font-mono text-xs text-text"
+            />
+          </details>
+        )}
       </Panel>
 
       <Panel id="database" title={LABELS.panels.database}>

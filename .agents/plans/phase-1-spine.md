@@ -314,6 +314,38 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   periods counts as dropped pulses. Follow engages once a window of bunched
   clock fills (about 2.7 s at 90 BPM); a tempo change drops confidence until
   the window holds the new tempo.
+- (12) Spine request for Phase 2 pre-work, from decision 7's readout
+  (`docs/HARDWARE_NOTES.md`, exit gate check 11): on the `output-timestamp`
+  path `getOutputTimestamp` already includes output latency, so
+  `WebAudioClockBridge.audibleAt` should be `audioToPerf(t)` there and keep
+  `+ outputLatencySec()` only on the `fit` path. Today it lands 24 ms late on
+  the phone and 40 ms late on the laptop. Calibration hides a constant error,
+  but it changes when the path switches.
+- (12) The phone loop doesn't survive a screen lock: it crackles a lot and
+  slows down (check 6). The wake lock only keeps the screen on; once the
+  owner locks the phone, Chrome throttles the page. Phase 2 needs a decision
+  (warn, stop the transport on `visibilitychange`, or accept it) before
+  drills run on the phone.
+- (12) On the phone the first `start` is often silent while the chord readout
+  steps (so the audio clock runs); stop and start again usually plays. Not
+  reproduced or diagnosed yet. Unknowns: whether the Field was plugged in at
+  the time (Android routes all audio to it), and whether the master gain or
+  the output device is what's silent.
+- (12) On the phone no `F8` seems to reach the app: the follower never gets
+  24 pulses and clock out shows no loopback, though the laptop got both.
+  The Field's notes don't light keys on the phone either, and in **midi
+  sync** it doesn't follow the app's clock out. Being diagnosed with the
+  probe below.
+- (12) `/dev/spine` has a `probe` panel (`probeReport.ts` pure and tested,
+  `liveProbe.ts` the Web MIDI side). It opens its own `MIDIAccess` once the
+  bridge has access, and counts what every input delivers by kind, whichever
+  port is selected. It shows each port's `state`/`connection` and can send
+  a test note to the selected output. `copy report` puts the whole page's
+  state on the clipboard as text for the owner to paste into a chat; the
+  report text also shows below the button. Its labels are placeholders. The
+  bridge never calls `port.open()` and listens with `addEventListener`,
+  which the Web MIDI spec doesn't count as an implicit open; the report's
+  `connection` field shows whether that matters on Android.
 
 ### Process notes
 
