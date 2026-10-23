@@ -13,29 +13,15 @@ log results, with no cable required.
 | Row | Name | Kind | Model | Branch | Merge order | Status | Commit |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | S1a | Spine contracts | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | `14ec998` |
-| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
-| L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | **Next** | |
-| L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | **Next** | |
-| L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | **Next** | |
-| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | | |
+| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | `4214869` |
+| L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | done 2026-10-23 | `ff40050` (merge `aea5641`) |
+| L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | done 2026-10-23 | `961d273` (merge `ab06ec5`) |
+| L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | done 2026-10-23 | `c8225d5` (merge `218991f`) |
+| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | **Next** | |
 | G | Exit gate (**attended**) | step | — | `main` | — | | |
 
 ### Carried forward
 
-- **S1b → L1, L2:** `qualityFamily` is in `src/theory/chords.ts` (and the
-  barrel) with `QUALITY_FAMILIES` (`maj7`, `7`, `m7`, `m7b5`, `sus`) and
-  the `QualityFamily` type; use the list for A3's buttons.
-- **S1b → L2:** `tapWindow(source, calibrated?, offsets?)` and
-  `tapVerdict(offsetMs, source, calibrated, offsets?)` take the measurements
-  as an optional last argument: L2's tests pass their own there, never
-  `TAP_OFFSETS`. Edges are inclusive (a 1e-9 ms epsilon absorbs float error).
-  `heardAudioTime(perfTs, clock)` needs only `audibleAt` and `perfToAudio`,
-  so `FakeClockBridge` works.
-- **S1b → L2:** `<MidiConnect />` takes only `className`. It opens its own
-  `MIDIAccess` (after the bridge's is granted, so no second prompt) to count
-  messages on every input; picking calls `midi.select(id, keptOutput)`, and
-  tapping the chosen input clears it. It isn't rendered anywhere yet: L2 puts
-  it under the `AudioGate`, and that is its first browser check.
 - **S1b → S2:** `docs/MODULE_CONTRACT.md`'s `useSpine()` / UI list doesn't
   name `Keyboard24`'s `guide` prop, the touch voice or `tapVerdict` (S1b
   owned the MidiConnect part of that page only); S2 adds them.
@@ -43,27 +29,47 @@ log results, with no cable required.
   patch (triangle `PolySynth`, -18 dB, under the chords' -14). Spine-built,
   never disposed, voices `touch` only once audio runs, and releases its notes
   when audio stops running. G re-measures touch tap offsets with it on.
-- **S1a → L1:** the loader (`src/curriculum/build.ts`, pure, and `index.ts`)
-  checks shape, duplicate ids per kind and `loadProgression` only. It doesn't
-  check a lesson's file name against its id, a drill step's `mode` against
-  `DRILL_MODES`, or that a `progressionId` exists: those are L1's
-  `content.test.ts`. A lesson file holds one lesson object; `progressions.json`
-  and `sequencerRecipes.json` hold lists. Seed progressions use `family:
-  "seed"`; seed lesson drill minutes (A0 3 of 4, B0 4 of 5) fit their lessons.
-- **S1a → L2, L3:** `parseLaunch` returns the first error only, ignores
-  unknown parameters, and rejects an empty `session`/`lesson`/`progression`
-  and a `returnTo` that isn't an app path (`/…`, not `//…`). `minutes` may be
-  fractional (`0.25`). `DrillLaunch` carries `module`; `launchQuery` leaves it
-  out (it's the route). `availableFrom` and the `AvailableModule` type live in
-  `src/ui/router.ts` (pure, beside `visibleModules`);
-  `availableModules.tsx` re-exports the type.
-- **S1a → L2:** a query change on the same route doesn't remount a module's
-  view (`ErrorBoundary` resets on `path` only), so a view reads
-  `useLocation().query` each render; `useLocation()` returns the same object,
-  `query` included, until the URL changes, so it's safe in effect deps.
-- **S1a → L2 (decision the plan didn't cover):** `MODULE_CONTRACT.md` says a
-  practice session's `startedAt` is when the drill started and its `scores` is
-  `{}` for an unscored drill (`Session.scores` is required).
+- **S1a → S2 (decision the plan didn't cover):** `MODULE_CONTRACT.md` says
+  a practice session's `startedAt` is when the drill started and its
+  `scores` is `{}` for an unscored drill (`Session.scores` is required).
+- **L1 → S2:** every `(field steps: VERIFY)` in the content goes into the
+  VERIFY log: b1 kick key (also V2); c3 loading the kit and sampling 10 s of
+  the Push; d0 changing tape speed; d1 brake on M1/M2; d2 Element LFO with
+  the G source; d3 per-track panning and master drive; d5 line-in
+  mono/stereo; and in `sequencerRecipes.json`, opening and entering each
+  sequencer (finger, endless, tombola), white-key variations switched with
+  Hold, whether an endless step is a 16th, recording unquantized, muting
+  tombola on a section change.
+- **L1 → S2:** `content.test.ts` re-implements L2's `usableFor` rules
+  locally (modules can't be imported from `src/curriculum/`); S2 confirms
+  L2's `usableFor` accepts each A lesson's progression (item 3 does this in
+  the browser).
+- **L1 → G:** A-lesson drill minutes are 3 (A2 2, A6 2 + 2), B and C
+  drills 4. The 4-track template (SPEC §4.3, "keep … from v1") isn't in the
+  content: the v1 document isn't in the repo.
+- **L2 → S2:** `AGENTS.md` **Repo conventions** gains a line: a drill's
+  scorers run through the Tone-free `DrillController`
+  (`src/modules/progression-trainer/drill.ts`, synth passed in as
+  `BackingLike`) and are tested on the fake transport.
+- **L2 → S2:** V6 gets a VERIFY-log note: A0's stage changes and A4's pair
+  changes restart the transport, sending `F2`/`FA` with no pre-pulses
+  (stubbed, as the spine does).
+- **L2 → G:** the drill's own stops land on the loop's last MIDI pulse
+  (deferred a microtask so clock out sends that pulse before `FC`); a
+  finish can end with a ~50 ms blip of the first chord, unheard (`[ear]`).
+  A score of 0, not absent, when nothing counted (absent would pass a gate).
+- **L2 → S2:** `back to session` must navigate to `returnTo` with
+  `navigate(path)` so `dev&fast` are kept; S2's flow confirms it. From a
+  library launch (`returnTo` with no `session`) the label reads oddly
+  (placeholder question for the owner).
+- **L3 → S2:** L3's browser check couldn't confirm a clean console (a stale
+  `ReferenceError` from mid-edit stayed in the pane's buffer); S2 checks the
+  console on the merged branch. L3's launch check used a temporary empty
+  `progression-trainer` module, since deleted; S2's flow is the real one.
+- **L3 → S2, G:** the library lives at `/runner?view=library&open=<id>`. An
+  open session from today shows its steps directly (`resume session`); a
+  segment's `startedAt` is the previous one's finish; `launchedAt` keeps the
+  first launch.
 
 ### Process notes
 
@@ -88,6 +94,26 @@ log results, with no cable required.
 - S1b: a Bash heredoc with an empty `python -` heredoc hung until the 120 s
   timeout (probably the Windows Store `python` stub waiting); scripted edits
   went to Node files in the scratchpad. A stray no-op line, not a needed step.
+- Run: the Agent tool's `isolation: "worktree"` cut every lane from
+  `origin/main` (`f56bbbf`), not the plan branch; the lanes stopped on the
+  base check and were respawned with `git reset --hard 4214869` as their
+  first step.
+- L2, L3: `preview_start` with `dev-l2` / `dev-l3` serves the main
+  checkout, not the lane's worktree; both lanes ran `npx vite --port <n>
+  --strictPort` from the worktree instead and checked the served source.
+- L2: browser-pane clicks by coordinate missed (the screenshot frame isn't
+  CSS pixels); clicks by `find` → `ref` worked. Stopping a background Bash
+  task left vite listening; it was killed by PID.
+- L3: the case-clash rule bit again (`home.ts` / `Home.tsx`,
+  `library.ts` / `Library.tsx`), caught by typecheck and renamed
+  (`homeAction.ts`, `libraryLogic.ts`).
+- L3: Vite's watcher on Windows can miss the second of two near-simultaneous
+  edits and serve a stale module; touching the file fixes it.
+- L3: L3's Done-when 3 expects `/progression-trainer` navigation, but
+  decision 10 stubs a module that isn't registered, so L3 needed a temporary
+  stub module outside its paths; that check belongs in S2.
+- L1: "one card per §4.4 topic" didn't settle whether sync setup is a D
+  topic (it went into d0), nor where C's resample-loop card goes (c3).
 
 ## How this plan runs
 
