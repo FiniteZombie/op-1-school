@@ -1,6 +1,7 @@
 /**
  * The app's frame (SPEC §5.4): nav, StatusBar, the app-wide power warning,
- * and the routed page. The nav sits at the bottom under 700 px of viewport
+ * and the routed page; everything but the nav sits in an `ErrorBoundary`,
+ * so a render error leaves the nav working. The nav sits at the bottom under 700 px of viewport
  * width and at the side from 700 px (`nav:` in tokens.css); its title links
  * home, then one entry per visible module (registry order), then the theme
  * toggle. Routes come from the registry (decision 9's router); `devOnly`
@@ -11,6 +12,7 @@ import { Suspense } from 'react';
 import { modules } from '../modules/registry';
 import type { ModuleDefinition } from '../types/modules';
 import { COPY } from './copy';
+import { ErrorBoundary } from './ErrorBoundary';
 import { Link, useLocation } from './navigation';
 import { PowerWarning } from './PowerWarning';
 import { resolveRoute, visibleModules } from './router';
@@ -68,11 +70,13 @@ export function AppShell() {
         <ThemeToggle className="ml-auto shrink-0 nav:mt-auto nav:ml-0" />
       </nav>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <StatusBar />
-        <PowerWarning />
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <Page path={path} dev={dev} />
-        </main>
+        <ErrorBoundary resetKey={path}>
+          <StatusBar />
+          <PowerWarning />
+          <main className="min-h-0 flex-1 overflow-y-auto">
+            <Page path={path} dev={dev} />
+          </main>
+        </ErrorBoundary>
       </div>
     </div>
   );

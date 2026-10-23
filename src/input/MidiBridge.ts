@@ -7,7 +7,7 @@
  * so tests pass fakes (`src/input/__fakes__`). This file imports only types
  * from `TransportEngine.ts` (it imports Tone) and stays Tone-free.
  *
- * Rules from the plan (`.agents/plans/phase-1-spine.md`, pre-flight answers):
+ * Rules from the plan (`.agents/plans/archive/phase-1-spine.md`, pre-flight answers):
  * - No sysex. No port is picked by guessing its name (the Field's port name is
  *   VERIFY V7): with nothing remembered, nothing is selected. A remembered port
  *   is reselected when access is granted or when it reappears, by id, then by

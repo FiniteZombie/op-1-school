@@ -63,12 +63,12 @@
    - The app cannot select an output device on Android (`setSinkId` is desktop-only). Desktop can route backing to speakers and samples to the Field.
 2. **Mic mode needs headphones.** Mic-based pitch/transient detection with the phone speaker active hears the app's own audio. The mic-mode screen requires headphones on the phone (or the Field as output) and must disable `echoCancellation`, `noiseSuppression`, `autoGainControl` in `getUserMedia` constraints — defaults will crush transients and shift pitch.
 3. **Power.** USB-C to USB-C with the phone as host may charge the Field from the phone. VERIFY whether the Field can decline charging (§8). Until known, the UI shows a one-line warning on connect.
-4. **Background throttling.** Screen-off or backgrounded tabs throttle timers. Tone.js uses a Worker ticker for its clock; also request a wake lock (`navigator.wakeLock`) while a drill transport is running.
+4. **Background throttling.** Screen-off or backgrounded tabs throttle timers. Tone.js uses a Worker ticker for its clock; also request a wake lock (`navigator.wakeLock`) while a drill transport is running. With the screen locked anyway the loop crackles and slows, so the transport stops when the page is hidden.
 5. **Audio latency.** Expect 20–100 ms output latency depending on device. `AudioContext({ latencyHint: 'interactive' })`, and read `ctx.outputLatency` / `ctx.baseLatency` for correction (§3.3).
 
 ### 2.3 Desktop
 
-Chrome on PC: same code path, plus `setSinkId` for output routing and far lower latency. Firefox lacks Web MIDI without an extension; the app detects and degrades to Unplugged mode with a notice.
+Chrome on PC: same code path, plus `setSinkId` for output routing and far lower latency. The app is Chrome-only, on Android and desktop; other browsers aren't supported or tested.
 
 ---
 
@@ -92,12 +92,14 @@ export class ClockBridge {
   refresh(): void                       // re-sample getOutputTimestamp() (call every ~250 ms)
   audioToPerf(audioSec: number): number // ms
   perfToAudio(perfMs: number): number   // sec
-  outputLatencySec(): number            // ctx.outputLatency ?? ctx.baseLatency ?? 0
-  audibleAt(audioSec: number): number   // audioToPerf(audioSec + outputLatencySec())
+  outputLatencySec(): number            // (ctx.outputLatency ?? 0) + (ctx.baseLatency ?? 0)
+  audibleAt(audioSec: number): number   // audioToPerf(audioSec); the fit path adds outputLatencySec()
 }
 ```
 
-Fallback when `getOutputTimestamp` is unavailable: sample `(ctx.currentTime, performance.now())` pairs and keep a running linear fit.
+`getOutputTimestamp().contextTime` is the frame leaving the device, so `audioToPerf` on that path is already when a sound is heard (measured on Android Chrome and Windows Chrome: `currentTime − contextTime` = `outputLatency + baseLatency`).
+
+Fallback when `getOutputTimestamp` is unavailable: sample `(ctx.currentTime, performance.now())` pairs and keep a running linear fit. `currentTime` is render time, so on this path `audibleAt` adds `outputLatencySec()`.
 
 ### 3.2 `src/audio/TransportEngine.ts`
 

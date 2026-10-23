@@ -68,7 +68,8 @@ export function createFakeTransport(): { transport: TransportCore; driver: FakeT
 }
 
 /**
- * `audioToPerf(t) = originMs + 1000·t`; `audibleAt` adds `outputLatencySec`.
+ * `audioToPerf(t) = originMs + 1000·t`; `audibleAt` adds `outputLatencySec`,
+ * as the real bridge does on its fit path.
  * The default origin (5000 ms) is SPEC §3.3's worked example.
  */
 export class FakeClockBridge implements ClockBridge {

@@ -1,6 +1,6 @@
 # Phase 1 spine — exit gate (2026-10-23)
 
-**Status:** not reviewed yet. Run `/retro` with the owner.
+**Status:** reviewed with the owner on 2026-10-23.
 
 Row 12, attended, run by the owner with `/step` on 2026-10-23 from the
 phone, the OP-1 Field and Firefox, with the agent on the Windows PC.
@@ -120,3 +120,66 @@ passed.
 3. When a hardware check fails on a device, ask for the probe's `copy report`
    first ([step], How to test this yourself). One line.
 4. Decide Firefox in SPEC §2.3 (owner).
+
+---
+
+## Review
+
+With the owner on 2026-10-23. The owner took the reviewer's suggestion on
+every item.
+
+### Decisions
+
+All three kept: the `/dev/spine` probe, the agent merging and pushing row 12
+with `--ff-only`, and Chrome-only.
+
+### Answers
+
+1. **Firefox.** SPEC §2.3 says the app is Chrome-only, on Android and
+   desktop; other browsers aren't supported or tested. No browser notice: the
+   error boundary shows a crash instead of a blank page.
+2. **Screen lock.** The transport stops when the page is hidden
+   (`visibilityAction` in `src/audio/timing.ts`, called from `ToneTransport`).
+   This also stops it when a desktop tab is switched away.
+3. **Phase 2 MIDI setup copy.** The port picker can't name the Field (V7), so
+   it labels ports with message counts, as the probe does, and the user picks
+   the one that lights up. Wording stays a placeholder.
+
+Placeholders kept: the probe's labels, and `COPY.pageError`
+(`something broke on this page`).
+
+### Spine requests
+
+Both accepted, landed in this review's change, with the screen-lock stop:
+
+- **`audibleAt`** (`src/audio/Clock.ts`): `audioToPerf(t)` on the
+  `output-timestamp` path; on the fit path `audioToPerf(t + outputLatencySec())`,
+  with `outputLatencySec()` = `outputLatency + baseLatency` (the measured gap),
+  not the retro's `outputLatency` alone, which would leave the fit path 5 ms
+  early on the phone and jump when the path switches. SPEC §3.1 matches.
+- **Error boundary** (`src/ui/ErrorBoundary.tsx`): wraps everything in
+  `AppShell` but the nav; navigating clears it (`resetKey`, not a React
+  `key`, so the power warning keeps its state). It catches render errors
+  only. The Firefox blank page was never diagnosed, so "one uncaught error"
+  was an inference.
+
+### Owner's checks still to run
+
+- `[phone]` After this lands on Pages: tap along to the loop; offsets sit
+  near 0, not near +24 ms. Phase 2 grading depends on it.
+- `[phone]` Lock the screen mid-loop: silence, and `start` on unlock.
+- `[field]` V6 (bar-1 lock) and Phase 3 checklist items 2–6, before Module 3.
+- `[ear]` A silent first `start` after a fresh load with the Field plugged in.
+
+### Recommendations
+
+| Recommendation | Outcome |
+| --- | --- |
+| 1 Phase 2 pre-work: `audibleAt` fix, error boundary | done: `Clock.ts`, `ErrorBoundary.tsx`, with tests in `clock.test.ts` and `uiLogic.test.ts`; seen on `/dev/spine` in the desktop pane |
+| (added) Stop the transport when hidden | done: `timing.ts`, `TransportEngine.ts`, test in `timing.test.ts`; SPEC §2.2.4 and HARDWARE_NOTES "Background throttling" |
+| 2 Name the Field's tempo mode in clock checks | dropped: `docs/HARDWARE_NOTES.md` defines free / beat match / sync, and check 12 names beat match |
+| 3 Ask for the probe's `copy report` first when a device check fails | done: `.claude/skills/step/SKILL.md`, folded into the "How to test this yourself" bullet on failures |
+| 4 Firefox in SPEC §2.3 | done: Chrome-only |
+| Friction: a port list on any MIDI debug page | dropped: `/dev/spine` has it |
+| Friction: `gh` isn't installed | deferred: curl worked; installing it is the owner's call |
+| Plan row 12's commit | backfilled `ec39a1a`; plan archived to `.agents/plans/archive/phase-1-spine.md` |

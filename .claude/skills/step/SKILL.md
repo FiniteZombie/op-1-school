@@ -90,7 +90,8 @@ message). If an orchestrator spawned you, also read
      touch `on` event");
    - the VERIFY items you hit and what you stubbed;
    - what's known to be rough, cut or untested;
-   - what to tell you if a check fails.
+   - what to tell you if a check fails: for one on a device, the `copy report`
+     from `/dev/spine`'s probe before anything else.
 
 ## Subagent mode
 

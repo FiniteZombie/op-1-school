@@ -23,6 +23,8 @@ export const COPY = {
   dismiss: 'dismiss',
   /** placeholder: the one-octave keyboard's toggle, naming the octave shown. */
   octave: (n: 1 | 2) => `octave ${n}`,
+  /** placeholder: `ErrorBoundary`'s heading over the error text. */
+  pageError: 'something broke on this page',
   /** placeholder: the StatusBar's BPM. */
   bpm: (bpm: number) => `${Math.round(bpm)} bpm`,
 } as const;

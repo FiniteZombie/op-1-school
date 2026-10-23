@@ -11,20 +11,16 @@ function fakeContext(init: Partial<AudioClockContext> & { currentTime?: number; 
 }
 
 describe('SPEC §3.3 worked number', () => {
-  // audioToPerf(t) = 5000 + 1000·t ms, output latency 40 ms.
-  const ctx = fakeContext({
-    currentTime: 10,
-    outputLatency: 0.04,
-    getOutputTimestamp: () => ({ contextTime: 1, performanceTime: 6000 }),
-  });
+  // Fit path: audioToPerf(t) = 5000 + 1000·t ms, output latency 40 ms.
+  const ctx = fakeContext({ currentTime: 10, outputLatency: 0.04 });
   const clock = new WebAudioClockBridge(ctx, () => 15000);
   clock.refresh();
 
-  test('the correlation is the output timestamp', () => {
+  test('the fit path adds the output latency', () => {
     expect(clock.audioToPerf(10)).toBeCloseTo(15000, 9);
     expect(clock.perfToAudio(15000)).toBeCloseTo(10, 9);
     expect(clock.audibleAt(10)).toBeCloseTo(15040, 9);
-    expect(clock.snapshot().path).toBe('output-timestamp');
+    expect(clock.snapshot().path).toBe('fit');
   });
 
   test('a snare at 10.000 s played at perf 15062 reads +22 ms, uncalibrated', () => {
@@ -45,9 +41,35 @@ describe('SPEC §3.3 worked number', () => {
   });
 });
 
+describe('decision 7: the output timestamp is already audible time', () => {
+  // The phone's readout at perf 15000: currentTime 10, gap 28.8 ms, outputLatency 24, baseLatency 5.
+  const ctx = fakeContext({
+    currentTime: 10,
+    outputLatency: 0.024,
+    baseLatency: 0.005,
+    getOutputTimestamp: () => ({ contextTime: 9.9712, performanceTime: 15000 }),
+  });
+  const clock = new WebAudioClockBridge(ctx, () => 15000);
+  clock.refresh();
+
+  test('audibleAt is audioToPerf, with no latency added', () => {
+    expect(clock.snapshot().path).toBe('output-timestamp');
+    expect(clock.audibleAt(10)).toBeCloseTo(clock.audioToPerf(10), 9);
+    expect(clock.audibleAt(10)).toBeCloseTo(15028.8, 9);
+  });
+
+  test('the fit path lands within the gap−latency mismatch of it', () => {
+    // currentTime 10 paired with perf 15000, + 29 ms = 15029, vs 15028.8 from the output timestamp.
+    const fit = new WebAudioClockBridge(fakeContext({ currentTime: 10, outputLatency: 0.024, baseLatency: 0.005 }), () => 15000);
+    fit.refresh();
+    expect(Math.abs(fit.audibleAt(10) - clock.audibleAt(10))).toBeLessThan(0.5);
+  });
+});
+
 describe('outputLatencySec', () => {
-  test('outputLatency, then baseLatency, then 0', () => {
-    expect(new WebAudioClockBridge(fakeContext({ outputLatency: 0.03, baseLatency: 0.01 }), () => 0).outputLatencySec()).toBe(0.03);
+  test('outputLatency plus baseLatency, each 0 when missing', () => {
+    expect(new WebAudioClockBridge(fakeContext({ outputLatency: 0.03, baseLatency: 0.01 }), () => 0).outputLatencySec()).toBeCloseTo(0.04, 12);
+    expect(new WebAudioClockBridge(fakeContext({ outputLatency: 0.03 }), () => 0).outputLatencySec()).toBe(0.03);
     expect(new WebAudioClockBridge(fakeContext({ baseLatency: 0.01 }), () => 0).outputLatencySec()).toBe(0.01);
     expect(new WebAudioClockBridge(fakeContext(), () => 0).outputLatencySec()).toBe(0);
   });

@@ -41,7 +41,8 @@ From SPEC §2.2.
 3. **Power.** With the phone as host, the Field may charge from the phone. The
    app shows a one-line warning on connect until V3 is answered.
 4. **Background throttling.** Screen-off and background tabs throttle timers.
-   Tone runs a worker ticker, and the transport holds a wake lock while running.
+   Tone runs a worker ticker, and the transport holds a wake lock while running
+   and stops when the page is hidden (a locked screen crackles and slows).
 5. **Audio latency** is 20–100 ms depending on the phone. The context uses
    `latencyHint: 'interactive'` and reads `outputLatency` / `baseLatency` for
    correction (SPEC §3.3).
@@ -170,7 +171,7 @@ into a chat when a check fails.
     the frame leaving the device and `audioToPerf` is already audible time on
     the `output-timestamp` path. `audibleAt` adds `outputLatency` again: 24 ms
     too late on this phone, 40 ms on the laptop. Spine request for Phase 2
-    pre-work (2026-10-23).
+    pre-work (2026-10-23), landed: `audibleAt` adds latency on the fit path only.
 12. The Field sending clock, the app's clock out off, `follow` on: the
     follower reads the Field's tempo within 0.5 BPM with confidence ≥ 0.8,
     and the transport BPM follows it (the `bpm` encoder is greyed out).

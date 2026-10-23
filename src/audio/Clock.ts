@@ -4,12 +4,12 @@
  * (`getNativeAudioContext()`), typed as the small `AudioClockContext` so
  * tests pass a fake.
  *
- * Decision 7 is open: the Web Audio spec defines
- * `getOutputTimestamp().contextTime` as the frame now leaving the output
- * device, which would make `audioToPerf` audible time already, and `audibleAt`
- * then double-counts the output latency; the fallback fit pairs
- * `currentTime` (render time) with `performance.now()`. This follows SPEC §3.1
- * as written, and `snapshot()` is the readout that settles it on real devices.
+ * Decision 7, measured on the phone and the laptop (docs/HARDWARE_NOTES.md,
+ * Clock readout): `getOutputTimestamp().contextTime` is the frame now leaving
+ * the device (`currentTime − contextTime` = `outputLatency + baseLatency`),
+ * so on that path `audioToPerf` is already audible time. The fallback fit
+ * pairs `currentTime` (render time) with `performance.now()`, so only that
+ * path adds the latency.
  */
 
 /** From `ctx.getOutputTimestamp()`, or the fallback fit. Seconds and ms. */
@@ -52,9 +52,9 @@ export interface ClockBridge {
   audioToPerf(audioSec: number): number;
   /** Performance ms → audio seconds. */
   perfToAudio(perfMs: number): number;
-  /** `ctx.outputLatency ?? ctx.baseLatency ?? 0`. */
+  /** Render to ear: `(ctx.outputLatency ?? 0) + (ctx.baseLatency ?? 0)`, the measured gap. */
   outputLatencySec(): number;
-  /** `audioToPerf(audioSec + outputLatencySec())`. */
+  /** When `audioSec` is heard: `audioToPerf(audioSec)` on the output-timestamp path, plus `outputLatencySec()` on the fit. */
   audibleAt(audioSec: number): number;
   snapshot(): ClockSnapshot;
 }
@@ -122,10 +122,11 @@ export class WebAudioClockBridge implements ClockBridge {
   }
 
   outputLatencySec(): number {
-    return this.ctx.outputLatency ?? this.ctx.baseLatency ?? 0;
+    return (this.ctx.outputLatency ?? 0) + (this.ctx.baseLatency ?? 0);
   }
 
   audibleAt(audioSec: number): number {
+    if (this.outputCorrelation) return this.audioToPerf(audioSec);
     return this.audioToPerf(audioSec + this.outputLatencySec());
   }
 

@@ -6,7 +6,7 @@
  * `getAudioContext()` / `initAudio()`, the Tone driver, and the wake lock.
  * Tests import this file as types only (decision 11).
  *
- * Plan decisions this follows (`.agents/plans/phase-1-spine.md`):
+ * Plan decisions this follows (`.agents/plans/archive/phase-1-spine.md`):
  * - Tone's swing stays 0 and Tone's own loop stays off. The transport runs
  *   unlooped, so Tone's ticks are `absTick`, and the `bars`-bar loop is
  *   `absTick % loopTicks` (decision 2). Swing is `swingOffsetSec()` for
@@ -17,7 +17,7 @@
  */
 import * as Tone from 'tone';
 import type { Unsubscribe } from '../types/music';
-import { TransportCore, type TransportDriver } from './timing';
+import { TransportCore, type TransportDriver, visibilityAction } from './timing';
 
 export type ClockSource = 'internal' | 'midi-follow'; // midi-follow is a stretch target, SPEC §3.5
 
@@ -196,8 +196,8 @@ class ToneDriver implements TransportDriver {
 /**
  * `TransportEngine` over `Tone.getTransport()` of `getAudioContext()`.
  * Constructing it touches no audio; `start()` needs `initAudio()` first.
- * Holds a screen wake lock while running, re-acquired when the page becomes
- * visible again; wake-lock failures are ignored.
+ * Holds a screen wake lock while running; wake-lock failures are ignored.
+ * Stops when the page is hidden (`visibilityAction`).
  */
 export class ToneTransport extends TransportCore {
   private wakeLock: WakeLockSentinel | null = null;
@@ -212,9 +212,9 @@ export class ToneTransport extends TransportCore {
   }
 
   private readonly onVisibility = (): void => {
-    if (document.visibilityState === 'visible' && this.state() === 'started') {
-      this.acquireWakeLock();
-    }
+    const action = visibilityAction(document.visibilityState, this.state());
+    if (action === 'stop') this.stop();
+    else if (action === 'relock') this.acquireWakeLock();
   };
 
   private acquireWakeLock(): void {

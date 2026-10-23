@@ -256,6 +256,17 @@ class Subscribers<A extends unknown[]> {
 }
 
 /**
+ * What a running transport does on `visibilitychange`. Hidden stops it: with
+ * the screen locked the phone throttles the page and the loop crackles and
+ * slows (HARDWARE_NOTES exit gate, check 6), which is worse than silence.
+ * Visible again re-takes the wake lock (the browser drops it when hidden).
+ */
+export function visibilityAction(visibility: string, state: TransportState): 'stop' | 'relock' | 'none' {
+  if (state !== 'started') return 'none';
+  return visibility === 'hidden' ? 'stop' : 'relock';
+}
+
+/**
  * `TransportEngine` over an injected driver. Every pulse the driver reports is
  * mapped to its absolute tick through the anchors, then dispatched in this
  * order: `onLoop` (in-loop tick 0), `onBeat`, `onSixteenth`, `onMidiPulse`.

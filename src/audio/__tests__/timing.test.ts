@@ -16,6 +16,7 @@ import {
   TransportCore,
   type TransportDriver,
   validateTransportConfig,
+  visibilityAction,
 } from '../timing';
 
 const CFG: TransportConfig = { bpm: 120, swing: 0, bars: 4, timeSig: [4, 4] };
@@ -347,5 +348,17 @@ describe('TransportCore', () => {
     driver.emit(core.tempoAnchors(), 0, 1152);
     expect(pulses.map((p) => p.absTick)).toEqual(Array.from({ length: 144 }, (_, i) => i * 8));
     expect(pulses.find((p) => p.absTick === 960)?.audioTime).toBeCloseTo(4.6667, 4);
+  });
+});
+
+describe('visibilityAction', () => {
+  test('a running transport stops when hidden and re-locks when visible', () => {
+    expect(visibilityAction('hidden', 'started')).toBe('stop');
+    expect(visibilityAction('visible', 'started')).toBe('relock');
+  });
+
+  test('a stopped transport ignores visibility', () => {
+    expect(visibilityAction('hidden', 'stopped')).toBe('none');
+    expect(visibilityAction('visible', 'stopped')).toBe('none');
   });
 });

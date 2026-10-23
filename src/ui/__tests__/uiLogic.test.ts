@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { audioStateOf } from '../audioGateLogic';
+import { errorText } from '../errorBoundaryText';
 import { raisesPowerWarning } from '../powerWarningLogic';
 import { calibrationDevices, calibrationText, midiPortText } from '../statusBarText';
 
@@ -9,6 +10,15 @@ describe('audio gate', () => {
     expect(audioStateOf(true, 'running')).toBe('running');
     expect(audioStateOf(true, 'suspended')).toBe('paused');
     expect(audioStateOf(true, 'interrupted')).toBe('paused');
+  });
+});
+
+describe('error boundary text', () => {
+  it('names the error and its message, or stringifies anything else', () => {
+    expect(errorText(new TypeError('x is undefined'))).toBe('TypeError: x is undefined');
+    expect(errorText(new Error(''))).toBe('Error');
+    expect(errorText('plain')).toBe('plain');
+    expect(errorText(null)).toBe('null');
   });
 });
 

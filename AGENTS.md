@@ -16,10 +16,9 @@ The build goes spine first, fan-out second
 runs each later phase as parallel lanes, with the owner's hardware gates in
 between.
 
-Open plans:
-
-- [`phase-1-spine.md`](.agents/plans/phase-1-spine.md): Phase 1, the spine
-  (SPEC §6.1) and the `/dev/spine` smoke page.
+Open plans: none. Phase 1, the spine, is done
+([archived](.agents/plans/archive/phase-1-spine.md)); Phase 2's plan isn't
+written yet (SPEC §6.2).
 
 Plans live in `.agents/plans/`, one per phase or spike; retros in
 `.agents/retros/`. Name each open plan here with a link and what it's for,
