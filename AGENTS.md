@@ -119,12 +119,21 @@ Push back before breaking one.
   port 5173). The app is at `http://localhost:5173/op-1-school/`. Parallel
   lanes use `dev-l2` (5174) and `dev-l3` (5175): another port is another
   origin with its own IndexedDB, so a check that reads it first runs
-  `indexedDB.deleteDatabase('op-1-school')` and reloads.
+  `indexedDB.deleteDatabase('op-1-school')` and reloads. The app doesn't
+  close its connection on `versionchange`, so the delete waits (`blocked`)
+  until every tab on that origin is gone: close the pane's extra tabs
+  (`preview_start` opens one) before reloading.
 - Drills are launched by URL and report one `Attempt`: `src/types/drills.ts`
   (`launchQuery`, `parseLaunch`, `DRILL_MODES`) and **Drills** in
   `docs/MODULE_CONTRACT.md`. The router keeps `dev`, and `fast` only
-  alongside it; `/` is the `runner` module once one is registered.
-  Curriculum JSON is read only through `src/curriculum/index.ts`.
+  alongside it; `/` is the `runner` module (also `/runner`; its library is
+  `/runner?view=library&open=<lesson id>`). Curriculum JSON is read only
+  through `src/curriculum/index.ts`.
+- Module 1's scorers run through a Tone-free `DrillController`
+  (`src/modules/progression-trainer/drill.ts`), with the backing synth passed
+  in as a `BackingLike`, so they're tested on the fake transport and clock;
+  the view only wires the real `ToneBackingSynth` in. A new drill module
+  follows the same pattern in its own directory (it can't import Module 1's).
 - The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
   `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest
   Android row per input). `tapWindow.test.ts` parses that table and fails when

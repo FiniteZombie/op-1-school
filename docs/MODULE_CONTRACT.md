@@ -122,7 +122,18 @@ Other spine pieces a module uses:
   degree names are `degreeName` in the same file; read those, not a copy here.
   They differ on purpose: `/<degree>` in a numeral is a degree of the key's mode, while
   degree *names* (`b6`) are relative to the tonic's major scale.
-- **UI.** `Keyboard24` (props `chord`, `musicKey`, `onOutOfRange`), `Encoder`,
+- **Touch voice.** The spine's `NoteVoice` (`src/audio/NoteVoice.ts`) sounds
+  `touch` notes once audio runs, and nothing from `midi` or `mic` (the Field
+  sounds by itself). A module builds no voice of its own for touch keys.
+- **Tap window.** `tapVerdict(offsetMs, source, calibrated)` in
+  `src/audio/tapWindow.ts` says `early`, `on`, `late` or `unscored` for an
+  offset from `offsetMs()` in `src/audio/Clock.ts` (positive is late); the window comes from the measured
+  `TAP_OFFSETS` per source (`tapWindow(source)`), and a source with no
+  measurement, or `mic`, is `unscored`. Never pick a tolerance of your own;
+  tests inject their measurements.
+- **UI.** `Keyboard24` (props `chord`, `musicKey`, `guide`, `onOutOfRange`;
+  `guide` is a list of pitch classes whose unlit keys carry a mark and
+  `data-guide="true"`), `Encoder`,
   `StatusBar` (in the shell), `Link` / `navigate` / `useLocation` from
   `src/ui/navigation.tsx` (these take a `query` and keep `?dev`, and `fast`
   alongside it; `useLocation()` gives `path`, `dev`, `fast` and `query`),

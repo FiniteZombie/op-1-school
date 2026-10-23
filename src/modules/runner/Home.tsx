@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { lessonById, lessons as allLessons } from '../../curriculum';
-import { newId, type Session } from '../../state/db';
+import { newId, type Attempt, type Session } from '../../state/db';
 import type { Lesson, LessonStep } from '../../types/lessons';
 import { useAvailableModules } from '../../ui/availableModules';
 import { Link, navigate, useLocation } from '../../ui/navigation';
@@ -27,7 +27,7 @@ import {
   RUNNER_ROUTE,
 } from './session';
 import { streak } from './streak';
-import { sessionMarkdown, summaryFilename, percent } from './summary';
+import { doneStepScore, sessionMarkdown, summaryFilename, percent } from './summary';
 import { errorText, type RunnerData } from './store';
 import type { RunnerHandle } from './useRunnerData';
 
@@ -115,7 +115,7 @@ export function Home({ handle }: { handle: RunnerHandle }) {
       {lessons.length === 0 && <p className="text-muted">{LABELS.noLessons}</p>}
 
       {open ? (
-        <ActiveSession session={open} now={now} fast={fast} busy={busy} run={run} update={update} routeOf={(id) => available.find((m) => m.id === id)?.route} />
+        <ActiveSession session={open} attempts={attempts} now={now} fast={fast} busy={busy} run={run} update={update} routeOf={(id) => available.find((m) => m.id === id)?.route} />
       ) : (
         action.kind !== 'none' && (
           <Section id="today" title={LABELS.today}>
@@ -190,11 +190,13 @@ function RecentList({ sessions }: { sessions: readonly Session[] }) {
   );
 }
 
-function StepLine({ step, state }: { step: LessonStep; state: 'done' | 'skipped' | 'todo' }) {
+function StepLine({ step, state, score }: { step: LessonStep; state: 'done' | 'skipped' | 'todo'; score?: string }) {
   return (
     <div data-step-state={state} className="flex justify-between gap-2 text-sm">
       <span className={state === 'todo' ? '' : 'text-muted'}>{step.kind === 'card' ? step.title : step.mode}</span>
-      <span className="text-muted">{state === 'done' ? LABELS.done : state === 'skipped' ? LABELS.skipped : ''}</span>
+      <span className="text-muted">
+        {state === 'done' ? (score ? `${LABELS.done} ${score}` : LABELS.done) : state === 'skipped' ? LABELS.skipped : ''}
+      </span>
     </div>
   );
 }
@@ -207,8 +209,10 @@ function ActiveSession({
   run,
   update,
   routeOf,
+  attempts,
 }: {
   session: Session;
+  attempts: readonly Attempt[];
   now: number;
   fast: boolean;
   busy: boolean;
@@ -240,7 +244,7 @@ function ActiveSession({
                     const current = isActive && at.step === i;
                     return (
                       <li key={i}>
-                        <StepLine step={step} state={state} />
+                        <StepLine step={step} state={state} score={doneStepScore(session.id, step, i, st, attempts)} />
                         {current && (
                           <CurrentStep
                             session={session}

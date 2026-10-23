@@ -17,59 +17,39 @@ log results, with no cable required.
 | L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | done 2026-10-23 | `ff40050` (merge `aea5641`) |
 | L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | done 2026-10-23 | `961d273` (merge `ab06ec5`) |
 | L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | done 2026-10-23 | `c8225d5` (merge `218991f`) |
-| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | **Next** | |
-| G | Exit gate (**attended**) | step | — | `main` | — | | |
+| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
+| G | Exit gate (**attended**) | step | — | `main` | — | **Next** | |
 
 ### Carried forward
 
-- **S1b → S2:** `docs/MODULE_CONTRACT.md`'s `useSpine()` / UI list doesn't
-  name `Keyboard24`'s `guide` prop, the touch voice or `tapVerdict` (S1b
-  owned the MidiConnect part of that page only); S2 adds them.
 - **S1b → G:** the touch voice (`src/audio/NoteVoice.ts`) is a placeholder
   patch (triangle `PolySynth`, -18 dB, under the chords' -14). Spine-built,
   never disposed, voices `touch` only once audio runs, and releases its notes
   when audio stops running. G re-measures touch tap offsets with it on.
-- **S1a → S2 (decision the plan didn't cover):** `MODULE_CONTRACT.md` says
-  a practice session's `startedAt` is when the drill started and its
-  `scores` is `{}` for an unscored drill (`Session.scores` is required).
-- **L1 → S2:** every `(field steps: VERIFY)` in the content goes into the
-  VERIFY log: b1 kick key (also V2); c3 loading the kit and sampling 10 s of
-  the Push; d0 changing tape speed; d1 brake on M1/M2; d2 Element LFO with
-  the G source; d3 per-track panning and master drive; d5 line-in
-  mono/stereo; and in `sequencerRecipes.json`, opening and entering each
-  sequencer (finger, endless, tombola), white-key variations switched with
-  Hold, whether an endless step is a 16th, recording unquantized, muting
-  tombola on a section change.
-- **L1 → S2:** `content.test.ts` re-implements L2's `usableFor` rules
-  locally (modules can't be imported from `src/curriculum/`); S2 confirms
-  L2's `usableFor` accepts each A lesson's progression (item 3 does this in
-  the browser).
+- **L1 → later phases:** `content.test.ts` keeps its own copy of Module 1's
+  `usableFor` rules (it can't import a module). The two agree today (S2 read
+  both, and every A lesson opens in Module 1 without an error); a change to
+  `usableFor` in `src/modules/progression-trainer/levels.ts` updates the copy.
 - **L1 → G:** A-lesson drill minutes are 3 (A2 2, A6 2 + 2), B and C
   drills 4. The 4-track template (SPEC §4.3, "keep … from v1") isn't in the
   content: the v1 document isn't in the repo.
-- **L2 → S2:** `AGENTS.md` **Repo conventions** gains a line: a drill's
-  scorers run through the Tone-free `DrillController`
-  (`src/modules/progression-trainer/drill.ts`, synth passed in as
-  `BackingLike`) and are tested on the fake transport.
-- **L2 → S2:** V6 gets a VERIFY-log note: A0's stage changes and A4's pair
-  changes restart the transport, sending `F2`/`FA` with no pre-pulses
-  (stubbed, as the spine does).
 - **L2 → G:** the drill's own stops land on the loop's last MIDI pulse
   (deferred a microtask so clock out sends that pulse before `FC`); a
   finish can end with a ~50 ms blip of the first chord, unheard (`[ear]`).
   A score of 0, not absent, when nothing counted (absent would pass a gate).
-- **L2 → S2:** `back to session` must navigate to `returnTo` with
-  `navigate(path)` so `dev&fast` are kept; S2's flow confirms it. From a
-  library launch (`returnTo` with no `session`) the label reads oddly
-  (placeholder question for the owner).
-- **L3 → S2:** L3's browser check couldn't confirm a clean console (a stale
-  `ReferenceError` from mid-edit stayed in the pane's buffer); S2 checks the
-  console on the merged branch. L3's launch check used a temporary empty
-  `progression-trainer` module, since deleted; S2's flow is the real one.
-- **L3 → S2, G:** the library lives at `/runner?view=library&open=<id>`. An
+- **L2, L3 → retro (placeholder question):** the library's `practice` link
+  launches with `returnTo: '/runner'` and no `session`, so after a practice
+  drill the result shows `back to session`, which leads to the Runner's home.
+  The label is the owner's call.
+- **L3 → G:** the library lives at `/runner?view=library&open=<id>`. An
   open session from today shows its steps directly (`resume session`); a
   segment's `startedAt` is the previous one's finish; `launchedAt` keeps the
   first launch.
+- **S2 → a later spine step:** `openAppDb()` (`src/state/db.ts`) has no
+  `blocking` / `versionchange` handler, so a database delete or a future
+  `DB_VERSION` upgrade waits for every other open tab, and the Runner sits on
+  `loading` meanwhile. Closing the connection on `versionchange` (and
+  reloading or showing a line) would fix it; it's a spine change, not S2's.
 
 ### Process notes
 
@@ -114,6 +94,25 @@ log results, with no cable required.
   stub module outside its paths; that check belongs in S2.
 - L1: "one card per §4.4 topic" didn't settle whether sync setup is a D
   topic (it went into d0), nor where C's resample-loop card goes (c3).
+- S2: `indexedDB.deleteDatabase` returned `blocked` and the Runner sat on
+  `loading`: `preview_start` had opened a second tab (`seed`) on the same
+  origin that held the database. Closing it let the delete through;
+  `AGENTS.md` **Repo conventions** says so, and Carried forward has the
+  spine fix.
+- S2: the pane's `find "skip"` once returned only the `skipped` label;
+  `find 'button "skip"'` found the button.
+- S2: `export` downloads a file and writes the clipboard; the check hooked
+  `HTMLAnchorElement.prototype.click`, `URL.createObjectURL` and
+  `navigator.clipboard.writeText` from the console and read the captured
+  text, so nothing was downloaded.
+- S2: Done-when 2's "reads done with its score" asked for something no lane
+  row built: the Runner showed `done` alone. With the orchestrator's go-ahead
+  S2 fixed it in the Runner's paths (`doneStepScore` in
+  `src/modules/runner/summary.ts`, tested, shown beside `done` as
+  `A0 <n>%` or `not scored`). A Done-when item in an integration row should
+  cite the lane row that builds what it checks.
+- S2: the time went on the browser flow (the blocked delete, then one
+  `find` → click per control); docs were short.
 
 ## How this plan runs
 

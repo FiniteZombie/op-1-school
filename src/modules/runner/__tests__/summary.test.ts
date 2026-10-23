@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Lesson } from '../../../types/lessons';
 import { newDailySession, patchStep, reconcile } from '../session';
-import { sessionMarkdown, summaryFilename } from '../summary';
+import { doneStepScore, sessionMarkdown, summaryFilename } from '../summary';
 import { at, attempt, card, lesson } from './fixtures';
 
 const a: Lesson = lesson('A', 3, [
@@ -57,5 +57,36 @@ describe('sessionMarkdown', () => {
   it('says not done for a drill that was neither finished nor skipped', () => {
     const s = newDailySession('s', at(2026, 1, 2), [b]);
     expect(sessionMarkdown(s, [], byId, 0)).toContain('- B0: not done');
+  });
+});
+
+describe('doneStepScore', () => {
+  const t = at(2026, 10, 23, 9);
+  const step1 = a.steps[1]!;
+  const step2 = a.steps[2]!;
+  const attempts = [
+    attempt({ mode: 'A3', sessionId: 's', at: t + 1, score: 0.55, data: { step: 1 } }),
+    attempt({ mode: 'A3', sessionId: 's', at: t + 2, score: 0.8, data: { step: 1 } }),
+    attempt({ mode: 'A3', sessionId: 's', at: t + 3, data: { step: 2 } }), // unscored
+    attempt({ mode: 'A3', sessionId: 'other', at: t + 4, score: 1, data: { step: 1 } }),
+  ];
+
+  it('shows the best score of a done drill step as recent does', () => {
+    expect(doneStepScore('s', step1, 1, { launchedAt: t, done: true }, attempts)).toBe('A3 80%');
+  });
+
+  it('says not scored when the done step has no scored attempt', () => {
+    expect(doneStepScore('s', step2, 2, { launchedAt: t, done: true }, attempts)).toBe('not scored');
+  });
+
+  it('shows a score of 0 as 0%', () => {
+    const zero = [attempt({ mode: 'A3', sessionId: 's', at: t + 1, score: 0, data: { step: 1 } })];
+    expect(doneStepScore('s', step1, 1, { launchedAt: t, done: true }, zero)).toBe('A3 0%');
+  });
+
+  it('shows nothing for a card, a skipped step or a step not done', () => {
+    expect(doneStepScore('s', a.steps[0]!, 0, { done: true }, attempts)).toBeUndefined();
+    expect(doneStepScore('s', step1, 1, { launchedAt: t, skipped: true }, attempts)).toBeUndefined();
+    expect(doneStepScore('s', step1, 1, { launchedAt: t }, attempts)).toBeUndefined();
   });
 });
