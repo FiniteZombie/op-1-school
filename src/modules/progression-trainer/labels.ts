@@ -24,6 +24,7 @@ export const LABELS = {
   notScored: 'not scored',
   timingNotScored: 'timing not scored yet',
   backToSession: 'back to session',
+  backToLibrary: 'back to library',
   noProgression: 'no progression fits this level',
   cantSave: "can't save progress",
   paused: 'paused',

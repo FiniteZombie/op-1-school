@@ -187,7 +187,8 @@ export function drillLaunch(
   if (step.progressionId !== undefined) launch.progression = step.progressionId;
   launch.minutes = scaleMinutes(step.minutes, fast);
   if (step.params !== undefined) launch.params = step.params;
-  launch.returnTo = RUNNER_ROUTE;
+  launch.returnTo =
+    sessionId !== undefined ? RUNNER_ROUTE : `${RUNNER_ROUTE}?view=library&open=${encodeURIComponent(lessonId)}`;
   return launch;
 }
 

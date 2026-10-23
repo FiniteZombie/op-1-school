@@ -42,7 +42,7 @@ export interface DrillLaunch {
   step?: number;
   progression?: string;
   minutes?: number;
-  /** An app path (`/runner`) for the module's way back. */
+  /** An app path for the module's way back, query allowed (`/runner?view=library&open=a6`); see `splitAppPath`. */
   returnTo?: string;
   /** The lesson step's `params`. */
   params?: Record<string, unknown>;
@@ -128,4 +128,15 @@ export function parseLaunch(
   }
 
   return { launch };
+}
+
+/**
+ * An app path with an optional query, split for `Link` / `navigate`, which
+ * take the two apart: `/runner?view=library&open=a6` → `/runner` and
+ * `{ view: 'library', open: 'a6' }`.
+ */
+export function splitAppPath(appPath: string): { path: string; query: Record<string, string> } {
+  const i = appPath.indexOf('?');
+  if (i < 0) return { path: appPath, query: {} };
+  return { path: appPath.slice(0, i), query: Object.fromEntries(new URLSearchParams(appPath.slice(i + 1))) };
 }

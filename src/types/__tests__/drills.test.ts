@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DRILL_MODES, PAD_NOTE, launchQuery, levelId, parseLaunch, type DrillLaunch } from '../drills';
+import { DRILL_MODES, PAD_NOTE, launchQuery, levelId, parseLaunch, splitAppPath, type DrillLaunch } from '../drills';
 import { DRILL_MODULE_IDS } from '../lessons';
 
 const full: DrillLaunch = {
@@ -65,6 +65,14 @@ describe('drills', () => {
     expect(DRILL_MODES['sample-flip']).toEqual(['C1', 'C2', 'C3']);
     expect(DRILL_MODES['kit-compiler']).toEqual([]);
     expect(Object.keys(DRILL_MODES).sort()).toEqual([...DRILL_MODULE_IDS].sort());
+  });
+
+  it('a returnTo with a query survives the launch and splits for a Link', () => {
+    const returnTo = '/runner?view=library&open=a6';
+    const r = parseLaunch('progression-trainer', launchQuery({ module: 'progression-trainer', mode: 'A6', returnTo }));
+    expect('launch' in r && r.launch.returnTo).toBe(returnTo);
+    expect(splitAppPath(returnTo)).toEqual({ path: '/runner', query: { view: 'library', open: 'a6' } });
+    expect(splitAppPath('/runner')).toEqual({ path: '/runner', query: {} });
   });
 
   it('levelId and the pad sentinel', () => {

@@ -1,6 +1,6 @@
 # Phase 2 fan-out — run (2026-10-23)
 
-**Status:** not reviewed yet. Run `/retro` with the owner.
+**Status:** reviewed with the owner on 2026-10-23.
 
 Branch `phase-2-fan-out`, cut from `main` at `3b6ff1e` (the plan's commit).
 Lane branches: `phase-2-fan-out-curriculum` (`ff40050`),
@@ -412,3 +412,70 @@ All times 2026-10-23, local.
    serves a stale module. One bullet in `.claude/skills/step/SKILL.md`.
 6. **Look at the `0:11 left` rounding** on a 10 s launch when Module 1 is
    next touched. Cosmetic.
+
+---
+
+## Review
+
+With the owner, 2026-10-23, on `phase-2-fan-out` (not merged to `main`
+yet; the owner merges and pushes before G).
+
+### Answers
+
+- **Decisions the plan didn't cover:** every one kept. The end-of-drill stop
+  timing (L2) stays until the owner hears the blip at G.
+- **Q1, the way back from a library practice drill:** one button, `back to
+  library`, back to that lesson; the nav already reaches the session. Done:
+  the Runner's library launch sets `returnTo` to
+  `/runner?view=library&open=<id>` (`drillLaunch`,
+  `src/modules/runner/session.ts`), `splitAppPath` in `src/types/drills.ts`
+  splits it for `Link`, and Module 1 labels the link by whether the launch
+  has a `session` (`View.tsx`, `labels.ts`). Tests in `drills.test.ts` and
+  `session.test.ts`; `MODULE_CONTRACT.md` **Drills** and the plan's Carried
+  forward and Placeholders updated.
+- **Q2, the 4-track template:** the owner added the v1 spec as
+  `docs/SPEC_V1_FROM_GEMINI_ARGON.md` (written by Gemini Argon; v2 is
+  Claude Fable's rework of it). SPEC's header links it, and says its Field
+  button combos and menu paths are unverified and never resolve a VERIFY
+  item or go into a card (v1 is full of them, and V10/V11 are open). The
+  template itself (track roles 1–4, v1's Vector C) goes into Phase 3's
+  curriculum work as a C card: plan Carried forward, L1 → G.
+- **Q3, tempo and swing per style:** the owner judges them by ear at G.
+- **Placeholders:** all stay; the owner changes copy later.
+
+### Spine requests
+
+- **`openAppDb` `versionchange` / `blocked` handler:** accepted, as its own
+  small change before Phase 3's fan-out and before any `DB_VERSION` bump
+  (plan Carried forward, S2 bullet).
+- **`TransportEngine.stop(atAudioTime?)`:** deferred to G's `[ear]` check of
+  the blip; if it's heard, it lands before Phase 3's fan-out (plan Carried
+  forward, L2 bullet).
+- **Per-configuration `cwd` in `.claude/launch.json`:** refused as a spine
+  change; the skills cover it (recommendation 1).
+
+### The owner's checks
+
+None run yet: every `[phone]`, `[field]` and `[ear]` item is at G. The ones
+a later phase leans on: the daily-use target, the touch tap re-measure, V6
+restarts with clock out, and connecting the Field from Module 1.
+
+### Recommendations
+
+| # | Recommendation | Outcome |
+| --- | --- | --- |
+| 1 | Lane worktrees from the plan branch; `preview_start` serves the main checkout | Done. `run-steps` Phase 1 step 3: the orchestrator runs `git worktree add -b <plan-slug>-<lane> .claude/worktrees/<plan-slug>-<lane> <commit>` and spawns lanes without `isolation`; the subagent prompt pins every command and edit to the worktree path. `step` **Check it yourself**: a lane starts vite from its worktree on its own port. |
+| 2 | `openAppDb` handlers | Deferred: its own spine change before Phase 3's fan-out (see Spine requests). |
+| 3 | `TransportEngine.stop(atAudioTime?)` | Deferred to G's `[ear]` blip check. |
+| 4 | Integration checks cite the row that builds what they check | Done: one bullet in `.agents/writing-a-plan.md` **Done-when items**. |
+| 5 | Browser-pane habits | Done: one bullet in `step` **Check it yourself** (`find` → `ref` with the role named, touch a stale module, kill a background vite by PID). The extra-tab rule was already in `AGENTS.md`. |
+| 6 | `0:11 left` on a 10 s `fast` launch | Deferred to when Module 1 is next touched; the cause (4-decimal rounding, then `Math.ceil`) is in the plan's Carried forward. |
+| — | S1 rows' Owns didn't fit the work | Dropped: one-off, caught in the run. |
+| — | File names that differ only by case | Dropped: the rule and `fileNames.test.ts` exist, and typecheck caught it. |
+| — | Windows tool quirks | Dropped, except the vite-by-PID line folded into 5; the compound-command refusal goes away with 1. |
+| — | L1's content gaps (sync setup, the resample card) | Dropped: one-off. |
+
+`npm run check` exits 0 (493 tests). In the browser pane on `dev`:
+`/runner?view=library&open=a1&dev&fast` → `practice` → gate, `start`; after
+the drill the result reads `back to library`, which opens the A1 lesson with
+`dev&fast` kept; the console had no errors.

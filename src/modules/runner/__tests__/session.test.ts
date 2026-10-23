@@ -141,9 +141,10 @@ describe('the launch', () => {
     expect(parseLaunch('progression-trainer', q)).toEqual({ launch });
   });
 
-  it('a library launch has no session; fast divides minutes by 12', () => {
+  it('a library launch has no session and returns to its lesson; fast divides minutes by 12', () => {
     const q = drillQuery(drillLaunch(a6.steps[0] as never, 0, 'a6', undefined, true));
     expect(q.session).toBeUndefined();
+    expect(q.returnTo).toBe('/runner?view=library&open=a6');
     expect(Number(q.minutes)).toBeCloseTo(2 / 12, 3);
   });
 });

@@ -15,7 +15,7 @@ import { progressionById, progressions } from '../../curriculum';
 import { getCalibration, defaultDevice } from '../../state/calibration';
 import { newId, openAppDb } from '../../state/db';
 import { QUALITY_FAMILIES, chordName } from '../../theory';
-import { DRILL_FORMS, type DrillForm } from '../../types/drills';
+import { DRILL_FORMS, splitAppPath, type DrillForm } from '../../types/drills';
 import type { InputSource } from '../../types/music';
 import { AudioGate } from '../../ui/AudioGate';
 import { Keyboard24 } from '../../ui/Keyboard24';
@@ -181,6 +181,7 @@ function DrillPanel({ route, saver, onBusy }: { route: DrillRoute; saver: DrillS
   const [ctl, setCtl] = useState<DrillController | null>(null);
   const [, bump] = useReducer((n: number) => n + 1, 0);
   const [saved, setSaved] = useState<'no' | 'yes' | 'off' | 'failed'>('no');
+  const back = route.launch.returnTo ? splitAppPath(route.launch.returnTo) : undefined;
 
   useEffect(() => {
     const synth = new ToneBackingSynth(spine.transport);
@@ -394,9 +395,10 @@ function DrillPanel({ route, saver, onBusy }: { route: DrillRoute; saver: DrillS
             </>
           )}
           {saved === 'failed' && <p className="text-sm text-bad">{LABELS.cantSave}</p>}
-          {route.launch.returnTo && (
-            <Link to={route.launch.returnTo} data-back className={`${button} self-start`}>
-              {LABELS.backToSession}
+          {back && (
+            <Link to={back.path} query={back.query} data-back className={`${button} self-start`}>
+              {/* The Runner returns a session's drill to the session and a library practice drill to its lesson. */}
+              {route.launch.session ? LABELS.backToSession : LABELS.backToLibrary}
             </Link>
           )}
         </section>

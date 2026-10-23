@@ -32,15 +32,23 @@ log results, with no cable required.
   `usableFor` in `src/modules/progression-trainer/levels.ts` updates the copy.
 - **L1 → G:** A-lesson drill minutes are 3 (A2 2, A6 2 + 2), B and C
   drills 4. The 4-track template (SPEC §4.3, "keep … from v1") isn't in the
-  content: the v1 document isn't in the repo.
+  content yet. It's in `docs/SPEC_V1_FROM_GEMINI_ARGON.md` (Vector C, track
+  roles 1–4), and Phase 3's curriculum work adds it as a C card.
 - **L2 → G:** the drill's own stops land on the loop's last MIDI pulse
   (deferred a microtask so clock out sends that pulse before `FC`); a
   finish can end with a ~50 ms blip of the first chord, unheard (`[ear]`).
   A score of 0, not absent, when nothing counted (absent would pass a gate).
-- **L2, L3 → retro (placeholder question):** the library's `practice` link
-  launches with `returnTo: '/runner'` and no `session`, so after a practice
-  drill the result shows `back to session`, which leads to the Runner's home.
-  The label is the owner's call.
+  If the owner hears the blip at G, `TransportEngine.stop(atAudioTime?)`
+  lands as its own spine change before Phase 3's fan-out and replaces the
+  deferral in `drill.ts`.
+- **Run → when Module 1 is next touched:** under `fast` a 10 s launch is
+  `minutes=0.1667` (`scaleMinutes`, `src/modules/runner/fast.ts`, rounds to
+  4 decimals), which is 10.002 s, so `timeLeft`'s `Math.ceil` reads `0:11
+  left` before start. Cosmetic and dev-only.
+- **L2, L3 → G:** a library `practice` drill launches with no `session` and
+  `returnTo` its lesson (`/runner?view=library&open=<id>`); its result reads
+  `back to library` and goes there. A session's drill reads `back to
+  session` and goes to `/runner`.
 - **L3 → G:** the library lives at `/runner?view=library&open=<id>`. An
   open session from today shows its steps directly (`resume session`); a
   segment's `startedAt` is the previous one's finish; `launchedAt` keeps the
@@ -834,7 +842,7 @@ them in the report. All lowercase.
   `start`, `stop`, `finish`, `tap` (A0's pad), `submit` (A4), the quality
   buttons as their family names, `on`, `early`, `late`, `missed`, `extra`,
   `right`, `wrong`, `score`, `not scored`, `timing not scored yet` (a source
-  with no measurement), `back to session`, `no progression fits this
+  with no measurement), `back to session`, `back to library`, `no progression fits this
   level`, `can't save progress`, `paused`, `voice-leading map`, `<m>:<ss>
   left`, `8 beats per chord` / `4` / `2`, `common tones`, `moving tone`,
   `none`, `phrase` / `call and response`, `unknown progression`, `reveal`,

@@ -162,7 +162,10 @@ launched by URL, and reports by writing one `Attempt`.
   `{ launch }` or `{ error }` naming the bad field. Fields: `mode` (the level
   id, one of `DRILL_MODES[module]`; `levelId('A', 0)` is `A0`), and
   optionally `session`, `lesson`, `step` (the step's index in its lesson),
-  `progression`, `minutes`, `returnTo` (an app path) and `params` (the step's
+  `progression`, `minutes`, `returnTo` (an app path, query allowed: the
+  Runner sends a session's drill back to `/runner` and a library practice
+  drill to `/runner?view=library&open=<lesson id>`; `splitAppPath` splits it
+  for `Link`) and `params` (the step's
   `params`; `params.form` is `phrase` or `call-response`). There's no shared
   in-memory state, so a reload mid-drill reopens the same drill. A query
   change on the same route doesn't remount the view: read `query` from

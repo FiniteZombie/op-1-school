@@ -76,10 +76,14 @@ grill checks against).
    `Plan: <plan> pre-flight answers`. Note the time.
 2. **Steps:** one fresh subagent per step, in order, never two at once, all on
    the plan branch. Check each (below) and commit it before the next.
-3. **Lanes:** spawn every lane's subagent in one message, each with
-   `isolation: "worktree"` and its `model`. You're notified as each finishes;
-   don't poll. Check each as it returns, rename its branch to
-   `<plan-slug>-<lane>`, and commit there. When all are in, merge them into the
+3. **Lanes:** create each lane's worktree yourself from the last step's
+   commit, `git worktree add -b <plan-slug>-<lane>
+   .claude/worktrees/<plan-slug>-<lane> <commit>`, and confirm the commit is
+   its `HEAD`. Don't use the Agent tool's `isolation: "worktree"`: it cuts
+   from `origin/main`, not the plan branch. Then spawn every lane's subagent
+   in one message, each pointed at its worktree's absolute path, with its
+   `model`. You're notified as each finishes; don't poll. Check each as it
+   returns and commit on its branch. When all are in, merge them into the
    plan branch in the plan's merge order (`git merge --no-ff`), running
    `npm run check` after each merge. Then write what each lane reported into
    the plan branch: its status, Carried forward, Process notes, VERIFY log
@@ -95,7 +99,9 @@ grill checks against).
 Fill in the `<…>` parts and keep the rest as written.
 
 ```
-You are working in <repo path, or "your own worktree"> on branch `<branch>`.
+You are working in <repo path | lane: its worktree's absolute path> on branch `<branch>`.
+<Lanes: Every command runs there (`cd <path> && …`) and every file you edit
+is under it; the main checkout belongs to other lanes.>
 Read AGENTS.md first. Then load the `step` skill
 (.claude/skills/step/SKILL.md) and follow it in its subagent mode.
 

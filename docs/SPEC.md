@@ -1,6 +1,6 @@
 # op-1-school — OP-1 Field Live Jam & Improvisation Trainer
 
-**Spec v2 (refined).** Supersedes `Op1 Field Improv Master Plan.md` (v1). Written to be executed by Claude Code using a **spine-first, fan-out-second** workflow (§6). Read §0 before doing anything.
+**Spec v2 (refined).** Supersedes v1, [`SPEC_V1_FROM_GEMINI_ARGON.md`](SPEC_V1_FROM_GEMINI_ARGON.md), which is here for what v2 says to keep from it. v1's Field button combos and menu paths are unverified: they never resolve a VERIFY item or go into a card. Written to be executed by Claude Code using a **spine-first, fan-out-second** workflow (§6). Read §0 before doing anything.
 
 ---
 
