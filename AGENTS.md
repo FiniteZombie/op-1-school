@@ -16,9 +16,14 @@ The build goes spine first, fan-out second
 runs each later phase as parallel lanes, with the owner's hardware gates in
 between.
 
-Open plans: none. Phase 1, the spine, is done
-([archived](.agents/plans/archive/phase-1-spine.md)); Phase 2's plan isn't
-written yet (SPEC §6.2).
+Open plans:
+
+- [`phase-2-fan-out.md`](.agents/plans/phase-2-fan-out.md): SPEC §6.2, the
+  curriculum, Module 1 (Progression Trainer) and the Runner, as a spine step,
+  three lanes, an integration step and the owner's exit gate.
+
+Phase 1, the spine, is done
+([archived](.agents/plans/archive/phase-1-spine.md)).
 
 Plans live in `.agents/plans/`, one per phase or spike; retros in
 `.agents/retros/`. Name each open plan here with a link and what it's for,
