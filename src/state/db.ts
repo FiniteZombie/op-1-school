@@ -10,22 +10,62 @@ export const EXPORT_APP = 'op-1-school';
 
 // ---------------------------------------------------------------- records
 
-export interface Session {
-  id: string;
+// Phase 2's fields below are optional, so rows written before them still read
+// and `DB_VERSION` stays 1.
+
+export const SESSION_KINDS = ['daily', 'practice'] as const;
+/** `daily`: the Runner's session. `practice`: one a module logs for a drill launched without a session. */
+export type SessionKind = (typeof SESSION_KINDS)[number];
+
+/** One lesson step's progress in a daily session, by the step's index in its lesson. */
+export interface SessionStep {
+  /** When the Runner launched this drill step; an attempt before it doesn't count. */
+  launchedAt?: number;
+  done?: boolean;
+  skipped?: boolean;
+}
+
+/** One lesson in a daily session's plan. */
+export interface SessionSegment {
   lessonId: string;
   startedAt: number;
   finishedAt?: number;
-  scores: Record<string, number>;
+  skipped?: boolean;
+  /** One entry per lesson step, by index. */
+  steps?: SessionStep[];
 }
 
+export interface Session {
+  id: string;
+  /** `'daily'` for a daily session; a practice session's lesson, or `'practice'`. */
+  lessonId: string;
+  startedAt: number;
+  finishedAt?: number;
+  /** `{ <mode>: score }`: the best score per mode in a daily session, the drill's in a practice one. */
+  scores: Record<string, number>;
+  /** Absent reads as `daily`. */
+  kind?: SessionKind;
+  /** Daily sessions only. */
+  segments?: SessionSegment[];
+}
+
+/**
+ * One finished drill (never an abandoned one). Launched with a `session`,
+ * `sessionId` is it and the module leaves the session row to the Runner;
+ * without one, the module writes its own `practice` session for it.
+ */
 export interface Attempt {
   id: string;
   sessionId: string;
   module: string;
+  /** The level id, `A0`…. */
   mode: string;
   at: number;
+  /** 0..1; absent for an unscored drill. */
   score?: number;
+  /** Timed levels. A tap on a pitchless pad has `note: PAD_NOTE` (`src/types/drills.ts`). */
   offsets?: TimingOffset[];
+  /** The module's own detail, plus `step` copied from the launch when it has one. */
   data?: unknown;
 }
 

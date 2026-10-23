@@ -1,0 +1,9 @@
+{
+  "id": "d0",
+  "vector": "D",
+  "level": 0,
+  "title": "placeholder seed d0",
+  "minutes": 6,
+  "scored": false,
+  "steps": [{ "kind": "card", "title": "placeholder seed card", "body": "placeholder seed text." }]
+}

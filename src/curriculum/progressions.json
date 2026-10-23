@@ -1,0 +1,60 @@
+[
+  {
+    "id": "seed-fminor",
+    "key": { "tonic": 5, "mode": "aeolian" },
+    "bpm": 90,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "ii°", "beats": 4 },
+      { "roman": "V7", "beats": 4 },
+      { "roman": "i", "beats": 4 },
+      { "roman": "VI", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "seed"
+  },
+  {
+    "id": "seed-gdorian",
+    "key": { "tonic": 7, "mode": "dorian" },
+    "bpm": 90,
+    "swing": 0.5,
+    "bars": 2,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "IV", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "seed"
+  },
+  {
+    "id": "seed-cmajor",
+    "key": { "tonic": 0, "mode": "ionian" },
+    "bpm": 90,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "I", "beats": 4 },
+      { "roman": "V", "beats": 4 },
+      { "roman": "vi", "beats": 4 },
+      { "roman": "IV", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "seed"
+  },
+  {
+    "id": "seed-aminor-pedal",
+    "key": { "tonic": 9, "mode": "aeolian" },
+    "bpm": 90,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "iv/1", "beats": 4 },
+      { "roman": "VII/1", "beats": 4 },
+      { "roman": "i", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "seed"
+  }
+]

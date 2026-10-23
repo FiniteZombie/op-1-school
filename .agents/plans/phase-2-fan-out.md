@@ -12,8 +12,8 @@ log results, with no cable required.
 
 | Row | Name | Kind | Model | Branch | Merge order | Status | Commit |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1a | Spine contracts | step | Opus 5.5 | `phase-2-fan-out` | — | **Next** | |
-| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | | |
+| S1a | Spine contracts | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
+| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | **Next** | |
 | L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | | |
 | L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | | |
 | L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | | |
@@ -22,7 +22,44 @@ log results, with no cable required.
 
 ### Carried forward
 
+- **S1a → S1b:** `docs/MODULE_CONTRACT.md` **Drills** states decision 7's
+  rule without a function name ("convert the note's `performance.now()` time
+  to the audio time heard then"); S1b names `heardAudioTime` there when it
+  adds it, and adds decision 12 (`MidiConnect`) to the same page.
+- **S1a → L1:** the loader (`src/curriculum/build.ts`, pure, and `index.ts`)
+  checks shape, duplicate ids per kind and `loadProgression` only. It doesn't
+  check a lesson's file name against its id, a drill step's `mode` against
+  `DRILL_MODES`, or that a `progressionId` exists: those are L1's
+  `content.test.ts`. A lesson file holds one lesson object; `progressions.json`
+  and `sequencerRecipes.json` hold lists. Seed progressions use `family:
+  "seed"`; seed lesson drill minutes (A0 3 of 4, B0 4 of 5) fit their lessons.
+- **S1a → L2, L3:** `parseLaunch` returns the first error only, ignores
+  unknown parameters, and rejects an empty `session`/`lesson`/`progression`
+  and a `returnTo` that isn't an app path (`/…`, not `//…`). `minutes` may be
+  fractional (`0.25`). `DrillLaunch` carries `module`; `launchQuery` leaves it
+  out (it's the route). `availableFrom` and the `AvailableModule` type live in
+  `src/ui/router.ts` (pure, beside `visibleModules`);
+  `availableModules.tsx` re-exports the type.
+- **S1a → L2:** a query change on the same route doesn't remount a module's
+  view (`ErrorBoundary` resets on `path` only), so a view reads
+  `useLocation().query` each render; `useLocation()` returns the same object,
+  `query` included, until the URL changes, so it's safe in effect deps.
+- **S1a → L2 (decision the plan didn't cover):** `MODULE_CONTRACT.md` says a
+  practice session's `startedAt` is when the drill started and its `scores` is
+  `{}` for an unscored drill (`Session.scores` is required).
+
 ### Process notes
+
+- S1a: the row puts `availableFrom` in `availableModules.tsx` with a
+  `availableModules.test.ts`, while **Repo conventions** says UI logic with a
+  test lives in a pure `.ts`; it went into `router.ts`, and the test imports
+  it from there.
+- S1a: the row lists decisions 7 and 12 for the **Drills** section, but
+  `heardAudioTime` and `MidiConnect` are S1b's; S1a wrote the rule only (see
+  Carried forward).
+- S1a: on `/dev/spine?dev`, `get_page_text` right after `navigate` can read
+  the page before the lazy view mounts (only the nav and status bar); waiting
+  a second, or reading `main` from the console, shows it.
 
 ## How this plan runs
 

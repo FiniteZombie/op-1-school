@@ -1,0 +1,12 @@
+{
+  "id": "a0",
+  "vector": "A",
+  "level": 0,
+  "title": "placeholder seed a0",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    { "kind": "card", "title": "placeholder seed card", "body": "placeholder seed text: tap each time the chord changes." },
+    { "kind": "drill", "module": "progression-trainer", "mode": "A0", "minutes": 3, "progressionId": "seed-cmajor" }
+  ]
+}

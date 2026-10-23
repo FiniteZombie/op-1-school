@@ -1,0 +1,12 @@
+{
+  "id": "b0",
+  "vector": "B",
+  "level": 0,
+  "title": "placeholder seed b0",
+  "minutes": 5,
+  "scored": false,
+  "steps": [
+    { "kind": "card", "title": "placeholder seed card", "body": "placeholder seed text." },
+    { "kind": "drill", "module": "pocket-dojo", "mode": "B0", "minutes": 4 }
+  ]
+}

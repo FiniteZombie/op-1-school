@@ -116,7 +116,15 @@ Push back before breaking one.
 - Colours come from the theme tokens in `src/ui/tokens.css` (a dark and a
   light value each; dark is a `dark` class on `<html>`), never raw hexes.
 - Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,
-  port 5173). The app is at `http://localhost:5173/op-1-school/`.
+  port 5173). The app is at `http://localhost:5173/op-1-school/`. Parallel
+  lanes use `dev-l2` (5174) and `dev-l3` (5175): another port is another
+  origin with its own IndexedDB, so a check that reads it first runs
+  `indexedDB.deleteDatabase('op-1-school')` and reloads.
+- Drills are launched by URL and report one `Attempt`: `src/types/drills.ts`
+  (`launchQuery`, `parseLaunch`, `DRILL_MODES`) and **Drills** in
+  `docs/MODULE_CONTRACT.md`. The router keeps `dev`, and `fast` only
+  alongside it; `/` is the `runner` module once one is registered.
+  Curriculum JSON is read only through `src/curriculum/index.ts`.
 - The build copies `dist/index.html` to `dist/404.html` so GitHub Pages serves
   the app shell for deep links.
 - `docs/` holds owner docs; `.agents/` holds agent notes. Every change updates
