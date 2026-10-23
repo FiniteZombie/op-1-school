@@ -15,7 +15,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 8 | UI primitives and registry | done 2026-10-22 | 39b01e5 |
 | 9 | `/dev/spine` | done 2026-10-22 | ad0c090 |
 | 10 | Fan-out docs | done 2026-10-22 | 16df9cd |
-| 11 | Retro fixes | done 2026-10-22 | |
+| 11 | Retro fixes | done 2026-10-22 | ee59677 |
 | 12 | Exit gate (**attended**) | **Next** | |
 
 ### Carried forward
