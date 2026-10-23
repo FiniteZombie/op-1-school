@@ -1,0 +1,15 @@
+{
+  "id": "d3",
+  "vector": "D",
+  "level": 3,
+  "title": "track panning and master drive",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "make room, then glue",
+      "body": "Pan each tape track so the OP-1's parts sit around the Push instead of on top of it (field steps: VERIFY).\n\nThen add a little master drive to glue the tracks together (field steps: VERIFY). Back it off if the drums lose their front."
+    }
+  ]
+}

@@ -59,6 +59,9 @@ GitHub Pages, and runs `/dev/spine?dev` on the phone and the Field.
   `[ear]` (listening: clicks, swing, a sound that's right). They go straight to
   the owner's list. Give each a fake twin where one exists (`FakeMidiPort`, a
   fake `ClockBridge`, touch input).
+- **A check names the row that builds what it checks.** An integration item
+  never checks something no row builds, and a lane's browser check never
+  needs another lane's module: that check goes in the integration row.
 - **A VERIFY item is never an agent's PASS.** A row that hits one names it, and
   its Done when is "stubbed behind `<interface>`, listed in the report and the
   VERIFY log".

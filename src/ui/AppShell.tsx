@@ -4,18 +4,21 @@
  * so a render error leaves the nav working. The nav sits at the bottom under 700 px of viewport
  * width and at the side from 700 px (`nav:` in tokens.css); its title links
  * home, then one entry per visible module (registry order), then the theme
- * toggle. Routes come from the registry (decision 9's router); `devOnly`
+ * toggle. Routes come from the registry (decision 9's router), `/` is the
+ * Runner once it's registered, and the shell provides the visible modules to
+ * `useAvailableModules()` (decision 10); `devOnly`
  * modules, nav entry and route, need `?dev`; anything else shows
  * `no page here`.
  */
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { modules } from '../modules/registry';
 import type { ModuleDefinition } from '../types/modules';
+import { AvailableModulesProvider } from './availableModules';
 import { COPY } from './copy';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Link, useLocation } from './navigation';
 import { PowerWarning } from './PowerWarning';
-import { resolveRoute, visibleModules } from './router';
+import { availableFrom, resolveRoute, visibleModules } from './router';
 import { StatusBar } from './StatusBar';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -54,30 +57,33 @@ function Page({ path, dev }: { path: string; dev: boolean }) {
 export function AppShell() {
   const { path, dev } = useLocation();
   const entries = visibleModules(modules, dev);
+  const available = useMemo(() => availableFrom(modules, dev), [dev]);
 
   return (
-    <div className="flex h-dvh flex-col bg-bg text-text nav:flex-row">
-      <nav
-        aria-label="main"
-        className="order-last flex shrink-0 items-center gap-1 overflow-x-auto border-t border-line bg-surface px-2 py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] nav:order-first nav:w-52 nav:flex-col nav:items-stretch nav:overflow-y-auto nav:border-t-0 nav:border-r nav:p-3"
-      >
-        <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="px-3 py-2 text-sm font-bold text-text nav:mb-2 nav:text-base">
-          {COPY.navTitle}
-        </Link>
-        {entries.map((m) => (
-          <NavEntry key={m.id} module={m} active={path === m.route} />
-        ))}
-        <ThemeToggle className="ml-auto shrink-0 nav:mt-auto nav:ml-0" />
-      </nav>
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <ErrorBoundary resetKey={path}>
-          <StatusBar />
-          <PowerWarning />
-          <main className="min-h-0 flex-1 overflow-y-auto">
-            <Page path={path} dev={dev} />
-          </main>
-        </ErrorBoundary>
+    <AvailableModulesProvider modules={available}>
+      <div className="flex h-dvh flex-col bg-bg text-text nav:flex-row">
+        <nav
+          aria-label="main"
+          className="order-last flex shrink-0 items-center gap-1 overflow-x-auto border-t border-line bg-surface px-2 py-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] nav:order-first nav:w-52 nav:flex-col nav:items-stretch nav:overflow-y-auto nav:border-t-0 nav:border-r nav:p-3"
+        >
+          <Link to="/" aria-current={path === '/' ? 'page' : undefined} className="px-3 py-2 text-sm font-bold text-text nav:mb-2 nav:text-base">
+            {COPY.navTitle}
+          </Link>
+          {entries.map((m) => (
+            <NavEntry key={m.id} module={m} active={path === m.route} />
+          ))}
+          <ThemeToggle className="ml-auto shrink-0 nav:mt-auto nav:ml-0" />
+        </nav>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <ErrorBoundary resetKey={path}>
+            <StatusBar />
+            <PowerWarning />
+            <main className="min-h-0 flex-1 overflow-y-auto">
+              <Page path={path} dev={dev} />
+            </main>
+          </ErrorBoundary>
+        </div>
       </div>
-    </div>
+    </AvailableModulesProvider>
   );
 }

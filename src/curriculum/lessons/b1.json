@@ -1,0 +1,21 @@
+{
+  "id": "b1",
+  "vector": "B",
+  "level": 1,
+  "title": "kick on the grid",
+  "minutes": 5,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "dead on",
+      "body": "Straight four-on-the-floor first, then a boom-bap kick pattern. The target zone is ±10 ms around the grid; the radar shows every hit.\n\nPlay the kick from your kit's kick key (field steps: VERIFY). Keep the other hand still: this is about one limb landing the same place every time."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B1",
+      "minutes": 4
+    }
+  ]
+}

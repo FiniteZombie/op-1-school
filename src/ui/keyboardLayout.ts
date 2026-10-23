@@ -11,7 +11,7 @@
  *
  * Key `index` is `note − base` (0..23) whether or not that key is visible.
  */
-import type { MidiNote, NoteEvent } from '../types/music';
+import type { MidiNote, NoteEvent, PitchClass } from '../types/music';
 
 export const KEY_COUNT = 24;
 /** Keys never get narrower than this when one octave fits (SPEC §5.4). */
@@ -140,6 +140,25 @@ export function litKeys(notes: Iterable<MidiNote>, layout: KeyboardLayout): Map<
     const list = out.get(index);
     if (list) list.push(note);
     else out.set(index, [note]);
+  }
+  return out;
+}
+
+/**
+ * Visible key indices that carry the guide mark: keys whose pitch class is in
+ * `guide` and that aren't lit (a lit key shows its own state instead).
+ */
+export function guideKeys(
+  layout: KeyboardLayout,
+  lit: ReadonlyMap<number, readonly MidiNote[]>,
+  guide: readonly PitchClass[],
+): Set<number> {
+  const pcs = new Set<number>(guide);
+  const out = new Set<number>();
+  for (const k of layout.keys) {
+    const lights = lit.get(k.index);
+    if (lights && lights.length > 0) continue;
+    if (pcs.has(((k.note % 12) + 12) % 12)) out.add(k.index);
   }
   return out;
 }

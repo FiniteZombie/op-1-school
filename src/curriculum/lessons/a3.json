@@ -1,0 +1,22 @@
+{
+  "id": "a3",
+  "vector": "A",
+  "level": 3,
+  "title": "chord quality",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "two notes tell you the quality",
+      "body": "After the root, the quality. Two notes decide most of it: the 3rd and the 7th.\n\n- `maj7`: major 3rd, major 7th. Bright, settled.\n- `7`: major 3rd, flat 7th. Wants to move.\n- `m7`: minor 3rd, flat 7th. Soft, at home.\n- `m7b5`: minor 3rd, flat 5th, flat 7th. The darkest of the five.\n- `sus`: no 3rd at all. It floats.\n\nTap the family of each chord while it plays. This loop has four chords and four different qualities."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A3",
+      "minutes": 3,
+      "progressionId": "turnaround-f-minor"
+    }
+  ]
+}

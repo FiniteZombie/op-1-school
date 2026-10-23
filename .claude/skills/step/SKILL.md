@@ -60,6 +60,13 @@ message). If an orchestrator spawned you, also read
      Playwright: a scratchpad script imports Playwright by absolute path (ESM
      ignores `NODE_PATH`) and drives the dev server. That's a real check, not
      an OWNER item.
+   - In the browser pane, click by `find` → `ref`, not by coordinate (the
+     screenshot frame isn't CSS pixels), and name the role
+     (`find 'button "skip"'`). If Vite serves a stale module after two quick
+     edits, touch the file. In a lane's worktree `preview_start` serves the
+     main checkout, so start `npx vite --port <lane port> --strictPort` from
+     the worktree in the background, and kill it by PID when you're done:
+     stopping the task can leave it listening.
    - `[phone]`, `[field]` and `[ear]` items are the owner's. Write their test
      steps; don't call them done.
 5. **Update the docs.**

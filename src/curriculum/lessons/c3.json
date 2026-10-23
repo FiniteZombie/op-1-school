@@ -1,0 +1,26 @@
+{
+  "id": "c3",
+  "vector": "C",
+  "level": 3,
+  "title": "micro-chopping",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "chop on the phone",
+      "body": "Take one long sample, mark the hits you want, and the kit compiler turns them into a sliced drum kit for the Field. That's the micro-chop workflow, prepared on the phone instead of on the device. Not scored.\n\nLoading the kit onto the Field: (field steps: VERIFY)."
+    },
+    {
+      "kind": "card",
+      "title": "the 10-second live resample loop",
+      "body": "In a jam: sample 10 seconds of what the Push is playing, chop it, and play it back over the loop before the moment passes. The app only runs the backing and the countdown.\n\n1. Start the backing and the countdown.\n2. Sample 10 seconds of the Push's output into the Field (field steps: VERIFY).\n3. Play the chop back over the loop before the countdown ends.\n\nWith the Field plugged into the phone, the phone's audio goes to the Field, so recording tape with input set to USB records the backing too."
+    },
+    {
+      "kind": "drill",
+      "module": "sample-flip",
+      "mode": "C3",
+      "minutes": 4
+    }
+  ]
+}

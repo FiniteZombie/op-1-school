@@ -1,0 +1,203 @@
+[
+  {
+    "id": "pendulum-d-dorian",
+    "key": { "tonic": 2, "mode": "dorian" },
+    "bpm": 100,
+    "swing": 0.3,
+    "bars": 2,
+    "slots": [
+      { "roman": "i7", "beats": 4 },
+      { "roman": "IV7", "beats": 4 }
+    ],
+    "style": "dorian-synth",
+    "family": "modal-pendulum"
+  },
+  {
+    "id": "pendulum-c-lydian",
+    "key": { "tonic": 0, "mode": "lydian" },
+    "bpm": 120,
+    "swing": 0.2,
+    "bars": 2,
+    "slots": [
+      { "roman": "Imaj7", "beats": 4 },
+      { "roman": "II7", "beats": 4 }
+    ],
+    "style": "lofi-house",
+    "family": "modal-pendulum"
+  },
+  {
+    "id": "pendulum-g-mixolydian",
+    "key": { "tonic": 7, "mode": "mixolydian" },
+    "bpm": 88,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "I", "beats": 8 },
+      { "roman": "VII", "beats": 8 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "modal-pendulum"
+  },
+  {
+    "id": "turnaround-c-major",
+    "key": { "tonic": 0, "mode": "ionian" },
+    "bpm": 86,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "ii7", "beats": 4 },
+      { "roman": "V7", "beats": 4 },
+      { "roman": "Imaj7", "beats": 4 },
+      { "roman": "vi7", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "jazz-hop-turnaround"
+  },
+  {
+    "id": "turnaround-f-minor",
+    "key": { "tonic": 5, "mode": "aeolian" },
+    "bpm": 90,
+    "swing": 0.6,
+    "bars": 4,
+    "slots": [
+      { "roman": "iiø7", "beats": 4 },
+      { "roman": "V7", "beats": 4 },
+      { "roman": "i7", "beats": 4 },
+      { "roman": "VImaj7", "beats": 4 }
+    ],
+    "style": "boombap-soul",
+    "family": "jazz-hop-turnaround"
+  },
+  {
+    "id": "walkdown-a-minor",
+    "key": { "tonic": 9, "mode": "aeolian" },
+    "bpm": 82,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "i/7", "beats": 4 },
+      { "roman": "VImaj7", "beats": 4 },
+      { "roman": "V7", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "cinematic-walkdown"
+  },
+  {
+    "id": "walkdown-c-major",
+    "key": { "tonic": 0, "mode": "ionian" },
+    "bpm": 84,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "I", "beats": 4 },
+      { "roman": "V/7", "beats": 4 },
+      { "roman": "vi", "beats": 4 },
+      { "roman": "vi/5", "beats": 2 },
+      { "roman": "IV", "beats": 2 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "cinematic-walkdown"
+  },
+  {
+    "id": "pedal-a-minor",
+    "key": { "tonic": 9, "mode": "aeolian" },
+    "bpm": 92,
+    "swing": 0.6,
+    "bars": 4,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "iv/1", "beats": 4 },
+      { "roman": "i", "beats": 4 },
+      { "roman": "VII/1", "beats": 4 }
+    ],
+    "style": "boombap-soul",
+    "family": "pedal-point"
+  },
+  {
+    "id": "pedal-e-phrygian",
+    "key": { "tonic": 4, "mode": "phrygian" },
+    "bpm": 100,
+    "swing": 0.3,
+    "bars": 2,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "II/1", "beats": 4 }
+    ],
+    "style": "dorian-synth",
+    "family": "pedal-point"
+  },
+  {
+    "id": "i-v-iv-d-minor",
+    "key": { "tonic": 2, "mode": "aeolian" },
+    "bpm": 84,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "i7", "beats": 4 },
+      { "roman": "v7", "beats": 4 },
+      { "roman": "iv7", "beats": 8 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "i-v-iv"
+  },
+  {
+    "id": "i-v-iv-e-minor",
+    "key": { "tonic": 4, "mode": "aeolian" },
+    "bpm": 118,
+    "swing": 0.2,
+    "bars": 4,
+    "slots": [
+      { "roman": "i", "beats": 4 },
+      { "roman": "v", "beats": 4 },
+      { "roman": "iv", "beats": 8 }
+    ],
+    "style": "lofi-house",
+    "family": "i-v-iv"
+  },
+  {
+    "id": "pop-c-major",
+    "key": { "tonic": 0, "mode": "ionian" },
+    "bpm": 90,
+    "swing": 0.5,
+    "bars": 4,
+    "slots": [
+      { "roman": "I", "beats": 4 },
+      { "roman": "V", "beats": 4 },
+      { "roman": "vi", "beats": 4 },
+      { "roman": "IV", "beats": 4 }
+    ],
+    "style": "chillhop-rhodes",
+    "family": "I-V-vi-IV"
+  },
+  {
+    "id": "pop-g-major",
+    "key": { "tonic": 7, "mode": "ionian" },
+    "bpm": 92,
+    "swing": 0.6,
+    "bars": 4,
+    "slots": [
+      { "roman": "Imaj7", "beats": 4 },
+      { "roman": "V7", "beats": 4 },
+      { "roman": "vi7", "beats": 4 },
+      { "roman": "IVmaj7", "beats": 4 }
+    ],
+    "style": "boombap-soul",
+    "family": "I-V-vi-IV"
+  },
+  {
+    "id": "pop-eb-major",
+    "key": { "tonic": 3, "mode": "ionian" },
+    "bpm": 100,
+    "swing": 0.3,
+    "bars": 2,
+    "slots": [
+      { "roman": "I", "beats": 2 },
+      { "roman": "V", "beats": 2 },
+      { "roman": "vi", "beats": 2 },
+      { "roman": "IV", "beats": 2 }
+    ],
+    "style": "dorian-synth",
+    "family": "I-V-vi-IV"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "id": "d4",
+  "vector": "D",
+  "level": 4,
+  "title": "pre-tape panning",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "pan before you record",
+      "body": "On the tape screen, Shift+orange sets the pan before the sound hits tape. It's a Field firmware addition.\n\nThe Push usually owns the centre. Pan the OP-1's parts left or right as you record, so they never fight it there."
+    }
+  ]
+}

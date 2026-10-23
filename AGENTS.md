@@ -19,8 +19,8 @@ between.
 Open plans:
 
 - [`phase-2-fan-out.md`](.agents/plans/phase-2-fan-out.md): SPEC §6.2, the
-  curriculum, Module 1 (Progression Trainer) and the Runner, as a spine step,
-  three lanes, an integration step and the owner's exit gate.
+  curriculum, Module 1 (Progression Trainer) and the Runner, as two spine
+  steps, three lanes, an integration step and the owner's exit gate.
 
 Phase 1, the spine, is done
 ([archived](.agents/plans/archive/phase-1-spine.md)).
@@ -116,7 +116,29 @@ Push back before breaking one.
 - Colours come from the theme tokens in `src/ui/tokens.css` (a dark and a
   light value each; dark is a `dark` class on `<html>`), never raw hexes.
 - Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,
-  port 5173). The app is at `http://localhost:5173/op-1-school/`.
+  port 5173). The app is at `http://localhost:5173/op-1-school/`. Parallel
+  lanes use `dev-l2` (5174) and `dev-l3` (5175): another port is another
+  origin with its own IndexedDB, so a check that reads it first runs
+  `indexedDB.deleteDatabase('op-1-school')` and reloads. The app doesn't
+  close its connection on `versionchange`, so the delete waits (`blocked`)
+  until every tab on that origin is gone: close the pane's extra tabs
+  (`preview_start` opens one) before reloading.
+- Drills are launched by URL and report one `Attempt`: `src/types/drills.ts`
+  (`launchQuery`, `parseLaunch`, `DRILL_MODES`) and **Drills** in
+  `docs/MODULE_CONTRACT.md`. The router keeps `dev`, and `fast` only
+  alongside it; `/` is the `runner` module (also `/runner`; its library is
+  `/runner?view=library&open=<lesson id>`). Curriculum JSON is read only
+  through `src/curriculum/index.ts`.
+- Module 1's scorers run through a Tone-free `DrillController`
+  (`src/modules/progression-trainer/drill.ts`), with the backing synth passed
+  in as a `BackingLike`, so they're tested on the fake transport and clock;
+  the view only wires the real `ToneBackingSynth` in. A new drill module
+  follows the same pattern in its own directory (it can't import Module 1's).
+- The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
+  `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest
+  Android row per input). `tapWindow.test.ts` parses that table and fails when
+  the two differ, so a new measurement updates both in one commit. Drill tests
+  inject their own measurements rather than read `TAP_OFFSETS`.
 - The build copies `dist/index.html` to `dist/404.html` so GitHub Pages serves
   the app shell for deep links.
 - `docs/` holds owner docs; `.agents/` holds agent notes. Every change updates

@@ -1,6 +1,6 @@
 # op-1-school — OP-1 Field Live Jam & Improvisation Trainer
 
-**Spec v2 (refined).** Supersedes `Op1 Field Improv Master Plan.md` (v1). Written to be executed by Claude Code using a **spine-first, fan-out-second** workflow (§6). Read §0 before doing anything.
+**Spec v2 (refined).** Supersedes v1, [`SPEC_V1_FROM_GEMINI_ARGON.md`](SPEC_V1_FROM_GEMINI_ARGON.md), which is here for what v2 says to keep from it. v1's Field button combos and menu paths are unverified: they never resolve a VERIFY item or go into a card. Written to be executed by Claude Code using a **spine-first, fan-out-second** workflow (§6). Read §0 before doing anything.
 
 ---
 
@@ -178,7 +178,7 @@ The v1 framing ("where are we in the progression?") is right; the fix is sequenc
 | A2 | **Safety net: pentatonic** | Play only minor-pentatonic (or major-pent for major keys) over the loop for 2 minutes. Goal is not scoring; it's permission to make sound without clashing | Clash count only |
 | A3 | **Chord quality** | After root: m7 / 7 / maj7 / m7b5 / sus. Two-note test: 3rd vs b3rd, 7th vs b7th | Quality correct |
 | A4 | **Common tones vs moving tone** | For 2-chord vamps: find the notes shared by both chords, then the single note that moves (e.g. Fm7→Bbm7: F and Ab stay, the moving line is the 7th → 3rd) | Notes correct |
-| A5 | **Guide tones** | Two fingers on 3rd and 7th; move by half/whole step on each change. The "voice-leading map" reveal is the payoff | Chord tone / tension / avoid per bar |
+| A5 | **Guide tones** | Two fingers on 3rd and 7th; move by half/whole step on each change. The "voice-leading map" reveal is the payoff | Both guide tones (3rd and 7th) played per bar; chord tone / tension / avoid counts are kept but not scored |
 | A6 | **Target-note phrasing** | Generate: 2-bar phrase that *ends* on the 3rd of the *next* chord, land on beat 1. Then call-and-response (play bars 1–2, rest 3, turnaround 4) | Landing note + timing |
 
 Progression families (in `progressions.json`): the four from v1 (modal pendulum, jazz-hop turnaround, cinematic walkdown, pedal point) plus **i–v–iv** (minor plagal-ish loop common in lo-fi) and **I–V–vi–IV in a major key**, so the ear doesn't over-fit to minor. Styles select synth voicings and harmonic rhythm, not different theory.

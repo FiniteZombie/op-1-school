@@ -12,11 +12,14 @@
  *   selected, so `bus.active()` lists the sources that can actually play.
  * - The MIDI port selection persists in settings (`portMemory(settings)`).
  * - The theme follows `settings.theme`.
+ * - The touch voice (`NoteVoice`, plan decision 8) sounds `touch` notes once
+ *   audio runs, and releases them when audio stops running.
  *
  * Nothing here is disposed: the spine lives as long as the page.
  */
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from 'react';
 import { WebAudioClockBridge, type ClockBridge } from '../audio/Clock';
+import { NoteVoice } from '../audio/NoteVoice';
 import {
   ToneTransport,
   getAudioContext,
@@ -98,6 +101,11 @@ export function createSpine(): Spine {
   }
 
   toneContext.on('statechange', updateAudioState);
+
+  const voice = new NoteVoice(bus, () => audioState === 'running');
+  audioListeners.add(() => {
+    if (audioState !== 'running') voice.releaseAll();
+  });
 
   const audio: AudioGateController = {
     state: () => audioState,

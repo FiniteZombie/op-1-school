@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { type AudioClockContext, type ClockBridge, fitLine, offsetMs, WebAudioClockBridge } from '../Clock';
+import { FakeClockBridge } from '../__fakes__/FakeTransport';
+import { type AudioClockContext, type ClockBridge, fitLine, heardAudioTime, offsetMs, WebAudioClockBridge } from '../Clock';
 
 /** A fake context whose fields the test sets directly. */
 function fakeContext(init: Partial<AudioClockContext> & { currentTime?: number; state?: string } = {}) {
@@ -158,5 +159,48 @@ describe('snapshot', () => {
     expect(s.outputLatencyMs).toBeCloseTo(40, 9);
     expect(s.baseLatencyMs).toBeCloseTo(10, 9);
     expect(s.hasOutputLatency).toBe(true);
+  });
+});
+
+describe('heardAudioTime inverts audibleAt (plan decision 7)', () => {
+  const times = [0, 0.5, 9.971, 10, 123.456];
+
+  test('on FakeClockBridge(5000, 0.029)', () => {
+    const clock = new FakeClockBridge(5000, 0.029);
+    for (const t of times) expect(Math.abs(heardAudioTime(clock.audibleAt(t), clock) - t)).toBeLessThan(1e-6);
+  });
+
+  test('decision 7: a note at 15 000 ms was heard against 9.971 s', () => {
+    expect(heardAudioTime(15000, new FakeClockBridge(5000, 0.029))).toBeCloseTo(9.971, 9);
+  });
+
+  test('on a WebAudioClockBridge, output-timestamp path', () => {
+    const ctx = fakeContext({
+      currentTime: 10,
+      outputLatency: 0.024,
+      baseLatency: 0.005,
+      getOutputTimestamp: () => ({ contextTime: 9.9712, performanceTime: 15000 }),
+    });
+    const clock = new WebAudioClockBridge(ctx, () => 15000);
+    clock.refresh();
+    expect(clock.snapshot().path).toBe('output-timestamp');
+    for (const t of times) expect(Math.abs(heardAudioTime(clock.audibleAt(t), clock) - t)).toBeLessThan(1e-6);
+    // No latency added on this path: the heard time is perfToAudio.
+    expect(heardAudioTime(15000, clock)).toBeCloseTo(9.9712, 9);
+  });
+
+  test('on a WebAudioClockBridge, fit path, with a slope off 1000 ms/s', () => {
+    const ctx = fakeContext({ currentTime: 3, outputLatency: 0.024, baseLatency: 0.005 });
+    let perf = 0;
+    const clock = new WebAudioClockBridge(ctx, () => perf);
+    for (let i = 0; i < 20; i++) {
+      ctx.currentTime = 3 + i * 0.25;
+      perf = 7000 + 1001 * ctx.currentTime + noise(i);
+      clock.refresh();
+    }
+    expect(clock.snapshot().path).toBe('fit');
+    for (const t of times) expect(Math.abs(heardAudioTime(clock.audibleAt(t), clock) - t)).toBeLessThan(1e-6);
+    // The fit path adds the 29 ms latency, so the heard time is 29 ms behind perfToAudio.
+    expect(clock.perfToAudio(15000) - heardAudioTime(15000, clock)).toBeCloseTo(0.029, 9);
   });
 });

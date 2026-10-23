@@ -1,0 +1,22 @@
+{
+  "id": "a1",
+  "vector": "A",
+  "level": 1,
+  "title": "bass root as scale degree",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "follow the lowest note",
+      "body": "Push players voice chords densely, so the top of the chord won't tell you its root. Follow the **lowest** note instead.\n\n- The drill plays drums and bass only.\n- Play each chord's bass note on the keyboard, Field keys or touch, any octave.\n- After each chord the reveal names it as a degree of the key: `1`, `b3`, `4`, `5`, `b6`, `b7`…\n\nThis loop is E minor, three chords. Hum the bass before you play it."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A1",
+      "minutes": 3,
+      "progressionId": "i-v-iv-e-minor"
+    }
+  ]
+}

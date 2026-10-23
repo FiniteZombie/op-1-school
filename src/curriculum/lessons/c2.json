@@ -1,0 +1,21 @@
+{
+  "id": "c2",
+  "vector": "C",
+  "level": 2,
+  "title": "re-contextualization",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "more than one right flip",
+      "body": "Try the same sample at 0, −2 and +3 semitones against the backing. More than one landing works: on the root, on the 5th, as the relative major or minor, as a 9th.\n\n`check my flip` lists every consonant landing, ranked by how far the sample had to move (fewer semitones keeps more of its sound), and says which one you got."
+    },
+    {
+      "kind": "drill",
+      "module": "sample-flip",
+      "mode": "C2",
+      "minutes": 4
+    }
+  ]
+}

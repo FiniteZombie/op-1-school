@@ -1,0 +1,21 @@
+{
+  "id": "b2",
+  "vector": "B",
+  "level": 2,
+  "title": "laid-back snare",
+  "minutes": 5,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "kick on time, snare behind",
+      "body": "Kick on the grid, snare on 2 and 4, **late** on purpose: +15 to +30 ms. The radar has two target zones, the kick's centred and the snare's behind the beat.\n\nLate isn't sloppy. Aim for the same lateness every time; the feel comes from it being consistent."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B2",
+      "minutes": 4
+    }
+  ]
+}

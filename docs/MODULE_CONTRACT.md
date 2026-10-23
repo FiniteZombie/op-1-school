@@ -61,9 +61,11 @@ A module may import from:
 - `src/state/`
 - `src/ui/`
 - its own directory, `src/modules/<id>/`
-- `src/curriculum/`, which is data (lessons, progressions, recipes) and is
-  created in Phase 2. It doesn't exist yet, so a check of this page's paths
-  against `git ls-files` skips this one.
+- `src/curriculum/`, the data (lessons, progressions, recipes), through its
+  `index.ts`: `lessons()`, `lessonById(id)`, `progressions()` (loaded),
+  `progressionSpecs()`, `progressionById(id)`, `sequencerRecipes()` and
+  `curriculumErrors()`. Every record is validated at load; a bad one is
+  dropped and its error logged, never thrown.
 
 It may not import another module, `src/modules/registry.ts`, `src/App.tsx` or
 `src/main.tsx`. Packages are not this rule's business; dependencies are
@@ -120,10 +122,23 @@ Other spine pieces a module uses:
   degree names are `degreeName` in the same file; read those, not a copy here.
   They differ on purpose: `/<degree>` in a numeral is a degree of the key's mode, while
   degree *names* (`b6`) are relative to the tonic's major scale.
-- **UI.** `Keyboard24` (props `chord`, `musicKey`, `onOutOfRange`), `Encoder`,
+- **Touch voice.** The spine's `NoteVoice` (`src/audio/NoteVoice.ts`) sounds
+  `touch` notes once audio runs, and nothing from `midi` or `mic` (the Field
+  sounds by itself). A module builds no voice of its own for touch keys.
+- **Tap window.** `tapVerdict(offsetMs, source, calibrated)` in
+  `src/audio/tapWindow.ts` says `early`, `on`, `late` or `unscored` for an
+  offset from `offsetMs()` in `src/audio/Clock.ts` (positive is late); the window comes from the measured
+  `TAP_OFFSETS` per source (`tapWindow(source)`), and a source with no
+  measurement, or `mic`, is `unscored`. Never pick a tolerance of your own;
+  tests inject their measurements.
+- **UI.** `Keyboard24` (props `chord`, `musicKey`, `guide`, `onOutOfRange`;
+  `guide` is a list of pitch classes whose unlit keys carry a mark and
+  `data-guide="true"`), `Encoder`,
   `StatusBar` (in the shell), `Link` / `navigate` / `useLocation` from
-  `src/ui/navigation.tsx` (these keep `?dev`), and `COPY` in `src/ui/copy.ts`
-  for settled strings.
+  `src/ui/navigation.tsx` (these take a `query` and keep `?dev`, and `fast`
+  alongside it; `useLocation()` gives `path`, `dev`, `fast` and `query`),
+  `useAvailableModules()` from `src/ui/availableModules.tsx`, and `COPY` in
+  `src/ui/copy.ts` for settled strings.
 - **State.** `openAppDb()` and the record types in `src/state/db.ts`;
   `settings` in `src/state/settings.ts`; calibration in
   `src/state/calibration.ts`.
@@ -135,6 +150,55 @@ Other spine pieces a module uses:
   `src/ui/PowerWarning.tsx`, driven by `raisesPowerWarning` in
   `src/ui/powerWarningLogic.ts` from `MidiBridge.onConnectionChange`. A module
   shows nothing of its own for it.
+
+## Drills
+
+A drill module (one with modes in `DRILL_MODES`, `src/types/drills.ts`) is
+launched by URL, and reports by writing one `Attempt`.
+
+- **The launch is the query.** The Runner, the library or a deep link
+  navigates to the module's route with `launchQuery(launch)`; the module reads
+  it back with `parseLaunch(module, useLocation().query)`, which returns
+  `{ launch }` or `{ error }` naming the bad field. Fields: `mode` (the level
+  id, one of `DRILL_MODES[module]`; `levelId('A', 0)` is `A0`), and
+  optionally `session`, `lesson`, `step` (the step's index in its lesson),
+  `progression`, `minutes`, `returnTo` (an app path, query allowed: the
+  Runner sends a session's drill back to `/runner` and a library practice
+  drill to `/runner?view=library&open=<lesson id>`; `splitAppPath` splits it
+  for `Link`) and `params` (the step's
+  `params`; `params.form` is `phrase` or `call-response`). There's no shared
+  in-memory state, so a reload mid-drill reopens the same drill. A query
+  change on the same route doesn't remount the view: read `query` from
+  `useLocation()` on every render.
+- **Other modules** come from `useAvailableModules()`, `{ id, route }` for
+  each visible module, never from the registry.
+- **One `Attempt` per finished drill** (time up, or `finish` after at least
+  one full loop), none for an abandoned one (navigating away, or `stop`
+  before a loop). `module` is the module id, `mode` the level id, `score`
+  0..1 or absent when unscored, `offsets` the `TimingOffset`s of a timed
+  level, and `data` the module's own detail plus `step` copied from the
+  launch when it has one (one attempt answers one step, so two steps of the
+  same mode in a lesson don't collide).
+- **A tap with no pitch** (A0's pad) is a `TimingOffset` with
+  `note: PAD_NOTE` (`-1`, outside `MidiNote`'s 0..127 on purpose).
+- **Sessions.** With a `session` in the launch, the attempt's `sessionId` is
+  it and the module leaves the session row alone (the Runner owns it).
+  Without one, the module writes its own `Session`: `kind: 'practice'`,
+  `lessonId` the launch's `lesson` or `'practice'`, `startedAt` when the drill
+  started, `finishedAt` the attempt's `at`, and `scores` `{ <mode>: score }`
+  when scored (`{}` when not).
+- **Which slot a played note answers** is the slot heard when it was played:
+  `heardAudioTime(e.perfTs, spine.clock)` (`src/audio/Clock.ts`, the inverse
+  of `audibleAt` on both clock paths) gives the audio time heard then, and
+  `slotAtAudioTime(transport, prepared, t)` from `src/audio/voicing.ts` its
+  slot. Scorers never call the synth's `currentSlot()`, so
+  their tests stay Tone-free. There's no grace window into the next slot.
+- **Connecting the Field** is `<MidiConnect />` (`src/ui/MidiConnect.tsx`),
+  under the `AudioGate`: `connect midi` asks for access on the tap, then each
+  input is a button labelled by the messages it has delivered, never by name
+  (VERIFY V7), and the player picks the one that counts up when they play. The
+  choice goes through `midi.select`, which remembers it. A module builds no
+  port picker of its own.
 
 ## Fakes for Module 3
 

@@ -10,6 +10,10 @@
  * tension = cyan, outline; avoid = yellow, striped; outside = red, with a ×.
  * Lit keys without a chord are gray, filled.
  *
+ * With `guide`, unlit keys of those pitch classes carry a mark (placeholder:
+ * a small dot in `--op-muted`) and `data-guide="true"`; A2 shows the
+ * pentatonic with it.
+ *
  * A note outside the 24 keys lights its octave-equivalent and calls
  * `onOutOfRange(note)` on its `on`; one in the hidden octave of one-octave
  * mode lights its equivalent and is not counted.
@@ -19,9 +23,9 @@
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { classify, noteName, pitchClass } from '../theory';
-import type { Chord, Key, MidiNote, NoteClassification } from '../types/music';
+import type { Chord, Key, MidiNote, NoteClassification, PitchClass } from '../types/music';
 import { COPY } from './copy';
-import { HeldNotes, PointerTracker, keyboardLayout, litKeys, locateNote, type KeyRect } from './keyboardLayout';
+import { HeldNotes, PointerTracker, guideKeys, keyboardLayout, litKeys, locateNote, type KeyRect } from './keyboardLayout';
 import { useSetting, useSpine } from './spine';
 
 export interface Keyboard24Props {
@@ -29,6 +33,8 @@ export interface Keyboard24Props {
   chord?: Chord;
   /** The key to classify in (`key` is React's own prop name, so this is `musicKey`). */
   musicKey?: Key;
+  /** Unlit keys of these pitch classes carry the guide mark. */
+  guide?: readonly PitchClass[];
   /** Called on each `on` for a note outside the 24 keys. */
   onOutOfRange?(note: MidiNote): void;
   className?: string;
@@ -68,7 +74,7 @@ function markStyle(mark: Mark): CSSProperties {
   }
 }
 
-export function Keyboard24({ chord, musicKey, onOutOfRange, className = '' }: Keyboard24Props) {
+export function Keyboard24({ chord, musicKey, guide, onOutOfRange, className = '' }: Keyboard24Props) {
   const { bus, touch } = useSpine();
   const baseSetting = useSetting('keyboardBaseNote');
   const octaveSetting = useSetting('keyboardOctave');
@@ -115,6 +121,7 @@ export function Keyboard24({ chord, musicKey, onOutOfRange, className = '' }: Ke
 
   const lit = useMemo(() => litKeys(held, layout), [held, layout]);
   const classifying = chord !== undefined && musicKey !== undefined;
+  const guided = useMemo(() => guideKeys(layout, lit, guide ?? []), [layout, lit, guide]);
 
   function markOf(k: KeyRect): Mark {
     const notes = lit.get(k.index);
@@ -168,16 +175,18 @@ export function Keyboard24({ chord, musicKey, onOutOfRange, className = '' }: Ke
           {layout.keys.map((k) => {
             const mark = markOf(k);
             const name = noteName(pitchClass(k.note), musicKey);
+            const isGuide = guided.has(k.index);
             return (
               <div
                 key={k.index}
                 role="button"
-                aria-label={`${name}${MARK_LABEL[mark] ? `, ${MARK_LABEL[mark]}` : ''}`}
+                aria-label={`${name}${MARK_LABEL[mark] ? `, ${MARK_LABEL[mark]}` : ''}${isGuide ? ', guide' : ''}`}
                 aria-pressed={mark !== 'off'}
                 data-note={k.note}
                 data-key-index={k.index}
                 data-lit={mark !== 'off'}
                 data-class={mark}
+                data-guide={isGuide || undefined}
                 onPointerDown={(e) => onPointerDown(e, k.note)}
                 onPointerUp={onPointerEnd}
                 onPointerCancel={onPointerEnd}
@@ -191,6 +200,10 @@ export function Keyboard24({ chord, musicKey, onOutOfRange, className = '' }: Ke
                   ...markStyle(mark),
                 }}
               >
+                {isGuide && (
+                  // placeholder: the guide mark's look.
+                  <span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ background: 'var(--op-muted)' }} />
+                )}
                 {mark === 'outside' && (
                   <span aria-hidden="true" className="text-2xl font-bold leading-none">
                     ×

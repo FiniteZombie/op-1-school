@@ -1,0 +1,21 @@
+{
+  "id": "b0",
+  "vector": "B",
+  "level": 0,
+  "title": "calibrate",
+  "minutes": 5,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "measure your own delay",
+      "body": "Every phone and every input has its own delay between your finger and the sound. Calibration measures yours: a click plays for 2 bars, you tap along 16 times, and the median offset becomes your correction.\n\n- Calibrate each input you use: touch, and the Field's keys.\n- Do it again on a new phone, and whenever timing feels off.\n- Set the Field's velocity off first (Shift+Tempo: off). The drills score placement, not velocity."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B0",
+      "minutes": 4
+    }
+  ]
+}

@@ -8,6 +8,8 @@ import {
   classify,
   commonTones,
   guideTones,
+  QUALITY_FAMILIES,
+  qualityFamily,
   voiceLead,
 } from '../chords';
 import { realize } from '../progressions';
@@ -195,5 +197,32 @@ describe('chordName', () => {
     expect(chordName(fSharp, { tonic: 4, mode: 'ionian' })).toBe('F♯maj7'); // E major: sharps
     expect(chordName(fSharp, F_MINOR)).toBe('G♭maj7'); // F minor: flats
     expect(chordName(fSharp)).toBe('G♭maj7'); // no key: flats
+  });
+});
+
+describe('qualityFamily', () => {
+  test('maps every member of CHORD_QUALITIES', () => {
+    const expected: Record<(typeof CHORD_QUALITIES)[number], ReturnType<typeof qualityFamily>> = {
+      maj7: 'maj7',
+      '7': '7',
+      m7: 'm7',
+      m7b5: 'm7b5',
+      dim7: null,
+      sus4: 'sus',
+      sus2: 'sus',
+      maj: null,
+      min: null,
+      mMaj7: null,
+      '6': null,
+      m6: null,
+      dim: null,
+    };
+    for (const q of CHORD_QUALITIES) expect(qualityFamily(q), q).toBe(expected[q]);
+    expect(Object.keys(expected).sort()).toEqual([...CHORD_QUALITIES].sort());
+  });
+
+  test('every family is reached by some quality', () => {
+    const reached = new Set(CHORD_QUALITIES.map(qualityFamily).filter((f) => f !== null));
+    expect([...reached].sort()).toEqual([...QUALITY_FAMILIES].sort());
   });
 });
