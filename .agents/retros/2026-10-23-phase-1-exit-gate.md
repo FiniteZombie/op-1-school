@@ -165,9 +165,12 @@ Both accepted, landed in this review's change, with the screen-lock stop:
 
 ### Owner's checks still to run
 
-- `[phone]` After this lands on Pages: tap along to the loop; offsets sit
-  near 0, not near +24 ms. Phase 2 grading depends on it.
+- `[phone]` Tap along on `/dev/spine`'s **taps** panel (added after the
+  review; `/dev/spine` had no offset readout), with touch and then with the
+  Field's keys; record the medians in `docs/HARDWARE_NOTES.md`, **Tap
+  offsets**. Levels A0 and A6 score tap timing, so Phase 2 depends on it.
 - `[phone]` Lock the screen mid-loop: silence, and `start` on unlock.
+  Passed (2026-10-23).
 - `[field]` V6 (bar-1 lock) and Phase 3 checklist items 2–6, before Module 3.
 - `[ear]` A silent first `start` after a fresh load with the Field plugged in.
 

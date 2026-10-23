@@ -2,7 +2,8 @@
  * `/dev/spine` (SPEC §6.1 item 8; plan row 9): the spine's smoke page, behind
  * `?dev`. Top to bottom: the audio gate; transport (start/stop, BPM and swing
  * encoders, part masks) playing `DEV_PROGRESSION`; the current chord; the
- * keyboard, classified against it; MIDI access, ports, clock out and follow;
+ * keyboard, classified against it; taps (each key-down's offset from the beat
+ * as heard, `tapOffsets.ts`); MIDI access, ports, clock out and follow;
  * decision 7's clock readout; decision 8's MIDI timing; the probe (what
  * every MIDI input delivers, and a `copy report` button that puts the whole
  * page's state on the clipboard as text); the database check; and a log of
@@ -49,6 +50,7 @@ import {
 } from './devSpine';
 import { openLiveProbe, type LiveProbe } from './liveProbe';
 import { PROBE_LABELS, formatProbeReport, tallyLine } from './probeReport';
+import { TAP_LABELS, TAP_WINDOW, nearestBeatOffsetMs, tapRows, tapStats } from './tapOffsets';
 
 const REFRESH_MS = 250;
 
@@ -217,6 +219,19 @@ export default function DevSpineView() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [log]);
 
+  // --------------------------------------------------------------- taps
+  const [taps, setTaps] = useState<number[]>([]);
+  useEffect(
+    () =>
+      bus.onNote((e) => {
+        if (e.kind !== 'on' || transport.state() !== 'started') return;
+        const o = nearestBeatOffsetMs(e.perfTs, transport.audioTimeOfTick(0), 60 / transport.config().bpm, clock);
+        setTaps((list) => appendCapped(list, o, TAP_WINDOW));
+      }),
+    [bus, transport, clock],
+  );
+  const tapSummary = tapStats(taps);
+
   // --------------------------------------------------------------- midi
   useEffect(() => {
     const offs = [midi.onConnectionChange(bump), midi.onClockModeChange(bump)];
@@ -318,6 +333,7 @@ export default function DevSpineView() {
           ],
         ],
         ['midi timing', timingRows(stats)],
+        ['taps', [...tapRows(tapSummary), ['offsets (ms)', taps.map((o) => o.toFixed(1)).join(' ') || 'none']]],
       ],
       ports:
         probe.kind === 'open'
@@ -436,6 +452,14 @@ export default function DevSpineView() {
         <p data-out-of-range={outOfRange} className="text-xs text-muted">
           {LABELS.outOfRange(outOfRange)}
         </p>
+      </Panel>
+
+      <Panel id="taps" title={TAP_LABELS.panel}>
+        <p className="text-xs text-muted">{running ? TAP_LABELS.hint : TAP_LABELS.stopped}</p>
+        <Rows hook="taps" rows={tapRows(tapSummary)} />
+        <button type="button" data-taps-reset disabled={taps.length === 0} onClick={() => setTaps([])} className={`self-start ${buttonClass}`}>
+          {TAP_LABELS.reset}
+        </button>
       </Panel>
 
       <Panel id="midi" title={LABELS.panels.midi}>

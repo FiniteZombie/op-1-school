@@ -77,6 +77,17 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 | Windows 11 laptop, Chrome 155, built-in speakers | `output-timestamp` | 49.8–52.6 | 40.0 | 10.0 | 2026-10-22 |
 | Android phone, Chrome, Pages URL, phone speaker | `output-timestamp` | 28.8 | 24.0 | 5.0 | 2026-10-23 |
 
+### Tap offsets
+
+From `/dev/spine`'s **taps** panel: 16 key-downs on the beat with the loop
+running, uncalibrated, through the same `offsetMs` the drills use. Positive
+is late. The touch median is the bias levels A0 and A6 must absorb until
+calibration (Phase 3); the Field's says whether `audibleAt` lines up with
+what you hear (a human lands within about ±20 ms of a beat they can hear).
+
+| Device and browser | Input | Median (ms) | Spread, IQR (ms) | Date |
+| --- | --- | --- | --- | --- |
+
 ### MIDI clock out
 
 | Device and browser | Headroom min / p5 / p50 (ms) | Late sends | Loopback \|error\| p50 / p95 (ms) | Date |
