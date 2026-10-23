@@ -12,20 +12,37 @@ log results, with no cable required.
 
 | Row | Name | Kind | Model | Branch | Merge order | Status | Commit |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| S1a | Spine contracts | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
-| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | **Next** | |
-| L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | | |
-| L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | | |
-| L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | | |
+| S1a | Spine contracts | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | `14ec998` |
+| S1b | Spine audio and input | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
+| L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | **Next** | |
+| L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | **Next** | |
+| L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | **Next** | |
 | S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | | |
 | G | Exit gate (**attended**) | step | — | `main` | — | | |
 
 ### Carried forward
 
-- **S1a → S1b:** `docs/MODULE_CONTRACT.md` **Drills** states decision 7's
-  rule without a function name ("convert the note's `performance.now()` time
-  to the audio time heard then"); S1b names `heardAudioTime` there when it
-  adds it, and adds decision 12 (`MidiConnect`) to the same page.
+- **S1b → L1, L2:** `qualityFamily` is in `src/theory/chords.ts` (and the
+  barrel) with `QUALITY_FAMILIES` (`maj7`, `7`, `m7`, `m7b5`, `sus`) and
+  the `QualityFamily` type; use the list for A3's buttons.
+- **S1b → L2:** `tapWindow(source, calibrated?, offsets?)` and
+  `tapVerdict(offsetMs, source, calibrated, offsets?)` take the measurements
+  as an optional last argument: L2's tests pass their own there, never
+  `TAP_OFFSETS`. Edges are inclusive (a 1e-9 ms epsilon absorbs float error).
+  `heardAudioTime(perfTs, clock)` needs only `audibleAt` and `perfToAudio`,
+  so `FakeClockBridge` works.
+- **S1b → L2:** `<MidiConnect />` takes only `className`. It opens its own
+  `MIDIAccess` (after the bridge's is granted, so no second prompt) to count
+  messages on every input; picking calls `midi.select(id, keptOutput)`, and
+  tapping the chosen input clears it. It isn't rendered anywhere yet: L2 puts
+  it under the `AudioGate`, and that is its first browser check.
+- **S1b → S2:** `docs/MODULE_CONTRACT.md`'s `useSpine()` / UI list doesn't
+  name `Keyboard24`'s `guide` prop, the touch voice or `tapVerdict` (S1b
+  owned the MidiConnect part of that page only); S2 adds them.
+- **S1b → G:** the touch voice (`src/audio/NoteVoice.ts`) is a placeholder
+  patch (triangle `PolySynth`, -18 dB, under the chords' -14). Spine-built,
+  never disposed, voices `touch` only once audio runs, and releases its notes
+  when audio stops running. G re-measures touch tap offsets with it on.
 - **S1a → L1:** the loader (`src/curriculum/build.ts`, pure, and `index.ts`)
   checks shape, duplicate ids per kind and `loadProgression` only. It doesn't
   check a lesson's file name against its id, a drill step's `mode` against
@@ -60,6 +77,17 @@ log results, with no cable required.
 - S1a: on `/dev/spine?dev`, `get_page_text` right after `navigate` can read
   the page before the lazy view mounts (only the nav and status bar); waiting
   a second, or reading `main` from the console, shows it.
+- S1b: the row's Owns gives `docs/MODULE_CONTRACT.md` "MidiConnect only",
+  while Carried forward asked S1b to name `heardAudioTime` there too; both
+  went into **Drills**, nothing else on that page.
+- S1b: `/dev/spine` (not S1b's) has no `MidiConnect`, so S1b's browser check
+  can't exercise it; it is unit-tested over `FakeMidiAccess` and the real
+  `WebMidiBridge`.
+- S1b: decision 6 names `tapWindow(source)`; it also takes `calibrated` and
+  the measurements, since `tapVerdict` needs both.
+- S1b: a Bash heredoc with an empty `python -` heredoc hung until the 120 s
+  timeout (probably the Windows Store `python` stub waiting); scripted edits
+  went to Node files in the scratchpad. A stray no-op line, not a needed step.
 
 ## How this plan runs
 

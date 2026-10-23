@@ -125,6 +125,11 @@ Push back before breaking one.
   `docs/MODULE_CONTRACT.md`. The router keeps `dev`, and `fast` only
   alongside it; `/` is the `runner` module once one is registered.
   Curriculum JSON is read only through `src/curriculum/index.ts`.
+- The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
+  `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest
+  Android row per input). `tapWindow.test.ts` parses that table and fails when
+  the two differ, so a new measurement updates both in one commit. Drill tests
+  inject their own measurements rather than read `TAP_OFFSETS`.
 - The build copies `dist/index.html` to `dist/404.html` so GitHub Pages serves
   the app shell for deep links.
 - `docs/` holds owner docs; `.agents/` holds agent notes. Every change updates

@@ -4,6 +4,7 @@ import {
   KEY_COUNT,
   MIN_KEY_PX,
   PointerTracker,
+  guideKeys,
   keyboardLayout,
   litKeys,
   locateNote,
@@ -117,5 +118,29 @@ describe('PointerTracker', () => {
     expect(t.up(3)).toBeNull();
     expect(t.releaseAll()).toEqual([53]);
     expect(t.up(1)).toBeNull();
+  });
+});
+
+describe('guideKeys', () => {
+  // Two octaves up from F3 (53): C is pitch class 0, at indices 7 (C4 = 60) and 19 (C5 = 72).
+  const layout = keyboardLayout({ width: 2000, baseNote: 53 });
+
+  it('marks every unlit key of the guide pitch classes', () => {
+    const marked = guideKeys(layout, new Map(), [0, 7]);
+    const notes = [...marked].map((i) => 53 + i).sort((a, b) => a - b);
+    expect(notes).toEqual([55, 60, 67, 72]); // G3, C4, G4, C5
+  });
+
+  it('leaves lit keys unmarked', () => {
+    const lit = litKeys([60, 67], layout);
+    const marked = guideKeys(layout, lit, [0, 7]);
+    expect([...marked].map((i) => 53 + i).sort((a, b) => a - b)).toEqual([55, 72]);
+  });
+
+  it('marks nothing with no guide, and only visible keys in one-octave mode', () => {
+    expect(guideKeys(layout, new Map(), []).size).toBe(0);
+    const one = keyboardLayout({ width: 360, baseNote: 53, half: 1 });
+    const marked = guideKeys(one, new Map(), [0]);
+    expect([...marked]).toEqual([19]);
   });
 });

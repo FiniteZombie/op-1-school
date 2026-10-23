@@ -174,10 +174,17 @@ launched by URL, and reports by writing one `Attempt`.
   started, `finishedAt` the attempt's `at`, and `scores` `{ <mode>: score }`
   when scored (`{}` when not).
 - **Which slot a played note answers** is the slot heard when it was played:
-  convert the note's `performance.now()` time to the audio time heard then,
-  and take `slotAtAudioTime(transport, prepared, t)` from
-  `src/audio/voicing.ts`. Scorers never call the synth's `currentSlot()`, so
+  `heardAudioTime(e.perfTs, spine.clock)` (`src/audio/Clock.ts`, the inverse
+  of `audibleAt` on both clock paths) gives the audio time heard then, and
+  `slotAtAudioTime(transport, prepared, t)` from `src/audio/voicing.ts` its
+  slot. Scorers never call the synth's `currentSlot()`, so
   their tests stay Tone-free. There's no grace window into the next slot.
+- **Connecting the Field** is `<MidiConnect />` (`src/ui/MidiConnect.tsx`),
+  under the `AudioGate`: `connect midi` asks for access on the tap, then each
+  input is a button labelled by the messages it has delivered, never by name
+  (VERIFY V7), and the player picks the one that counts up when they play. The
+  choice goes through `midi.select`, which remembers it. A module builds no
+  port picker of its own.
 
 ## Fakes for Module 3
 

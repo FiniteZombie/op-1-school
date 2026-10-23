@@ -152,3 +152,23 @@ export function chordName(chord: Chord, key?: Key): string {
   const bass = chord.bass !== undefined && chord.bass !== chord.root ? `/${noteName(chord.bass, key)}` : '';
   return `${noteName(chord.root, key)}${QUALITY_SUFFIX[chord.quality]}${bass}`;
 }
+
+/** The five chord-quality families A3 asks about (plan S1b). */
+export const QUALITY_FAMILIES = ['maj7', '7', 'm7', 'm7b5', 'sus'] as const;
+export type QualityFamily = (typeof QUALITY_FAMILIES)[number];
+
+/** A3's family of a quality: `sus2`/`sus4` → `sus`, the four sevenths as themselves, anything else null. */
+export function qualityFamily(quality: ChordQuality): QualityFamily | null {
+  switch (quality) {
+    case 'maj7':
+    case '7':
+    case 'm7':
+    case 'm7b5':
+      return quality;
+    case 'sus2':
+    case 'sus4':
+      return 'sus';
+    default:
+      return null;
+  }
+}

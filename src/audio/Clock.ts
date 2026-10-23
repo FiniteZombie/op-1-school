@@ -188,6 +188,19 @@ export function fitLine(pairs: readonly ClockCorrelation[]): { slope: number; in
 }
 
 /**
+ * The audio time being heard at `perfTs`: the inverse of `audibleAt`, on
+ * either path (plan decision 7: a played note answers the slot heard when it
+ * was played). `audibleAt` is affine in audio time on both paths, so one
+ * Newton step from `perfToAudio(perfTs)` is exact.
+ */
+export function heardAudioTime(perfTs: number, clock: Pick<ClockBridge, 'audibleAt' | 'perfToAudio'>): number {
+  const t0 = clock.perfToAudio(perfTs);
+  const at0 = clock.audibleAt(t0);
+  const msPerSec = clock.audibleAt(t0 + 1) - at0;
+  return t0 - (at0 - perfTs) / msPerSec;
+}
+
+/**
  * SPEC §3.3: `perfTs − clock.audibleAt(tAudio) − calibrationMs`. Positive is
  * late. `calibrated` is whether a calibration was given (for
  * `TimingOffset.calibrated`).
