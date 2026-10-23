@@ -1,0 +1,33 @@
+// All placeholder copy (plan "Placeholders"), lowercase; the owner changes it later.
+
+export const LABELS = {
+  today: 'today',
+  startSession: 'start session',
+  resumeSession: 'resume session',
+  next: 'next',
+  skip: 'skip',
+  openDrill: 'open drill',
+  stub: 'arrives in a later phase',
+  streak: (n: number) => `streak ${n}`,
+  recent: 'recent',
+  library: 'library',
+  back: 'back',
+  export: 'export',
+  copied: 'copied',
+  summaryText: 'summary text',
+  locked: 'locked',
+  noLessons: 'no lessons yet',
+  sessionDone: 'session done',
+  cantSave: "can't save progress",
+  vectorHeading: (v: string) => v.toLowerCase(),
+  // beyond the plan's list:
+  loading: 'loading',
+  done: 'done',
+  skipped: 'skipped',
+  unfinished: 'unfinished',
+  practice: 'practice',
+  open: 'open',
+  noRecent: 'no sessions yet',
+  minutes: (n: number) => `${n} min`,
+  step: (i: number, n: number) => `step ${i} of ${n}`,
+} as const;
