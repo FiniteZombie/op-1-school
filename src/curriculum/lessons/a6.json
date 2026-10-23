@@ -1,0 +1,40 @@
+{
+  "id": "a6",
+  "vector": "A",
+  "level": 6,
+  "title": "target-note phrasing",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "aim, then land",
+      "body": "Play a 2-bar phrase that *ends* on the 3rd of the next chord, landing on beat 1. The targets are the downbeats of bars 1 and 3. Pick the landing note first, then work backwards.\n\nIn G major, a phrase over bars 1 and 2 lands on bar 3's `Em7`: its 3rd is G."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A6",
+      "minutes": 2,
+      "progressionId": "pop-g-major",
+      "params": {
+        "form": "phrase"
+      }
+    },
+    {
+      "kind": "card",
+      "title": "call and response",
+      "body": "Now the jam shape: play bars 1 and 2 and land on bar 3's downbeat, rest for the rest of bar 3, then play a short turnaround in bar 4 into the top of the loop. A note during the rest breaks it.\n\nIn F minor, a phrase over bars 1 and 2 lands on bar 3's `Fm7`: its 3rd is A♭."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A6",
+      "minutes": 2,
+      "progressionId": "turnaround-f-minor",
+      "params": {
+        "form": "call-response"
+      }
+    }
+  ]
+}

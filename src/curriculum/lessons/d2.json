@@ -1,0 +1,15 @@
+{
+  "id": "d2",
+  "vector": "D",
+  "level": 2,
+  "title": "element lfo to nitro and filter",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "movement from the g source",
+      "body": "Use the Element LFO with the G source to move Nitro or the filter, so a held part breathes instead of sitting still (field steps: VERIFY).\n\nKeep the movement slow against the loop: a cycle every 2 or 4 bars sits with the Push; faster turns into a wobble."
+    }
+  ]
+}

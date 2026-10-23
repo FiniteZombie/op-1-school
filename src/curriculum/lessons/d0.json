@@ -2,8 +2,19 @@
   "id": "d0",
   "vector": "D",
   "level": 0,
-  "title": "placeholder seed d0",
+  "title": "tape speed tricks",
   "minutes": 6,
   "scored": false,
-  "steps": [{ "kind": "card", "title": "placeholder seed card", "body": "placeholder seed text." }]
+  "steps": [
+    {
+      "kind": "card",
+      "title": "lock the tape to the jam",
+      "body": "Set the Field to **sync** (Tempo, then the green encoder) and turn on the app's clock out: `start` in the app starts the Field's tape at the app's tempo. In sync with clock in enabled, the tape speed follows the external clock too.\n\nNow the tape is part of the band, not a separate recorder."
+    },
+    {
+      "kind": "card",
+      "title": "bend the tape",
+      "body": "Change the tape speed to drop a recorded part an octave, or to slow it into a wind-down at the end of a section. Try it on a 4-bar loop of chords first (field steps: VERIFY)."
+    }
+  ]
 }

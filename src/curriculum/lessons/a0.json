@@ -2,11 +2,21 @@
   "id": "a0",
   "vector": "A",
   "level": 0,
-  "title": "placeholder seed a0",
+  "title": "hear the harmonic rhythm",
   "minutes": 4,
   "scored": true,
   "steps": [
-    { "kind": "card", "title": "placeholder seed card", "body": "placeholder seed text: tap each time the chord changes." },
-    { "kind": "drill", "module": "progression-trainer", "mode": "A0", "minutes": 3, "progressionId": "seed-cmajor" }
+    {
+      "kind": "card",
+      "title": "where the chord turns",
+      "body": "Before you can play over a progression you have to *feel* where it turns. A chord change is the moment the harmony moves under you.\n\n- Listen to the bass and the chords, not the drums.\n- Tap the pad on the beat the new chord arrives, not when you notice it.\n- It starts slow, 8 beats per chord, and speeds up to 4 and then 2 as you land the changes.\n\nThis loop is C major, four chords: `I V vi IV`."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A0",
+      "minutes": 3,
+      "progressionId": "pop-c-major"
+    }
   ]
 }

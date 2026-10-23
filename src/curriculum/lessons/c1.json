@@ -1,0 +1,21 @@
+{
+  "id": "c1",
+  "vector": "C",
+  "level": 1,
+  "title": "hum and match",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "find the sample's note",
+      "body": "Load a sample, hum its main pitch, and let the app find the note you hummed. Then shift the sample so that note sits in the backing's key.\n\nThe mic needs headphones on the phone, or the Field as the output: with the phone's speaker on, the mic hears the app's own sound."
+    },
+    {
+      "kind": "drill",
+      "module": "sample-flip",
+      "mode": "C1",
+      "minutes": 4
+    }
+  ]
+}

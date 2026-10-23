@@ -1,0 +1,22 @@
+{
+  "id": "a5",
+  "vector": "A",
+  "level": 5,
+  "title": "guide tones",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "two fingers, 3rd and 7th",
+      "body": "Put one finger on the chord's 3rd and one on its 7th. On each change, move each finger to the nearest 3rd or 7th of the next chord: a half step, a whole step, or not at all.\n\nIn C major, `Dm7` to `G7`: F and C become F and B. C falls a half step to B, F stays.\n\nA bar counts when you play both guide tones of its chord. The keys show chord tone, tension or avoid as you play. After the drill, the voice-leading map shows every move in the loop."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A5",
+      "minutes": 3,
+      "progressionId": "turnaround-c-major"
+    }
+  ]
+}
