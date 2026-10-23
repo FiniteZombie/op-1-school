@@ -56,7 +56,7 @@ A module may import from:
 
 - `src/types/`
 - `src/theory/`
-- `src/audio/`
+- `src/audio/` (including `src/audio/__fakes__/` in tests)
 - `src/input/` (including `src/input/__fakes__/` in tests)
 - `src/state/`
 - `src/ui/`
@@ -74,12 +74,9 @@ It may not import another module, `src/modules/registry.ts`, `src/App.tsx` or
 `importRule.ts` beside it) by reading every file under `src/`. It fails the
 build, so `npm run check` catches a break.
 
-**Import theory by its `index` file.** The checker rejects a bare barrel
-import from a module: `'../../theory'` fails, because a one-segment target
-isn't classed as spine. Write `'../../theory/index'`, as `dev-spine` does. Other
-spine directories have no barrel, so import their files by name
-(`'../../audio/VirtualPushSynth'`). A fix to the checker is a spine request
-the owner settles; don't edit it.
+**Import theory from its barrel**, `'../../theory'`, as `dev-spine` does.
+Other spine directories have no barrel, so import their files by name
+(`'../../audio/VirtualPushSynth'`).
 
 ## Spine changes
 
@@ -118,7 +115,7 @@ Other spine pieces a module uses:
   Call `transport.configure(transportConfigFor(progression))` before
   `synth.load(progression)`. Stop the transport on unmount if you started it.
 - **Theory.** `classify`, `realize`, `loadProgression`, `chordName`,
-  `noteName` and the rest, from `src/theory/index`. The roman-numeral grammar
+  `noteName` and the rest, from `src/theory`. The roman-numeral grammar
   is in the doc comment of `realize` in `src/theory/progressions.ts`, and
   degree names are `degreeName` in the same file; read those, not a copy here.
   They differ on purpose: `/<degree>` in a numeral is a degree of the key's mode, while
@@ -141,13 +138,14 @@ Other spine pieces a module uses:
 
 ## Fakes for Module 3
 
-Pocket Dojo's timing tests run on the fakes in `src/input/__fakes__/`. They
+Pocket Dojo's timing tests run on the fakes in `src/input/__fakes__/` and
+`src/audio/__fakes__/`. They
 are app-typed (no Node types) and Tone-free; keep them so.
 
 - `FakeMidiPort.ts`: `FakeMidiOutput` (records `[data, timestamp]`),
   `FakeMidiInput` (`emit`), `FakeMidiAccess` (`plug` / `unplug`), and
   `fakeMidiNavigator(access | null)`.
-- `FakeTransport.ts`: `createFakeTransport()`, a real `TransportCore` over
+- `src/audio/__fakes__/FakeTransport.ts`: `createFakeTransport()`, a real `TransportCore` over
   `FakeTransportDriver.advanceTo(t)`, which hands out every pulse due by
   `t + lookAhead` like Tone; and `FakeClockBridge(originMs, latencySec)`.
 

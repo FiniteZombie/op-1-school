@@ -1,6 +1,6 @@
 # Phase 1 spine — run (2026-10-22)
 
-**Status:** not reviewed yet. Run `/retro` with the owner.
+**Status:** reviewed with the owner on 2026-10-22.
 
 Branch `phase-1-spine`, from `main` at 92ea236 (Spine 1: scaffold). The
 pre-flight (dc6ac78) and row 2 (e9ff2eb) ran in a local session on the
@@ -446,3 +446,72 @@ had asked for the branch to be pushed anyway.
 6. **Consider a virtual MIDI loopback for unattended MIDI checks.** It needs
    the owner's OK to install a program; it would make clock out, follow and
    jitter checkable before the Field is in hand.
+
+---
+
+## Review (2026-10-22)
+
+Done remotely: the owner wasn't at the laptop, so nothing new was checked on
+hardware. The laptop checks above, from earlier that day, stand.
+
+### Answers
+
+- **Placeholders, for the whole project:** fine as built. The owner asks for
+  changes to anything they don't like. That covers the palette and
+  classification shades, the power warning's `dismiss` and `!`, the keyboard
+  details, the StatusBar, every sound setting, half-slot bass in short slots,
+  the contract's wording and the Phase 3 checklist figures.
+- **Lower-case `maj7`:** stays plain maj7, as built. mMaj7 prints `CmMaj7`.
+- **Slash bass as a tension, not a chord tone:** kept.
+- **`/dev/spine` labels and icon:** settled as built; the `placeholder`
+  markers went.
+- **Remember clock out between loads:** no. `settings.clockOut` is deleted.
+- **BPM encoder while following:** disabled.
+- **Decisions the plan didn't cover:** all kept except `clockContextOf`,
+  which spine request A replaced.
+
+### Spine requests
+
+All three were accepted and landed as plan row 11 (Retro fixes), done in this
+session. The exit gate is now row 12.
+
+- **A.** `getAudioContext()` builds Tone's context over a native
+  `AudioContext`, `getNativeAudioContext()` feeds the clock, and
+  `src/ui/clockContext.ts` is gone. The retro walkthrough flagged a risk with
+  Tone's worklet nodes on a native context. It doesn't hold: Tone 15's
+  `createAudioWorkletNode` picks the native constructor for a native
+  context. The browser pane showed `getOutputTimestamp` and `outputLatency`
+  present, path `output-timestamp` after start, chords Gdim → C7 → Fm → D♭,
+  and no console errors.
+- **B.** The import rule treats `'../../theory'` as the barrel. `dev-spine`,
+  `MODULE_CONTRACT.md` and `AGENTS.md` use the bare import. A bare module
+  directory (`'../beta'`) is now reported as another module.
+- **C.** `PulseClockFollower` fits a least-squares line through 96 pulses,
+  and its confidence is how well the window's halves agree. The retro only
+  named the BPM, but the old confidence (share of intervals within ±5 % of
+  the median) would also have kept follow from engaging on bunched clock.
+  Fixtures: 0–15 ms jitter at 90 BPM, and a 15.6 ms batching timer at 120 BPM
+  (where the median interval is more than 5 % off), each read within 0.2 BPM
+  with confidence ≥ 0.8. The real proof is exit-gate check 12 with the Field.
+
+### Owner checks
+
+None new. Still open: the R9 no-ports path, and all of row 12, which gains a
+follow check (`docs/HARDWARE_NOTES.md`, exit gate check 12). Set GitHub Pages'
+source to "GitHub Actions" before row 12's push.
+
+### Recommendations
+
+| # | Recommendation | Outcome |
+| --- | --- | --- |
+| 1 | Native audio context before Phase 2 | Done: row 11, `src/audio/TransportEngine.ts`, `src/ui/spine.tsx` |
+| 2 | Import rule accepts spine barrels | Done: row 11, `src/modules/__tests__/importRule.ts`, `MODULE_CONTRACT.md`, `AGENTS.md` |
+| 3a | Cloud browser recipe in `/step` | Done: `step` skill, item 4 |
+| 3b | `/run-steps` resume path, check notes per machine | Done: `run-steps` Phase 0 items 2 and 5 |
+| 4 | Edit a decision a pre-flight answer overrides | Done: `run-steps` Phase 0 item 5, `writing-a-plan.md` (The status table) |
+| 5 | Shared audio fakes | Done: `src/audio/__fakes__/FakeTransport.ts` (moved from `src/input/__fakes__/`), used by `voicing.test.ts`. The plan rule about room in Owns was dropped as a one-off |
+| 6 | Virtual MIDI loopback | Dropped: `snd-virmidi` needs a kernel module cloud containers usually can't load, and the Field path is proven on real hardware |
+| — | Onset-time readout on `/dev/spine` | Dropped: the owner's `[ear]` check passed |
+| — | IndexedDB export→import button | Deferred: until Phase 2's progress code uses import and export |
+| — | Ask which plan only when more than one is open (row 1 process note) | Done: `AGENTS.md` Where we are, `step` item 1 |
+| — | Placeholders by default (owner, this review) | Done: `AGENTS.md` load-bearing rules, `step` item 3, `run-steps` Phase 0 item 4, `retro` walkthrough item 2, and memory |

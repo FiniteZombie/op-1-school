@@ -24,13 +24,12 @@ export const DEV_PROGRESSION: ProgressionSpec = {
     { roman: 'VI', beats: 4 },
   ],
   style: 'chillhop-rhodes',
-  // placeholder: the progression family (the plan leaves it to this row).
   family: 'dev',
 };
 
 // ------------------------------------------------------------------ labels
 
-/** placeholder: every label on the page (plan pre-flight "R9 labels"), all lowercase. */
+/** Every label on the page, all lowercase. */
 export const LABELS = {
   start: 'start',
   stop: 'stop',
@@ -57,22 +56,14 @@ export const LABELS = {
     midiTiming: 'midi timing',
     database: 'database',
   },
-  // Not in the plan's list: neutral stand-ins (row 9's report asks the owner).
-  /** placeholder: the database check's button. */
   dbCheck: 'write then read',
-  /** placeholder: the database check while it runs. */
   dbRunning: 'checking',
-  /** placeholder: the row's own text for a missing loopback. */
   noLoopback: 'no loopback',
-  /** placeholder: MIDI access states with no settled copy. */
   midiUnrequested: 'midi not requested',
   midiPending: 'waiting for midi permission',
   midiGranted: 'midi ok',
-  /** placeholder: the follower's readout. */
   follower: (bpm: number, confidence: number) => `in ${bpm > 0 ? bpm.toFixed(1) : '–'} bpm, confidence ${confidence.toFixed(2)}`,
-  /** placeholder: the keyboard's out-of-range count. */
   outOfRange: (n: number) => `out of range ${n}`,
-  /** placeholder: the log while empty. */
   logEmpty: 'no events yet',
 } as const;
 

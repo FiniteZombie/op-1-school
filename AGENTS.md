@@ -24,7 +24,8 @@ Open plans:
 Plans live in `.agents/plans/`, one per phase or spike; retros in
 `.agents/retros/`. Name each open plan here with a link and what it's for,
 never how far along it is: its status table says that. **When the owner asks
-to continue plan work without naming the plan, ask which one.**
+to continue plan work without naming the plan and more than one is open, ask
+which one.**
 
 ## Before you start a job
 
@@ -61,7 +62,9 @@ Push back before breaking one.
   classifications, radar zones and pass/fail states use blue or cyan = good,
   red = bad, yellow = warning, gray = neutral, and never differ by hue alone.
 - **Creative choices are the owner's**: copy, names, look and layout beyond
-  what the spec fixes. Use neutral, obviously temporary placeholders and ask.
+  what the spec fixes. Use neutral, obviously temporary placeholders, mark
+  them, and list them in your report rather than stopping to ask: the owner
+  is fine with placeholders and asks for changes later.
 
 ## Dependencies
 
@@ -85,8 +88,6 @@ Push back before breaking one.
 - `src/modules/__tests__/importRule.test.ts` enforces the import rule: a
   module imports only the spine, its own directory and `src/curriculum/`;
   only `src/ui/AppShell.tsx` imports `src/modules/registry.ts`.
-- A module imports theory as `'../../theory/index'`: the checker rejects the
-  bare `'../../theory'` barrel (see `docs/MODULE_CONTRACT.md`).
 - Test files never import `tone`. Pure maths lives in Tone-free files
   (`timing.ts`, `Clock.ts`, `voicing.ts`, `drumPatterns.ts`); the Tone
   wrappers stay thin and are checked on `/dev/spine`. Only
@@ -95,9 +96,9 @@ Push back before breaking one.
   file next to its component, named apart from it and not by case alone
   (`audioGateLogic.ts` beside `AudioGate.tsx`): Windows resolves imports
   case-insensitively, and `src/__tests__/fileNames.test.ts` fails on a clash.
-- Fakes for tests are in `src/input/__fakes__/` (fake MIDI ports, a fake
-  transport over the real `TransportCore`, a fake clock bridge). They stay
-  Tone-free. Settled copy is `COPY` in `src/ui/copy.ts`; anything else a page
+- Fakes for tests: `src/input/__fakes__/` (fake MIDI ports) and
+  `src/audio/__fakes__/` (a fake transport over the real `TransportCore`, a
+  fake clock bridge). They stay Tone-free. Settled copy is `COPY` in `src/ui/copy.ts`; anything else a page
   shows is a labelled placeholder until the owner decides.
 - Enum-like types come from `as const` lists next to them (`MODULE_IDS`,
   `STYLE_IDS`, …); adding a member means adding it to the list. The lesson

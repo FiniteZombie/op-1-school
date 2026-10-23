@@ -15,8 +15,8 @@ message). If an orchestrator spawned you, also read
 
 ## The steps
 
-1. **Find it.** Open the plan the owner named. If they didn't name one, ask
-   which; `AGENTS.md` **Where we are** lists the open ones. Do the row marked
+1. **Find it.** Open the plan the owner named. If they didn't name one and
+   more than one is open, ask which; `AGENTS.md` **Where we are** lists them. Do the row marked
    **Next**, or the one named. Read:
    - its row text, and the SPEC sections it cites;
    - the plan's overview and any **Pre-flight answers** (they win over the row
@@ -41,8 +41,9 @@ message). If an orchestrator spawned you, also read
 3. **Build it.**
    - Push back before going against a load-bearing rule or a resolved
      decision.
-   - A creative decision the plan doesn't make (copy, a name, a look): stop
-     and ask.
+   - A creative decision the plan doesn't make (copy, a name, a look): a
+     neutral placeholder, marked `placeholder` in a comment and listed in
+     your report.
    - A VERIFY item: stub behind the interface, never guess, and log it (the
      VERIFY log in `docs/HARDWARE_NOTES.md`, and your report).
    - A lane touches only its owned paths. If it needs a spine change, don't
@@ -54,7 +55,11 @@ message). If an orchestrator spawned you, also read
    - `npm run check` (tsc, Vitest, build) exits 0.
    - Run each Done-when item's check. Browser checks use the dev server from
      `.claude/launch.json` and `/dev/spine?dev`; read the
-     page as text and read the console.
+     page as text and read the console. With no browser pane (a cloud
+     container), the container has headless Chromium and a global
+     Playwright: a scratchpad script imports Playwright by absolute path (ESM
+     ignores `NODE_PATH`) and drives the dev server. That's a real check, not
+     an OWNER item.
    - `[phone]`, `[field]` and `[ear]` items are the owner's. Write their test
      steps; don't call them done.
 5. **Update the docs.**

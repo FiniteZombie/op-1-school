@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ClockSnapshot } from '../../../audio/Clock';
 import type { ClockStats, PortInfo } from '../../../input/MidiBridge';
-import { chordName, loadProgression } from '../../../theory/index';
+import { chordName, loadProgression } from '../../../theory';
 import { validateProgressionSpec } from '../../../types/lessons';
 import {
   DB_CHECK_ID,

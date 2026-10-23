@@ -95,8 +95,9 @@ GitHub Pages, and runs `/dev/spine?dev` on the phone and the Field.
   process; the retro reads it).
 - The phase's exit criteria (from the spec) are the plan's last Done-when list.
 - A `/run-steps` pre-flight adds a **Pre-flight answers** section. It wins over
-  the row text where they differ, so a later edit to either keeps them in
-  agreement.
+  the row text where they differ, but an answer that overrides a numbered
+  decision or a row edits that text too, and a later edit to either keeps
+  them in agreement.
 
 ## When a plan is done
 

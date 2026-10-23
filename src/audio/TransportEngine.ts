@@ -86,27 +86,35 @@ export interface TransportEngine {
 // ---------------------------------------------------------------------------
 // The audio context
 
+let nativeContext: AudioContext | null = null;
 let toneContext: Tone.Context | null = null;
 let audioInitialised = false;
 
 /**
- * The app's one Tone context, made on first call: `latencyHint: 'interactive'`,
- * `lookAhead: 0.1`, worker ticker, installed with `Tone.setContext`. Every
- * piece of spine code reaches Tone's context through here.
+ * The app's one Tone context, made on first call over a native
+ * `AudioContext` (`latencyHint: 'interactive'`), with `lookAhead: 0.1` and a
+ * worker ticker, installed with `Tone.setContext`. Every piece of spine code
+ * reaches Tone's context through here.
  *
  * Importing `tone` already creates a default context (its index reads
  * `getContext()` at load); this replaces and disposes that one.
  */
 export function getAudioContext(): Tone.Context {
   if (!toneContext) {
-    toneContext = new Tone.Context({
-      latencyHint: 'interactive',
-      lookAhead: 0.1,
-      clockSource: 'worker',
-    });
+    // Tone's own context is a standardized-audio-context wrapper with no
+    // `outputLatency` or `getOutputTimestamp()`; handing it a native one keeps
+    // both reachable for the clock (decision 7, SPEC §3.3).
+    nativeContext = new AudioContext({ latencyHint: 'interactive' });
+    toneContext = new Tone.Context({ context: nativeContext, lookAhead: 0.1, clockSource: 'worker' });
     Tone.setContext(toneContext, true);
   }
   return toneContext;
+}
+
+/** The native `AudioContext` under `getAudioContext()`, for `WebAudioClockBridge`. */
+export function getNativeAudioContext(): AudioContext {
+  getAudioContext();
+  return nativeContext as AudioContext;
 }
 
 /** Call from a user gesture: resumes the context (`Tone.start()`). Also resumes a suspended one. */

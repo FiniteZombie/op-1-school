@@ -33,6 +33,8 @@ describe('the import rule', () => {
       'modules/alpha/View.tsx',
       [
         "import { k } from '../../ui/Keyboard24';",
+        "import { realize } from '../../theory';",
+        "import { beta } from '../beta';",
         "import data from '../../curriculum/lessons/a.json';",
         "import { helper } from './helper';",
         "import React from 'react';",
@@ -54,6 +56,7 @@ describe('the import rule', () => {
         "App.tsx imports './modules/registry': only src/ui/AppShell.tsx imports the registry",
         "audio/x.ts imports '../modules/alpha/helper': nothing outside src/modules/alpha/ imports it",
         "modules/alpha/View.tsx imports '../../App': a module imports only from the spine, its own directory and src/curriculum/",
+        "modules/alpha/View.tsx imports '../beta': a module never imports another module",
         "modules/alpha/View.tsx imports '../beta/View': a module never imports another module",
         "modules/alpha/View.tsx imports '../beta/other': a module never imports another module",
         "modules/alpha/View.tsx imports '../beta/thing': a module never imports another module",

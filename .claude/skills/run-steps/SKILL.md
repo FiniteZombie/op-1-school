@@ -25,7 +25,10 @@ grill checks against).
 2. **The machine.** `git status` is clean, you're on `main`, the last plan's
    branch is merged (`git branch --no-merged main` doesn't list it),
    `npm run check` passes, and no dev server is running. If not, say so and
-   stop.
+   stop. **Resuming a plan** that already has **Pre-flight answers**: stay on
+   its branch, skip the `main` and merged checks and steps 3–5, and re-read
+   its check notes for this machine (a cloud container has no Field and no
+   phone; its browser is headless Chromium, see the `step` skill).
 3. **Grill the plan.** Spawn one fresh read-only subagent to read the plan,
    the SPEC sections it cites, `AGENTS.md`, `docs/MODULE_CONTRACT.md` and
    `.agents/writing-a-plan.md`, and list:
@@ -41,16 +44,18 @@ grill checks against).
      spine that the spine doesn't have yet;
    - anything that breaks a load-bearing rule.
 4. **Ask the owner, once.** Show the list grouped as above, each with your
-   suggested answer. Use `AskUserQuestion` for the creative calls; whatever
-   they leave open becomes a placeholder under override (b). For lanes, also
+   suggested answer. Creative calls default to placeholders under override
+   (b): list them, but the owner only answers the ones they care about. For lanes, also
    ask whether to push the branches and open PRs at the end, or keep it all
    local.
 5. **Branch, and write the answers into the plan.** `git switch -c
    <plan-slug>` from `main`, then add a `## Pre-flight answers (<date>)`
    section to the plan: the owner's calls, the
-   technical answers you settled, then check notes. Say that it wins over
-   anything that reads differently. Fix plain mistakes in the row text, and
-   when an answer renames something, fix every mention of the old name
+   technical answers you settled, then check notes, each note saying which
+   machine it holds for. Say that it wins over anything that reads
+   differently. Fix plain mistakes in the row text; when an answer overrides a
+   numbered decision or a row's text, edit that text to agree; and when an
+   answer renames something, fix every mention of the old name
    (`git grep -n '<old>' -- <plan>` hits only the answers afterwards).
 6. **Recommend a model and effort.** You can't change your own, so recommend
    and wait for the owner to switch and say go. Subagents inherit your effort;

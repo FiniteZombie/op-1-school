@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { TransportConfig } from '../../audio/TransportEngine';
 import { FakeMidiAccess, FakeMidiInput, FakeMidiOutput, fakeMidiNavigator } from '../__fakes__/FakeMidiPort';
-import { createFakeTransport, FakeClockBridge } from '../__fakes__/FakeTransport';
+import { createFakeTransport, FakeClockBridge } from '../../audio/__fakes__/FakeTransport';
 import { percentile, WebMidiBridge } from '../MidiBridge';
 
 const CFG: TransportConfig = { bpm: 120, swing: 0, bars: 4, timeSig: [4, 4] };

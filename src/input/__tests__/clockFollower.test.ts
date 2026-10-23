@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { median, MIN_INTERVALS, PulseClockFollower } from '../ClockFollower';
+import { FOLLOWER_WINDOW, median, MIN_INTERVALS, PulseClockFollower } from '../ClockFollower';
 
 /** Feeds `count` pulses `intervalMs` apart from `t0`; returns the last timestamp. */
 function feed(f: PulseClockFollower, count: number, intervalMs: number, t0 = 1000): number {
@@ -40,19 +40,62 @@ describe('PulseClockFollower', () => {
     expect(g.estimate().confidence).toBe(0);
     g.onPulse(1000 + MIN_INTERVALS * 25);
     expect(g.estimate().confidence).toBe(1);
-    expect(g.estimate().bpm).toBeCloseTo(100, 9); // seeded from the first median
+    expect(g.estimate().bpm).toBeCloseTo(100, 9);
   });
 
-  test('smooths with α = 0.2 after a tempo change', () => {
+  test('a tempo change drops confidence, then settles on the new tempo within a window', () => {
     const f = new PulseClockFollower();
-    let t = feed(f, 25, 25); // 24 intervals at 25 ms: seeded at 100 BPM
-    for (let i = 0; i < 23; i += 1) f.onPulse((t += 20));
-    // 24 × 25 ms and 23 × 20 ms: the median is still 25 ms.
-    expect(f.estimate().bpm).toBeCloseTo(100, 9);
-    f.onPulse((t += 20));
-    // 24 of each: median 22.5 ms = 111.11 BPM; the estimate moves a fifth of the way.
-    const raw = 60000 / (22.5 * 24);
-    expect(f.estimate().bpm).toBeCloseTo(100 + 0.2 * (raw - 100), 9);
+    let t = feed(f, 120, 25); // 100 BPM
+    for (let i = 0; i < 30; i += 1) f.onPulse((t += 20)); // 125 BPM
+    expect(f.estimate().confidence).toBeLessThan(0.8);
+    for (let i = 0; i < FOLLOWER_WINDOW; i += 1) f.onPulse((t += 20));
+    expect(Math.abs(f.estimate().bpm - 125)).toBeLessThanOrEqual(0.1);
+    expect(f.estimate().confidence).toBe(1);
+  });
+
+  // Windows Chrome delivered the Field's echoed clock 12.9–42 ms apart at a
+  // true 90 BPM (27.8 ms), and the old median-of-intervals read 83 BPM.
+  describe('bunched delivery', () => {
+    /** Deterministic 0..1 values, so the jitter is the same every run. */
+    function lcg(seed: number): () => number {
+      let s = seed;
+      return () => {
+        s = (s * 1664525 + 1013904223) % 2 ** 32;
+        return s / 2 ** 32;
+      };
+    }
+
+    test('0–15 ms of arrival jitter at 90 BPM reads 90 ±0.2 with confidence ≥ 0.8', () => {
+      const f = new PulseClockFollower();
+      const period = 60000 / (90 * 24);
+      const rand = lcg(7);
+      for (let i = 0; i < 200; i += 1) f.onPulse(1000 + i * period + 15 * rand());
+      const e = f.estimate();
+      expect(Math.abs(e.bpm - 90)).toBeLessThanOrEqual(0.2);
+      expect(e.confidence).toBeGreaterThanOrEqual(0.8);
+    });
+
+    test('arrivals batched on a 15.6 ms timer at 120 BPM read 120 ±0.2, where a median of intervals is off by more than 5 %', () => {
+      const f = new PulseClockFollower();
+      const period = 60000 / (120 * 24);
+      const arrivals: number[] = [];
+      for (let i = 0; i < 200; i += 1) arrivals.push(Math.ceil((1000 + i * period) / 15.6) * 15.6);
+      for (const t of arrivals) f.onPulse(t);
+      const e = f.estimate();
+      expect(Math.abs(e.bpm - 120)).toBeLessThanOrEqual(0.2);
+      expect(e.confidence).toBeGreaterThanOrEqual(0.8);
+      const intervals = arrivals.slice(1).map((t, i) => t - (arrivals[i] as number));
+      expect(Math.abs(median(intervals) - period) / period).toBeGreaterThan(0.05);
+    });
+
+    test('alternating 15 / 35 ms reads 100 BPM with full confidence', () => {
+      const f = new PulseClockFollower();
+      let t = 1000;
+      for (let i = 0; i < 120; i += 1) f.onPulse((t += i % 2 ? 15 : 35));
+      const e = f.estimate();
+      expect(Math.abs(e.bpm - 100)).toBeLessThanOrEqual(0.1);
+      expect(e.confidence).toBeGreaterThanOrEqual(0.95);
+    });
   });
 
   test('0xFA clears the history and restarts the beat count', () => {

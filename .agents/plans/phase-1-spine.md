@@ -15,7 +15,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 | 8 | UI primitives and registry | done 2026-10-22 | 39b01e5 |
 | 9 | `/dev/spine` | done 2026-10-22 | ad0c090 |
 | 10 | Fan-out docs | done 2026-10-22 | 16df9cd |
-| 11 | Exit gate (**attended**) | **Next** | |
+| 11 | Retro fixes | done 2026-10-22 | |
+| 12 | Exit gate (**attended**) | **Next** | |
 
 ### Carried forward
 
@@ -53,7 +54,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   passes the progression's key. mMaj7 prints `mMaj7` (placeholder; the plan's
   list has none). Parent-major G♭/F♯ keys spell with flats.
 - (3) Per the pre-flight suffix table, `maj7` ignores case (`imaj7` is maj7,
-  not decision 3's mMaj7), so no numeral spells mMaj7. Owner question.
+  not decision 3's mMaj7), so no numeral spells mMaj7. The owner kept it (retro review).
 - (3) SPEC §5.3's four progressions are `ProgressionSpec`s in
   `src/theory/__tests__/fixtures.ts` (`SPEC_FIXTURES`); later tests import
   them from there, as `src/audio/__tests__/voicing.test.ts` does.
@@ -62,14 +63,14 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   already makes a default context (Tone's index calls `getContext()` at
   load), so `getAudioContext()` replaces it with `Tone.setContext(ctx, true)`.
   Row 5 makes its synths after that (any Tone node made earlier binds to the
-  disposed context). The spine's clock is built over the native context
-  under Tone's, not `rawContext` itself (see row 8's `clockContextOf`).
+  disposed context). Tone's context wraps a native `AudioContext` that
+  `getAudioContext()` makes; `getNativeAudioContext()` returns it, and the
+  spine's clock is built over that (row 11).
 - (4) Names: interface `ClockBridge`, class `WebAudioClockBridge` (the
   pre-flight names no class; a same-named class would block structural
   fakes). `ToneTransport` is `TransportCore` (Tone-free, in `timing.ts`, the
-  tested logic) plus a Tone driver and the wake lock. Fakes for rows 5 and 6:
-  `new TransportCore(fakeDriver)` gives a real engine over a hand-stepped
-  `TransportDriver` (see `src/audio/__tests__/timing.test.ts`'s `FakeDriver`).
+  tested logic) plus a Tone driver and the wake lock. The shared fake is
+  `createFakeTransport()` in `src/audio/__fakes__/FakeTransport.ts`.
 - (4) Tone's transport runs **unlooped** with swing 0: Tone ticks are
   `absTick`, and the `bars` loop is `absTick % loopTicks`. Nothing uses a
   looping `Tone.Part`/`Sequence`; the backing synth schedules from
@@ -132,15 +133,14 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   back at the next slot start. A master gain is 0 while stopped (10 ms fade
   from the `stopped` time) and is set at `started`, which also applies a mask
   set while stopped.
-- (5) Known edge, unverified: `start()` while running restarts at Tone's
-  `now()`, and a note queued just after that time (a swung hat) from before
-  the restart may still sound. Row 9's `[ear]` check would hear it as a
-  stray hat on restart.
-- (5) A bass in a slot of two sixteenths or less holds half the slot (no rule
-  in the plan; owner question). Every sound parameter (envelopes, filters,
-  levels, kick pitch, note velocities, hat accent 0.7 / normal 0.35) is a
-  placeholder; `ToneBackingSynth` has never made a sound (no browser here):
-  row 9 is its first run.
+- (5) Known edge: `start()` while running restarts at Tone's `now()`, and a
+  note queued just after that time (a swung hat) from before the restart may
+  still sound. The owner heard no stray hat on three stop→start cycles
+  150 ms apart (desktop, 2026-10-22).
+- (5) A bass in a slot of two sixteenths or less holds half the slot. That
+  and every sound parameter (envelopes, filters, levels, kick pitch, note
+  velocities, hat accent 0.7 / normal 0.35) are placeholders; the owner's
+  desktop `[ear]` check passed.
 - (6) Input lives in `src/input/`: `NoteInput.ts` (`NoteInputSource`,
   `NoteBus`, and `Listeners`, the throw-safe subscriber set),
   `TouchInput.ts`, `MidiBridge.ts` (interface `MidiBridge`, class
@@ -185,7 +185,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (6) Fakes for later rows and Module 3: `src/input/__fakes__/FakeMidiPort.ts`
   (`FakeMidiOutput` records `[data, timestamp]`, `FakeMidiInput.emit`,
   `FakeMidiAccess` with `plug`/`unplug`, `fakeMidiNavigator(access |
-  null)`) and `FakeTransport.ts` (`createFakeTransport()`: a real
+  null)`) and `src/audio/__fakes__/FakeTransport.ts` (`createFakeTransport()`: a real
   `TransportCore` over `FakeTransportDriver.advanceTo(t)`, which hands out
   every pulse due by `t + lookAhead` like Tone; `FakeClockBridge(originMs,
   latencySec)`). They live under `src/` outside `__tests__`, so they're
@@ -195,9 +195,8 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   (`chromagram(samples, sampleRate)`, `estimateKey(chroma)` →
   `{ key, confidence }`) are stubs whose signatures are provisional: the
   Module 3 lane and the Phase 4 plan's first row own them by name.
-- (6) Nothing in `src/input` has touched a real Web MIDI port: row 9's
-  headless run only reached the refused-permission path (`denied`). Row 11's
-  `[field]` checks are the first run with ports.
+- (6) Real ports have run only on the owner's Windows laptop with the Field
+  (the retro's laptop checks); the phone with the Field is row 12's.
 - (7) `src/state/` API. `db.ts`: `openAppDb()` (rejects `IndexedDB is not
   available…` with no global), `upgradeDb(target, oldVersion)` over the
   `UpgradeTarget` slice, `newId()`, the record types (`Session`, `Attempt`,
@@ -210,7 +209,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   `subscribe`), `createSettings(storage)`, `SETTINGS_KEY`, `DEFAULT_SETTINGS`.
   The theme script in `index.html` reads the same key. `save` notifies only
   when a value changed; there is no cross-tab `storage` listener.
-- (7) `keyboardBaseNote` 53 is VERIFY V8's stub; `keyboardOctave` accepts any
+- (7) `keyboardBaseNote` 53 is the Field's lowest key (V8, resolved); `keyboardOctave` accepts any
   integer, and `Keyboard24` applies it unclamped (nothing sets it yet). Add-ons to the plan: calibration
   `computeCalibration(offsets, { source, device, outputLatencyMs,
   measuredAt? })` returns the record; `getCalibration`, `putCalibration` and
@@ -223,7 +222,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   on the next load, with no update prompt. Fine while everything is in one
   bundle.
 - (1) OWNER: GitHub **Settings → Pages → Source** = "GitHub Actions" before
-  row 11's push.
+  row 12's push.
 
 - (8) `useSpine()` (`src/ui/spine.tsx`, inside `<SpineProvider>`, which
   `App.tsx` puts around the shell) gives `{ clock, transport, bus, midi, touch,
@@ -239,15 +238,11 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   plays sound puts it at the top. `audio.state()` is `off` / `running` /
   `paused`; `audio.start()` runs `initAudio()`, then refreshes the clock
   every 250 ms. `useAudioState()` and `useSetting(key)` are the hooks.
-- (8) The clock is `new WebAudioClockBridge(clockContextOf(rawContext))`:
-  Tone's `rawContext` is a standardized-audio-context wrapper with no
-  `outputLatency` and no `getOutputTimestamp()`, so `clockContextOf`
-  (`src/ui/clockContext.ts`) unwraps its private `_nativeAudioContext`.
-  It reaches into a library internal; the clean fix is a spine change in
-  `getAudioContext()` (make a native `AudioContext` and pass it to
-  `new Tone.Context({ context, … })`), not made here (row 4's file). Headless
-  Chromium read path `output-timestamp`, `outputLatency` 32 ms,
-  `baseLatency` 10 ms, gap 42.4 ms: not a device measurement, not recorded.
+- (8) The clock is `new WebAudioClockBridge(getNativeAudioContext())`: a
+  standardized-audio-context wrapper (Tone's default) has no
+  `outputLatency` and no `getOutputTimestamp()`. Tone 15 accepts the native
+  context everywhere, worklets included (`createAudioWorkletNode` picks the
+  native constructor for one).
 - (8) Copy lives in `src/ui/copy.ts` (`COPY`): every settled string, plus
   placeholders `dismiss` (power warning), `octave 1` / `octave 2` (keyboard
   toggle, naming the octave shown), `<n> bpm` (StatusBar) and the theme
@@ -286,41 +281,39 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
 - (8) The import rule is `src/modules/__tests__/importRule.test.ts` (checker
   in `importRule.ts` next to it). Packages aren't its business; it skips its
   own file, whose fixtures look like broken imports.
-- (8) `settings.clockOut` isn't applied by anything: clock out starts off
-  every load. Row 9's toggle doesn't save it either (sending clock to a
-  device on load, unasked, seemed wrong; owner question), so the setting is
-  unused.
+- (8) Clock out isn't a setting: it starts off on every load (owner, retro
+  review).
 - (9) `/dev/spine` is `src/modules/dev-spine/`: `module.ts`, `View.tsx`, and
   the pure `devSpine.ts` (`DEV_PROGRESSION`, `LABELS`, `bpmFromEncoder`,
   `midiPanelView`, `clockRows`, `timingRows`, `appendCapped`, `runDbCheck`)
-  with its test. Every label is in `LABELS`, marked `placeholder`; settled
+  with its test. Every label is in `LABELS`; settled
   MIDI copy comes from `COPY`. Panels carry `data-panel` and readouts
   `data-*` hooks (`data-current-chord`, `data-readout="clock"`,
   `data-midi-status`, `data-db-result`, `data-log`, `data-toggle=…`,
   `data-transport`) for scripted checks.
 - (9) The page builds one `ToneBackingSynth` per mount, configures the
   transport from `DEV_PROGRESSION` only if it is stopped, and stops the
-  transport on unmount. The BPM encoder stays enabled in follow mode, where
-  follow can move the BPM under it (the encoder shows the configured BPM,
-  clamped to 60–160; a turn is overwritten by the next estimate). The current chord is `currentSlot(currentTime)` polled every
+  transport on unmount. The BPM encoder is disabled while following. The current chord is `currentSlot(currentTime)` polled every
   250 ms, so it can lag a change by up to 250 ms.
-- (9) OWNER, /retro: the import-rule checker rejects a bare `'../../theory'`
-  barrel import from a module, so modules import `'../../theory/index'`
-  (stated in `docs/MODULE_CONTRACT.md` and `AGENTS.md`). A checker fix is a
-  spine request for the owner to settle; when it lands, update both docs.
 - (9) Headless Chromium refused `requestMIDIAccess` (the page shows `midi
   permission denied`); the no-ports `no midi` path and the pickers, clock out
   and follow with real ports have only run in Vitest (`midiPanelView`) and
-  are row 11's `[field]` checks.
+  are row 12's `[field]` checks.
 - (10) `docs/MODULE_CONTRACT.md` is written and `docs/HARDWARE_NOTES.md` has the
-  Phase 3 checklist and row 11's checks as numbered steps with blanks (all
-  open: this run had no MIDI hardware and no phone). Row 11 fills the blanks,
+  Phase 3 checklist and row 12's checks as numbered steps with blanks (all
+  open: this run had no MIDI hardware and no phone). Row 12 fills the blanks,
   the VERIFY log and **Platform measurements** there.
 - (10) Placeholders for the owner: the contract's wording and the checklist
   figures (a 30-minute drain test in Phase 3 step 5) are mine, not settled.
 - (10) The contract says `src/curriculum/` is created in Phase 2; the
   Phase 2 curriculum lane should add it to the contract's import list as
   existing and drop the "doesn't exist yet" sentence.
+- (11) `PulseClockFollower` reads BPM from a least-squares line through the
+  last 96 pulse timestamps (four beats), and confidence from how well the
+  window's halves agree on the period (0 at 5 % apart). A gap over 1.75 mean
+  periods counts as dropped pulses. Follow engages once a window of bunched
+  clock fills (about 2.7 s at 90 BPM); a tempo change drops confidence until
+  the window holds the new tempo.
 
 ### Process notes
 
@@ -450,7 +443,7 @@ smoke page the owner runs on the phone and the Field. Written 2026-10-22.
   on the `phase-1-spine` branch. SPEC §6.1 asks for one agent in one session;
   this plan replaces that with one row per subagent, and Carried forward and
   the handoffs carry the context between rows.
-- **Row 11 is attended**, after `/retro` and after the owner merges the plan
+- **Row 12 is attended**, after `/retro` and after the owner merges the plan
   branch into `main`.
 - Nothing in this plan starts a module other than `dev-spine` (SPEC §6.1).
 
@@ -539,7 +532,7 @@ are under [The owner's calls](#the-owners-calls).
     the phone in Firefox gets the unplugged path and the "not available"
     copy. Nothing branches on the browser: no `requestMIDIAccess` means
     `unsupported`, a refused prompt means `denied`. Dev checks run in the
-    Chromium browser pane; row 11 adds the owner's Firefox checks.
+    Chromium browser pane; row 12 adds the owner's Firefox checks.
 
 ## The owner's calls
 
@@ -683,7 +676,7 @@ found it the most underspecified row. R7 and R10 stay on Sonnet 5.5.
   (BPM 30–300, swing 0–1, bars ≥ 1, `[n, 4]`).
 - `onStateChange` states are `'started' | 'stopped'`; `started` fires before
   the tick-0 `onBeat` and `onMidiPulse`.
-- Wake lock has no unattended check: it is R11's `[phone]` lock-screen item.
+- Wake lock has no unattended check: it is R12's `[phone]` lock-screen item.
 - The Tone-free grep, used in R4 and again in R5 and R6:
   `git grep -n --untracked -e "from 'tone'" -e 'from "tone"' -e "import 'tone'"
   -- 'src/*/__tests__' src/audio/Clock.ts src/audio/timing.ts
@@ -780,7 +773,7 @@ found it the most underspecified row. R7 and R10 stay on Sonnet 5.5.
   clock. R9's "no MIDI" check uses the refused-permission path (`midi
   permission denied`), which holds whether or not the Field is visible. If an
   agent does see a port, it reports the name under VERIFY items and doesn't
-  write it into the log as a result; the owner confirms it in R11. If the
+  write it into the log as a result; the owner confirms it in R12. If the
   browser pane's permission prompt blocks, that item is OWNER.
 - The orchestrator runs `git add -N .` before `git diff --check`, so new
   files are checked too.
@@ -849,7 +842,7 @@ Done when:
       has no errors.
 - [ ] `package.json` lists exactly the 14 packages above.
 - [ ] OWNER: GitHub repo **Settings → Pages → Source** is "GitHub Actions"
-      (needed before row 11's push; optional now).
+      (needed before row 12's push; optional now).
 
 ### 2. Types
 
@@ -1056,7 +1049,7 @@ Done when:
       moves it less than 0.1 BPM; with 10 pulses its confidence is 0.
 - [ ] Vitest: calling each stub throws `NotImplementedError`.
 
-The `[field]` checks for MIDI are row 11's.
+The `[field]` checks for MIDI are row 12's.
 
 ### 7. State
 
@@ -1202,7 +1195,7 @@ Done when:
       lag at swing 0.5 and sit straight at 0; masking bass leaves drums and
       chords.
 
-The `[phone]` checks are row 11's.
+The `[phone]` checks are row 12's.
 
 ### 10. Fan-out docs
 
@@ -1217,7 +1210,7 @@ Model: Sonnet 5.5. Owns: `docs/MODULE_CONTRACT.md`, `docs/HARDWARE_NOTES.md`,
   owner`; the roman-numeral grammar and degree names (decisions 3 and 4)
   pointed at by doc comment, not copied.
 - `HARDWARE_NOTES.md`: the Phase 3 hardware checklist from SPEC §6.3, and the
-  row 11 checks below as numbered steps with blanks for results.
+  row 12 checks below as numbered steps with blanks for results.
 - `AGENTS.md`: the table's `once it exists` qualifiers go; anything rows 2–9
   left in Carried forward that every future agent needs.
 
@@ -1228,7 +1221,48 @@ Done when:
 - [ ] `MODULE_CONTRACT.md` names every path a module may import from and
       nothing that doesn't exist (each path checked with `git ls-files`).
 
-### 11. Exit gate (attended)
+### 11. Retro fixes
+
+Added and done in the phase 1 `/retro` session (2026-10-22), from the spine
+requests and answers in `.agents/retros/2026-10-22-phase-1-spine.md`.
+Model: Opus 5.5. Owns: `src/audio/TransportEngine.ts`, `src/audio/Clock.ts`,
+`src/audio/__fakes__/` (`FakeTransport.ts`, moved from `src/input/__fakes__/`),
+`src/audio/__tests__/voicing.test.ts`, `src/ui/spine.tsx`,
+`src/ui/clockContext.ts` (deleted), `src/ui/__tests__/uiLogic.test.ts`,
+`src/modules/__tests__/importRule*.ts`, `src/input/ClockFollower.ts`,
+`src/input/__tests__/`, `src/state/settings.ts` and its test,
+`src/modules/dev-spine/`, `docs/MODULE_CONTRACT.md`, `AGENTS.md`.
+
+- `getAudioContext()` builds Tone's context over a native `AudioContext`;
+  `getNativeAudioContext()` feeds `WebAudioClockBridge`, and
+  `clockContextOf` goes.
+- The import rule treats a bare spine directory (`'../../theory'`) as its
+  barrel; modules import theory that way.
+- `PulseClockFollower` fits a line through the pulses instead of taking the
+  median interval: on Windows Chrome the Field's clock arrives 12.9–42 ms
+  apart at a true 27.8 ms, and the median read 83 BPM at 90.01 and 155 at
+  120.04.
+- `createFakeTransport()` moves to `src/audio/__fakes__/`, and
+  `voicing.test.ts` uses it instead of its own copy.
+- `settings.clockOut` goes; the `/dev/spine` BPM encoder is disabled while
+  following; the `/dev/spine` labels and icon are settled as built.
+
+Done when:
+
+- [ ] `npm run check` exits 0.
+- [ ] Vitest: pulses with 0–15 ms of arrival jitter at 90 BPM, and pulses
+      batched on a 15.6 ms timer at 120 BPM, read within 0.2 BPM with
+      confidence ≥ 0.8; the batched case's median interval is off by more
+      than 5 %.
+- [ ] Vitest: the import rule passes `'../../theory'` from a module and
+      rejects `'../beta'`.
+- [ ] Browser, dev server: on `/dev/spine?dev` the clock panel shows
+      `getOutputTimestamp` and `outputLatency present` `yes`; after start
+      the path reads `output-timestamp`, the chord steps Gdim, C7, Fm, D♭,
+      and the console has no errors.
+- [ ] `[field]` is row 12's: follow locks to the Field's clock.
+
+### 12. Exit gate (attended)
 
 After `/retro` and the owner's merge of `phase-1-spine` into `main`. SPEC
 §6.1's exit criteria, run by the owner with `/step`.
@@ -1255,6 +1289,9 @@ Done when:
 - [ ] `[field]` Field in **sync**, clock out on: the Field follows the app's
       tempo. Record headroom stats (and loopback numbers, if the Field echoes
       clock) in **Platform measurements**.
+- [ ] `[field]` the Field sending clock, the app's clock out off, `follow`
+      on: the follower reads the Field's tempo within 0.5 BPM with confidence
+      ≥ 0.8, and the transport BPM follows it.
 - [ ] OWNER, Firefox desktop: `/dev/spine?dev` from the Pages URL; the loop
       plays and keys light. Accept the MIDI add-on prompt, pick the Field's
       port, and see its notes light. Record the clock readout in **Platform

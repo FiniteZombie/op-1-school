@@ -103,7 +103,7 @@ plugged into the phone, and writes each result in the blank.
    reaches the Field's USB input, and the phone's own speaker is silent.
    Result: ______
 
-## Exit gate checks (Phase 1, row 11)
+## Exit gate checks (Phase 1, row 12)
 
 The owner runs these from the Pages URL
 (`https://finitezombie.github.io/op-1-school/`) after merging `phase-1-spine`
@@ -142,5 +142,9 @@ so every blank is open. Page: `/op-1-school/dev/spine?dev`.
     phone and write down whether `getOutputTimestamp` already includes output
     latency. If it does, the fix to `audibleAt` is a spine request for
     Phase 2 pre-work, not a guess. Result: ______
-12. Every VERIFY item above that moved is updated in the VERIFY log.
+12. The Field sending clock, the app's clock out off, `follow` on: the
+    follower reads the Field's tempo within 0.5 BPM with confidence ≥ 0.8,
+    and the transport BPM follows it (the `bpm` encoder is greyed out).
+    Result: ______
+13. Every VERIFY item above that moved is updated in the VERIFY log.
     Result: ______

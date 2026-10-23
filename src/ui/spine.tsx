@@ -17,14 +17,20 @@
  */
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from 'react';
 import { WebAudioClockBridge, type ClockBridge } from '../audio/Clock';
-import { ToneTransport, getAudioContext, initAudio, isAudioInitialised, type TransportEngine } from '../audio/TransportEngine';
+import {
+  ToneTransport,
+  getAudioContext,
+  getNativeAudioContext,
+  initAudio,
+  isAudioInitialised,
+  type TransportEngine,
+} from '../audio/TransportEngine';
 import { WebMidiBridge, type MidiBridge } from '../input/MidiBridge';
 import { NoteBus } from '../input/NoteInput';
 import { TouchInput } from '../input/TouchInput';
 import { portMemory, settings as appSettings, type SettingsStore } from '../state/settings';
 import type { Unsubscribe } from '../types/music';
 import { audioStateOf, type AudioState } from './audioGateLogic';
-import { clockContextOf } from './clockContext';
 import { applyTheme } from './theme';
 
 /** How often the clock re-samples its correlation once audio runs (SPEC §3.1). */
@@ -50,7 +56,7 @@ export interface Spine {
 export function createSpine(): Spine {
   const settings = appSettings;
   const toneContext = getAudioContext();
-  const clock = new WebAudioClockBridge(clockContextOf(toneContext.rawContext));
+  const clock = new WebAudioClockBridge(getNativeAudioContext());
   const transport = new ToneTransport();
   const bus = new NoteBus();
   const touch = new TouchInput();
@@ -140,7 +146,7 @@ export function useAudioState(): AudioState {
 }
 
 /** One settings field, re-rendering when it changes (a primitive, so the snapshot is stable). */
-export function useSetting<K extends 'theme' | 'keyboardBaseNote' | 'keyboardOctave' | 'clockOut'>(
+export function useSetting<K extends 'theme' | 'keyboardBaseNote' | 'keyboardOctave'>(
   key: K,
 ): ReturnType<SettingsStore['get']>[K] {
   const { settings } = useSpine();

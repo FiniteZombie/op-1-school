@@ -36,8 +36,9 @@ One message, in this order, leading each section with what needs them.
 1. **Decisions the agents made that the plan didn't cover.** A table: the
    decision, and your take (keep, or reconsider and why). The biggest call
    first.
-2. **Questions**: placeholders, names, copy. Give a suggestion for each, but
-   they're the owner's calls. Number them so they can answer by number.
+2. **Questions**: behaviour the agents had to choose, numbered, each with
+   your suggestion. Placeholders (names, copy, looks) go in one line: the
+   owner is fine with them and asks for changes later.
 3. **Spine requests.** For each: your take, and whether it should land as its
    own small change before the next fan-out (SPEC §6.5).
 4. **VERIFY items** hit, and what was stubbed. Say which ones block a later

@@ -65,11 +65,12 @@ function areaOf(srcPath: string): Area {
   if (first === 'modules') {
     if (parts.length === 2 && /^registry(\.tsx?)?$/.test(second ?? '')) return { kind: 'registry' };
     if (second === '__tests__') return { kind: 'registry-tests' };
-    if (parts.length >= 3 && second) return { kind: 'module', id: second };
+    if (second) return { kind: 'module', id: second };
     return { kind: 'other' };
   }
-  if ((SPINE_DIRS as readonly string[]).includes(first ?? '') && parts.length >= 2) return { kind: 'spine' };
-  if (first === 'curriculum' && parts.length >= 2) return { kind: 'curriculum' };
+  // A bare directory ('../../theory') is its index.ts barrel.
+  if ((SPINE_DIRS as readonly string[]).includes(first ?? '')) return { kind: 'spine' };
+  if (first === 'curriculum') return { kind: 'curriculum' };
   return { kind: 'other' };
 }
 

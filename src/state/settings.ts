@@ -12,8 +12,7 @@ export type Theme = 'dark' | 'light';
 export interface Settings {
   midiInput: StoredPort | null;
   midiOutput: StoredPort | null;
-  clockOut: boolean;
-  /** MIDI note of the keyboard's lowest key. 53 (F3) is a VERIFY default: the Field's lowest key (V8). */
+  /** MIDI note of the keyboard's lowest key: 53 (F3), the Field's lowest key at its default octave (V8). */
   keyboardBaseNote: number;
   /** Octaves of transposition applied to `keyboardBaseNote` (× 12). */
   keyboardOctave: number;
@@ -23,7 +22,6 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   midiInput: null,
   midiOutput: null,
-  clockOut: false,
   keyboardBaseNote: 53,
   keyboardOctave: 0,
   theme: 'dark',
@@ -50,7 +48,6 @@ function port(v: unknown): StoredPort | null | undefined {
 const FIELDS: { [K in keyof Settings]: (v: unknown) => Settings[K] | undefined } = {
   midiInput: port,
   midiOutput: port,
-  clockOut: (v) => (typeof v === 'boolean' ? v : undefined),
   keyboardBaseNote: (v) => (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 127 ? v : undefined),
   keyboardOctave: (v) => (typeof v === 'number' && Number.isInteger(v) ? v : undefined),
   theme: (v) => (v === 'dark' || v === 'light' ? v : undefined),

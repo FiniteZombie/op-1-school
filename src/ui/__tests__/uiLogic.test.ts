@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { audioStateOf } from '../audioGateLogic';
 import { raisesPowerWarning } from '../powerWarningLogic';
-import { clockContextOf } from '../clockContext';
 import { calibrationDevices, calibrationText, midiPortText } from '../statusBarText';
 
 describe('audio gate', () => {
@@ -10,15 +9,6 @@ describe('audio gate', () => {
     expect(audioStateOf(true, 'running')).toBe('running');
     expect(audioStateOf(true, 'suspended')).toBe('paused');
     expect(audioStateOf(true, 'interrupted')).toBe('paused');
-  });
-});
-
-describe('clockContextOf', () => {
-  it('unwraps the native context Tone keeps, else passes the context through', () => {
-    const native = { currentTime: 1, state: 'running', outputLatency: 0.02 };
-    expect(clockContextOf({ _nativeAudioContext: native })).toBe(native);
-    const plain = { currentTime: 1, state: 'running' };
-    expect(clockContextOf(plain)).toBe(plain);
   });
 });
 

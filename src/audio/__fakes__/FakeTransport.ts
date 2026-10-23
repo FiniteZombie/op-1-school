@@ -4,13 +4,13 @@
  * engine is the real one, tempo anchors, pulse ticks and swing behave exactly
  * as in the app; only time is fake.
  */
-import type { ClockBridge, ClockSnapshot } from '../../audio/Clock';
+import type { ClockBridge, ClockSnapshot } from '../Clock';
 import {
   audioTimeOfAbsTick,
   PULSE_TICKS,
   TransportCore,
   type TransportDriver,
-} from '../../audio/timing';
+} from '../timing';
 
 /**
  * Like Tone: `now()` is `currentTime + lookAhead`, and `advanceTo` hands out

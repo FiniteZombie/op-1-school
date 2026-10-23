@@ -1,7 +1,7 @@
 /**
  * Audio time ↔ `performance.now()` (SPEC §3.1) and the input offset formula
  * (SPEC §3.3). Tone-free: it takes the raw `AudioContext`
- * (`getAudioContext().rawContext`), typed as the small `AudioClockContext` so
+ * (`getNativeAudioContext()`), typed as the small `AudioClockContext` so
  * tests pass a fake.
  *
  * Decision 7 is open: the Web Audio spec defines

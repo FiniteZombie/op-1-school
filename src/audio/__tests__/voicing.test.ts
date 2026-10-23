@@ -2,15 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { chordTones, loadProgression } from '../../theory';
 import { F_MINOR_TURNAROUND, SPEC_FIXTURES } from '../../theory/__tests__/fixtures';
 import type { Progression } from '../../types/music';
+import { createFakeTransport } from '../__fakes__/FakeTransport';
 import { CHILLHOP_RHODES } from '../drumPatterns';
-import {
-  TransportCore,
-  audioTimeOfAbsTick,
-  sixteenthSeconds,
-  swingOffsetSec,
-  type TempoAnchor,
-  type TransportDriver,
-} from '../timing';
+import { sixteenthSeconds, swingOffsetSec } from '../timing';
 import {
   BASS_HIGH,
   BASS_LOW,
@@ -33,37 +27,8 @@ import {
 const ALL: PartMask = { drums: true, bass: true, chords: true };
 const fMinor = (): Progression => loadProgression(F_MINOR_TURNAROUND);
 
-/** A hand-stepped driver: time moves only when the test sets it. */
-class FakeDriver implements TransportDriver {
-  time = 0;
-  onPulse: ((t: number) => void) | null = null;
-  ready() {
-    return true;
-  }
-  now() {
-    return this.time + 0.1;
-  }
-  currentTime() {
-    return this.time;
-  }
-  lookAhead() {
-    return 0.1;
-  }
-  start(_at: number, _bpm: number, onPulse: (t: number) => void) {
-    this.onPulse = onPulse;
-  }
-  stop() {
-    this.onPulse = null;
-  }
-  setBpmAt() {}
-  emit(anchors: TempoAnchor[], from: number, to: number) {
-    for (let t = from; t < to; t += 8) this.onPulse?.(audioTimeOfAbsTick(anchors, t));
-  }
-}
-
 function runningTransport(p: Progression, startAt: number) {
-  const driver = new FakeDriver();
-  const core = new TransportCore(driver);
+  const { transport: core, driver } = createFakeTransport();
   core.configure(transportConfigFor(p));
   driver.time = startAt - 0.1;
   core.start(startAt);
@@ -154,7 +119,7 @@ describe('slots', () => {
   it('slot 0 and no change times while stopped', () => {
     const p = fMinor();
     const prepared = prepareProgression(p, transportConfigFor(p));
-    const core = new TransportCore(new FakeDriver());
+    const { transport: core } = createFakeTransport();
     core.configure(transportConfigFor(p));
     expect(slotAtAudioTime(core, prepared, 12).index).toBe(0);
     expect(chordChangeTimesFor(core, prepared)).toEqual([]);

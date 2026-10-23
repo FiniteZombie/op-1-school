@@ -24,7 +24,7 @@ import {
 import { getAudioContext } from '../../audio/TransportEngine';
 import { ToneBackingSynth, transportConfigFor, type PartMask } from '../../audio/VirtualPushSynth';
 import { openAppDb, type AppDB } from '../../state/db';
-import { chordName, loadProgression } from '../../theory/index';
+import { chordName, loadProgression } from '../../theory';
 import { AudioGate } from '../../ui/AudioGate';
 import { Encoder } from '../../ui/Encoder';
 import { Keyboard24 } from '../../ui/Keyboard24';
@@ -289,6 +289,7 @@ export default function DevSpineView() {
             label={LABELS.bpm}
             value={encoderFromBpm(cfg.bpm)}
             valueText={String(Math.round(cfg.bpm))}
+            disabled={midiView.followOn}
             onChange={(v) => {
               transport.configure({ ...transport.config(), bpm: bpmFromEncoder(v) });
               bump();

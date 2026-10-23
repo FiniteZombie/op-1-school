@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type { NoteEvent } from '../../types/music';
 import { FakeMidiAccess, FakeMidiInput, FakeMidiOutput, fakeMidiNavigator } from '../__fakes__/FakeMidiPort';
-import { createFakeTransport } from '../__fakes__/FakeTransport';
+import { createFakeTransport } from '../../audio/__fakes__/FakeTransport';
 import {
   type ClockMode,
   type MidiConnectionChange,
@@ -238,10 +238,10 @@ describe('follow', () => {
 
   test('applies at most once a beat (24 pulses) while the estimate keeps moving', async () => {
     const { input, configure } = await following();
-    // Intervals stretch by 0.01 ms per pulse, so every pulse moves the estimate.
+    // Intervals stretch by 0.001 ms per pulse: every pulse moves the estimate, slowly enough to stay confident.
     let t = 0;
     input.emit([0xf8], t);
-    for (let i = 1; i <= 120; i += 1) input.emit([0xf8], (t += 25 + 0.01 * i));
+    for (let i = 1; i <= 120; i += 1) input.emit([0xf8], (t += 25 + 0.001 * i));
     // Applied at pulses 24, 48, 72, 96 and 120.
     expect(configure).toHaveBeenCalledTimes(5);
   });
@@ -255,15 +255,15 @@ describe('follow', () => {
     expect(slow.transport.bpm()).toBe(30);
   });
 
-  test('low confidence leaves the BPM alone', async () => {
+  test('an unsteady clock leaves the BPM alone', async () => {
     const input = new FakeMidiInput('in-1', 'Field');
     const { bridge } = await grantedBridge([input]);
     bridge.select('in-1');
     const { transport } = createFakeTransport();
     bridge.follow(true, transport);
-    // Alternating 15 / 35 ms: median 25, but no interval within ±5 %.
+    // Intervals stretching from 20 to 40 ms: the window's halves disagree.
     let t = 0;
-    for (let i = 0; i < 60; i += 1) input.emit([0xf8], (t += i % 2 ? 15 : 35));
+    for (let i = 0; i < 60; i += 1) input.emit([0xf8], (t += 20 + i / 3));
     expect(bridge.follower().estimate().confidence).toBeLessThan(0.8);
     expect(transport.bpm()).toBe(120);
   });

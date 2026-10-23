@@ -5,9 +5,13 @@
  */
 
 export interface ClockEstimate {
-  /** Smoothed BPM; 0 until `MIN_INTERVALS` intervals exist. */
+  /** BPM from a straight-line fit over the kept pulses; 0 until `MIN_INTERVALS` intervals exist. */
   bpm: number;
-  /** Share of the kept intervals within ±5 % of their median, 0..1; 0 until `MIN_INTERVALS` intervals exist. */
+  /**
+   * How well the window's two halves agree on the pulse period, 0..1: 1 when
+   * they match, 0 when they differ by `CONFIDENCE_TOLERANCE` or more. 0 until
+   * `MIN_INTERVALS` intervals exist.
+   */
   confidence: number;
   /**
    * The last pulse whose count since `0xFA` is a multiple of 24 (a beat; the
@@ -27,14 +31,17 @@ export interface ExternalClockFollower {
   estimate(): ClockEstimate;
 }
 
-/** Inter-pulse intervals kept for the median. */
-export const FOLLOWER_WINDOW = 48;
+/** Inter-pulse intervals kept for the fit: four beats. */
+export const FOLLOWER_WINDOW = 96;
 /** Intervals needed before the follower reports anything. */
 export const MIN_INTERVALS = 24;
-/** EMA weight of each new median. */
-export const FOLLOWER_ALPHA = 0.2;
-/** An interval counts towards confidence within this share of the median. */
+/** The halves' periods differing by this share of the period gives confidence 0. */
 export const CONFIDENCE_TOLERANCE = 0.05;
+/**
+ * A gap longer than this many mean periods counts as dropped pulses. Bunched
+ * delivery reaches about 1.55 (42 ms at a 27.8 ms period), a drop starts at 2.
+ */
+export const DROPPED_PULSE_GAP = 1.75;
 
 const PULSES_PER_BEAT = 24;
 
@@ -46,40 +53,68 @@ export function median(values: readonly number[]): number {
 }
 
 /**
- * BPM from the median of the last 48 inter-pulse intervals, smoothed with
- * α = 0.2 (the first median seeds it). `0xFA` / `0xFB` clear the history and
- * restart the beat count. Pulses between a stop and the next start still
- * count (some masters send clock while stopped).
+ * Pulse numbers for timestamps that may skip dropped pulses: a gap over
+ * `DROPPED_PULSE_GAP` mean periods counts as the whole number it spans.
+ */
+function pulseIndices(times: readonly number[]): number[] {
+  const n = times.length;
+  const mean = ((times[n - 1] as number) - (times[0] as number)) / (n - 1);
+  const ks = [0];
+  for (let i = 1; i < n; i += 1) {
+    const gap = (times[i] as number) - (times[i - 1] as number);
+    const step = gap > DROPPED_PULSE_GAP * mean ? Math.round(gap / mean) : 1;
+    ks.push((ks[i - 1] as number) + step);
+  }
+  return ks;
+}
+
+/** Least-squares slope of `times` against `ks`: ms per pulse. */
+function fitPeriod(ks: readonly number[], times: readonly number[]): number {
+  const n = ks.length;
+  let kMean = 0;
+  let tMean = 0;
+  for (let i = 0; i < n; i += 1) {
+    kMean += ks[i] as number;
+    tMean += times[i] as number;
+  }
+  kMean /= n;
+  tMean /= n;
+  let num = 0;
+  let den = 0;
+  for (let i = 0; i < n; i += 1) {
+    const dk = (ks[i] as number) - kMean;
+    num += dk * ((times[i] as number) - tMean);
+    den += dk * dk;
+  }
+  return num / den;
+}
+
+/**
+ * BPM from a least-squares line through the last 96 pulse timestamps, not
+ * from single intervals: Windows Chrome delivers the Field's clock bunched
+ * (12.9–42 ms apart at a true 27.8 ms), which pulls a median of intervals
+ * off by 8 % or more while the line's slope holds. `0xFA` / `0xFB` clear
+ * the history and restart the beat count. Pulses between a stop and the next
+ * start still count (some masters send clock while stopped).
  */
 export class PulseClockFollower implements ExternalClockFollower {
-  private intervals: number[] = [];
-  private lastPulse: number | null = null;
+  private pulses: number[] = [];
   private pulseCount = 0;
   private phase = NaN;
-  private smoothed = 0;
   private runningFlag = false;
 
   onPulse(perfTs: number): void {
-    if (this.lastPulse !== null) {
-      const interval = perfTs - this.lastPulse;
-      if (interval > 0) {
-        this.intervals.push(interval);
-        if (this.intervals.length > FOLLOWER_WINDOW) this.intervals.shift();
-        if (this.intervals.length >= MIN_INTERVALS) {
-          const bpm = 60000 / (median(this.intervals) * PULSES_PER_BEAT);
-          this.smoothed = this.smoothed === 0 ? bpm : this.smoothed + FOLLOWER_ALPHA * (bpm - this.smoothed);
-        }
-      }
+    const last = this.pulses[this.pulses.length - 1];
+    if (last === undefined || perfTs > last) {
+      this.pulses.push(perfTs);
+      if (this.pulses.length > FOLLOWER_WINDOW + 1) this.pulses.shift();
     }
-    this.lastPulse = perfTs;
     if (this.pulseCount % PULSES_PER_BEAT === 0) this.phase = perfTs;
     this.pulseCount += 1;
   }
 
   onStart(perfTs: number): void {
-    this.intervals = [];
-    this.lastPulse = null;
-    this.smoothed = 0;
+    this.pulses = [];
     this.pulseCount = 0;
     this.phase = perfTs;
     this.runningFlag = true;
@@ -95,9 +130,16 @@ export class PulseClockFollower implements ExternalClockFollower {
   }
 
   estimate(): ClockEstimate {
-    if (this.intervals.length < MIN_INTERVALS) return { bpm: 0, confidence: 0, phasePerfMs: this.phase };
-    const m = median(this.intervals);
-    const within = this.intervals.filter((i) => Math.abs(i - m) <= CONFIDENCE_TOLERANCE * m).length;
-    return { bpm: this.smoothed, confidence: within / this.intervals.length, phasePerfMs: this.phase };
+    const n = this.pulses.length;
+    if (n - 1 < MIN_INTERVALS) return { bpm: 0, confidence: 0, phasePerfMs: this.phase };
+    const ks = pulseIndices(this.pulses);
+    const period = fitPeriod(ks, this.pulses);
+    // The halves share the middle pulse.
+    const mid = n >> 1;
+    const early = fitPeriod(ks.slice(0, mid + 1), this.pulses.slice(0, mid + 1));
+    const late = fitPeriod(ks.slice(mid), this.pulses.slice(mid));
+    const disagreement = Math.abs(early - late) / period;
+    const confidence = Math.max(0, 1 - disagreement / CONFIDENCE_TOLERANCE);
+    return { bpm: 60000 / (period * PULSES_PER_BEAT), confidence, phasePerfMs: this.phase };
   }
 }

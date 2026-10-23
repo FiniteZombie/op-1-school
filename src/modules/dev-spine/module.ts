@@ -6,7 +6,6 @@ export const module: ModuleDefinition = {
   id: 'dev-spine',
   route: '/dev/spine',
   title: 'dev spine',
-  // placeholder: the nav icon (any one character; the owner picks).
   icon: '∿',
   component: lazy(() => import('./View')),
   phase: 1,

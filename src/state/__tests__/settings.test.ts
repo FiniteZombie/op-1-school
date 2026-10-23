@@ -42,13 +42,13 @@ describe('settings', () => {
 
   test('no storage at all works from memory', () => {
     const s = createSettings(null);
-    s.save({ clockOut: true });
-    expect(s.get().clockOut).toBe(true);
+    s.save({ theme: 'light' });
+    expect(s.get().theme).toBe('light');
   });
 
   test('a wrong-typed field falls back on its own; the others are kept', () => {
     const s = createSettings(
-      memoryStorage(JSON.stringify({ version: 1, theme: 'light', clockOut: 'yes', keyboardBaseNote: 48, midiInput: { id: 3 } })),
+      memoryStorage(JSON.stringify({ version: 1, theme: 'light', keyboardOctave: 'yes', keyboardBaseNote: 48, midiInput: { id: 3 } })),
     );
     expect(s.get()).toEqual({ ...DEFAULT_SETTINGS, theme: 'light', keyboardBaseNote: 48 });
   });
@@ -90,7 +90,7 @@ describe('settings', () => {
     const err = console.error;
     console.error = () => {};
     try {
-      s.save({ clockOut: true });
+      s.save({ theme: 'light' });
     } finally {
       console.error = err;
     }
