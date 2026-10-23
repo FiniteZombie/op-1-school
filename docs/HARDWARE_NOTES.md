@@ -81,12 +81,16 @@ the `send` call; negative is late) and, with a loopback, true jitter.
 
 From `/dev/spine`'s **taps** panel: 16 key-downs on the beat with the loop
 running, uncalibrated, through the same `offsetMs` the drills use. Positive
-is late. The touch median is the bias levels A0 and A6 must absorb until
-calibration (Phase 3); the Field's says whether `audibleAt` lines up with
-what you hear (a human lands within about ±20 ms of a beat they can hear).
+is late. The median is the bias levels A0 and A6 must absorb until
+calibration (Phase 3); the spread is how wide their "on the beat" window has
+to be for a player who is on it. People tap a little ahead of a beat they
+hear, so a median can't settle `audibleAt` on its own; the clock readout's
+gap does that.
 
 | Device and browser | Input | Median (ms) | Spread, IQR (ms) | Date |
 | --- | --- | --- | --- | --- |
+| Android 10, Chrome 155, Pages URL, Field attached, 90 BPM swing 0.5 | Field keys (note 53), output-timestamp path | −5.7 | 46.7 (range −41.8 to +39.1) | 2026-10-23 |
+| Android 10, Chrome 155, Pages URL, no MIDI, 90 BPM swing 0.5 | touch on `Keyboard24` (silent: no touch synth), output-timestamp path | −43.2 | 46.5 (range −154.2 to +3.8; −154.2 looks like a miss) | 2026-10-23 |
 
 ### MIDI clock out
 
