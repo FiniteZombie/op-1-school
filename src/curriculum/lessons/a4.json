@@ -1,0 +1,22 @@
+{
+  "id": "a4",
+  "vector": "A",
+  "level": 4,
+  "title": "common tones vs moving tone",
+  "minutes": 4,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "what stays, what moves",
+      "body": "Two chords in a row usually share notes. Find the ones that **stay**, then the one that **moves**.\n\nIn F minor, `Fm7` to `B♭m7`: F and A♭ stay. The moving line is `Fm7`'s 7th, E♭, falling a whole step to D♭, the 3rd of `B♭m7`.\n\n1. Play the notes the two chords share, then `submit`. If they share none, submit nothing.\n2. Play the moving tone as two notes in order: where it starts, then where it goes. Then `submit`.\n\nEach pair loops until you've answered both. This loop is D minor `i7 v7 iv7`: `Dm7` to `Am7` shares A and C."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A4",
+      "minutes": 3,
+      "progressionId": "i-v-iv-d-minor"
+    }
+  ]
+}

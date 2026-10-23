@@ -1,0 +1,21 @@
+{
+  "id": "b4",
+  "vector": "B",
+  "level": 4,
+  "title": "hat swing",
+  "minutes": 5,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "swing as a number",
+      "body": "Play 16th hats. Swing is how long the first 16th of each pair lasts, as a share of the pair: 50% is straight, about 67% is a triplet shuffle.\n\nThe target is 54 to 62%: felt, not bouncy. The score is your measured swing from the offsets of every second 16th, not the milliseconds of each hit."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B4",
+      "minutes": 4
+    }
+  ]
+}

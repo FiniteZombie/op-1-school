@@ -1,0 +1,21 @@
+{
+  "id": "b3",
+  "vector": "B",
+  "level": 3,
+  "title": "ghost kick placement",
+  "minutes": 5,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "the a of 2",
+      "body": "Add a soft pickup kick on the last 16th of beat 2 (the `a` in `2 e and a`), leading into beat 3. It's scored by placement.\n\nIf the Field's velocity is on (Shift+Tempo: soft or hard), the radar also shows how soft it was. Velocity on the Field is coarse, so treat that as a hint, not a score."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B3",
+      "minutes": 4
+    }
+  ]
+}

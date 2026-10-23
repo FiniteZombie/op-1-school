@@ -1,0 +1,30 @@
+{
+  "id": "b6",
+  "vector": "B",
+  "level": 6,
+  "title": "sequencer recipes",
+  "minutes": 5,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "feel you can record",
+      "body": "The drills are for feel you then *record*, not for playing live along a grid. Unquantized tape is where the OP-1 earns its keep next to a quantized Push.\n\nThese recipes put the Field's own sequencers to work: the finger sequencer for one-handed arrangement, the endless sequencer for odd-length motifs, and tombola for texture in the upper octave. Nothing here is scored."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B6",
+      "minutes": 4,
+      "params": {
+        "recipeIds": [
+          "finger-six-variations",
+          "endless-five-step",
+          "endless-six-step",
+          "endless-seven-step",
+          "tombola-upper-octave"
+        ]
+      }
+    }
+  ]
+}

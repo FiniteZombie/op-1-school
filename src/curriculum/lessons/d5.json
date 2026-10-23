@@ -1,0 +1,15 @@
+{
+  "id": "d5",
+  "vector": "D",
+  "level": 5,
+  "title": "line in, mono or stereo",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "sampling the push",
+      "body": "When you sample the Push's output through line in, choose mono or stereo on purpose (field steps: VERIFY).\n\n- **Stereo** keeps the Push's width: good for pads and full loops.\n- **Mono** for a single hit or a bass line you'll pitch and pan yourself."
+    }
+  ]
+}

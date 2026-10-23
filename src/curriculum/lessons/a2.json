@@ -1,0 +1,22 @@
+{
+  "id": "a2",
+  "vector": "A",
+  "level": 2,
+  "title": "safety net: pentatonic",
+  "minutes": 4,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "permission to make sound",
+      "body": "For two minutes, play only the notes the keyboard marks: the key's pentatonic. Minor pentatonic in a minor key, major pentatonic in a major one.\n\nThe pentatonic leaves out the key's most tense notes, so it sits over the whole loop. The goal isn't a score: it's playing without fear. The drill counts notes outside the marks only so you can see how few there were.\n\n- Start with long notes on the beat.\n- Then leave space: two bars playing, two bars listening.\n- Then try short repeated figures and move them around."
+    },
+    {
+      "kind": "drill",
+      "module": "progression-trainer",
+      "mode": "A2",
+      "minutes": 2,
+      "progressionId": "pendulum-d-dorian"
+    }
+  ]
+}

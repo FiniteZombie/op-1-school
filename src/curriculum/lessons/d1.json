@@ -1,0 +1,15 @@
+{
+  "id": "d1",
+  "vector": "D",
+  "level": 1,
+  "title": "brakes on M1 and M2",
+  "minutes": 6,
+  "scored": false,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "stop like a record",
+      "body": "Set up a brake on M1 or M2 so a part slows to a stop like a turntable losing power (field steps: VERIFY).\n\nUse it on the last bar before a drop: everything stops, then the Push comes back in on 1."
+    }
+  ]
+}

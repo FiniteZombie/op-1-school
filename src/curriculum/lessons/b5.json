@@ -1,0 +1,21 @@
+{
+  "id": "b5",
+  "vector": "B",
+  "level": 5,
+  "title": "dilla drunk",
+  "minutes": 5,
+  "scored": true,
+  "steps": [
+    {
+      "kind": "card",
+      "title": "three feels at once",
+      "body": "Kick straight, snare late, hats swung, all at the same time. Each part keeps its own target from B1, B2 and B4; the score combines them.\n\nBuild it a part at a time: kick alone for 4 bars, add the snare, then the hats."
+    },
+    {
+      "kind": "drill",
+      "module": "pocket-dojo",
+      "mode": "B5",
+      "minutes": 4
+    }
+  ]
+}

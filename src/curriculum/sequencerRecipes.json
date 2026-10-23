@@ -1,8 +1,58 @@
 [
   {
-    "id": "seed-recipe",
-    "title": "placeholder seed recipe",
+    "id": "finger-six-variations",
+    "title": "finger sequencer: six variations, one hand",
     "sequencer": "finger",
-    "steps": ["placeholder seed step (field steps: VERIFY)"]
+    "steps": [
+      "Open the finger sequencer on a drum track. (field steps: VERIFY)",
+      "Build a one-bar groove: kick, snare, hats. Keep it plain; it's the base every variation answers.",
+      "Put six variations of it on six white keys: fewer hats, a ghost kick on the a of 2, a late snare, a fill, a half-time feel, a drop with only hats. (field steps: VERIFY)",
+      "With Hold on, switch between the white keys one-handed while the loop runs, so the other hand is free to play. (field steps: VERIFY)",
+      "Arrange live: 4 bars of the base, 2 of a variation, back to the base, the fill on the last bar before a change."
+    ]
+  },
+  {
+    "id": "endless-five-step",
+    "title": "endless sequencer: a 5-step motif",
+    "sequencer": "endless",
+    "steps": [
+      "Open the endless sequencer on a synth track. (field steps: VERIFY)",
+      "Enter a 5-step motif from the key's pentatonic: three notes and two rests. (field steps: VERIFY)",
+      "Let it run against the 4/4 loop. If each step is a 16th (field steps: VERIFY), the motif starts on a different 16th every bar and lines up with bar 1 again after 5 bars.",
+      "Move one rest one step and listen to how the accent shifts."
+    ]
+  },
+  {
+    "id": "endless-six-step",
+    "title": "endless sequencer: a 6-step motif",
+    "sequencer": "endless",
+    "steps": [
+      "Open the endless sequencer on a synth track. (field steps: VERIFY)",
+      "Enter a 6-step motif: the chord's 3rd and 7th, a rest, the root, two rests. (field steps: VERIFY)",
+      "If each step is a 16th (field steps: VERIFY), 6 steps make a dotted-quarter figure: it lines up with the beat every 3 beats and with bar 1 every 3 bars.",
+      "When the chord changes, change only the 3rd and 7th steps to the new chord's guide tones."
+    ]
+  },
+  {
+    "id": "endless-seven-step",
+    "title": "endless sequencer: a 7-step motif",
+    "sequencer": "endless",
+    "steps": [
+      "Open the endless sequencer on a synth track. (field steps: VERIFY)",
+      "Enter a 7-step motif of four notes and three rests. (field steps: VERIFY)",
+      "Seven steps against a 16-step bar drift the most: use it for texture under a plain part, not as the lead.",
+      "Record 8 bars of it to tape unquantized (field steps: VERIFY), then play over the recording."
+    ]
+  },
+  {
+    "id": "tombola-upper-octave",
+    "title": "tombola: texture in the upper octave",
+    "sequencer": "tombola",
+    "steps": [
+      "Open the tombola sequencer on a soft synth track. (field steps: VERIFY)",
+      "Feed it a few notes in the upper octave of the keyboard only, from the key's pentatonic. (field steps: VERIFY)",
+      "Keep its level low: it's texture behind the Push's chords, not a melody.",
+      "Let it run for 8 bars, then mute it on a section change. (field steps: VERIFY)"
+    ]
   }
 ]
