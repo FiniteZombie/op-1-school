@@ -17,8 +17,8 @@ log results, with no cable required.
 | L1 | Curriculum | lane | Opus 5.5 | `phase-2-fan-out-curriculum` | 1 | done 2026-10-23 | `ff40050` (merge `aea5641`) |
 | L2 | Module 1, Progression Trainer | lane | Opus 5.5 | `phase-2-fan-out-module-1` | 2 | done 2026-10-23 | `961d273` (merge `ab06ec5`) |
 | L3 | Runner | lane | Sonnet 5.5 | `phase-2-fan-out-runner` | 3 | done 2026-10-23 | `c8225d5` (merge `218991f`) |
-| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | |
-| G | Exit gate (**attended**) | step | — | `main` | — | **Next** | |
+| S2 | Integration | step | Opus 5.5 | `phase-2-fan-out` | — | done 2026-10-23 | `321fc20` |
+| G | Exit gate (**attended**) | step | — | `main` | — | done 2026-10-28 (item 3 by the owner's call, with the silent start open) | |
 
 ### Carried forward
 
@@ -58,6 +58,22 @@ log results, with no cable required.
   `DB_VERSION` upgrade waits for every other open tab, and the Runner sits on
   `loading` meanwhile. Closing the connection on `versionchange` (and
   reloading or showing a line) would fix it; it's a spine change, not S2's.
+
+- **G → when the owner asks:** the first `start` after a fresh load, a
+  tab switch or a screen unlock is often silent or partial on the phone
+  (2026-10-28): one chord and no drums, then silence; or drums and no chords.
+  `stop` then `start` usually fixes it. Once only leaving Module 1 (`[5]`)
+  and coming back did. `/dev/spine` showed it too at the Phase 1 gate, so
+  the cause is in the spine (the transport, `ToneBackingSynth`, or the
+  context's resume), not in Module 1. Not reproduced on desktop, and the
+  cause isn't known. The owner closed G with it open (2026-10-28): it
+  doesn't block the app, and they'll ask for it when it gets annoying.
+- **G → the owner:** the owner read the `[1]` and `[5]` nav icons
+  (placeholders for Module 1 and the Runner) as lesson days. The icons need
+  the owner's call.
+- **G → a later spine step:** the Field didn't answer Module 1 until MIDI was
+  granted and `USB device` picked on `/dev/spine`. The port reads `USB
+  device` on Chrome 156; V7 recorded `USB Peripheral Port` on Chrome 155.
 
 ### Process notes
 
@@ -817,21 +833,21 @@ G records each result in **The owner's list** below and in
 Items only the owner can check, each with its fake twin (what the agents
 checked instead).
 
-| Item | Check | Fake twin |
-| --- | --- | --- |
-| `[phone]` daily-use target | On the Pages URL, unplugged: a full 15-minute session with touch, start to finish; it's logged and the streak reads 1 | S2 item 2 (`fast`, headless) |
-| `[phone]` A0 on the phone | Taps on chord changes read mostly `on` when you're on them, and `late` when you tap a beat late on purpose | L2 item 2, decision 6's example on the fake clock |
-| `[field]` same path as touch | Field keys answer A1, A5 and A6 as touch does, unplugged and plugged | L2 item 3 (`FakeMidiInput` vs touch) |
-| `[phone]` screen lock mid-drill | Lock the phone mid-drill: the loop stops; unlock, `start`: it resumes with the time left, and the attempt is logged once | L2 item 4 (state machine) |
-| `[ear]` touch voice | Touch keys sound, without clicks, at a level that sits with the backing; Field keys don't double | S1b item 5 (which events are voiced) |
-| `[ear]` backing per progression | Each A lesson's progression sounds right for its key and style (styles other than `chillhop-rhodes` share its drums) | L1 item 2 (every progression loads) |
-| `[phone]` export | `export` on the phone copies the summary (or shows the box) and downloads the `.md` | L3 item 2 (`sessionMarkdown`) |
-| `[ear]` silent first `start` | Carried from the Phase 1 exit gate: after a fresh load with the Field plugged in, is the first `start` silent? | none |
-| `[phone]` touch tap offsets | Re-measure touch on `/dev/spine`'s taps panel now that touch keys sound and add the row; the agent then copies it into `TAP_OFFSETS` (S1b's test fails until the two match) | S1b item 3 |
-| `[phone]` A0 pad vs keys | Run A0 tapping the (silent) pad, then again tapping the (sounding) keys, and compare the two medians; if they differ by more than 10 ms the owner decides whether the pad gets its own entry. Until then `touch` is one entry | none |
-| `[ear]` A1's bass on the phone | A1 (drums and bass only), unplugged: the bass line is audible on the phone's speaker | none |
-| `[field]` restarts with clock out (V6) | With clock out on, A0's stage changes and A4's pair changes restart the transport: note whether the Field lurches or drifts at each restart | none: V6 is stubbed |
-| `[field]` connect from Module 1 | `connect midi` under the gate, pick the port that lights up when you play: Field keys answer the drill | S1b item 7 (labels by message count) |
+| Item | Check | Fake twin | Result |
+| --- | --- | --- | --- |
+| `[phone]` daily-use target | On the Pages URL, unplugged: a full 15-minute session with touch, start to finish; it's logged and the streak reads 1 | S2 item 2 (`fast`, headless) | partial (2026-10-28): the session runs, but the first `play` gave one chord with no drums, then silence; `stop` then `start` fixed it. The streak was not reported. Accepted by the owner with the silent start open (Carried forward) |
+| `[phone]` A0 on the phone | Taps on chord changes read mostly `on` when you're on them, and `late` when you tap a beat late on purpose | L2 item 2, decision 6's example on the fake clock | partial (2026-10-28): the first `start` gave drums but no chords, and `stop`/`start` didn't fix it; switching to `[5]` and back to `[1]` did. After that it worked |
+| `[field]` same path as touch | Field keys answer A1, A5 and A6 as touch does, unplugged and plugged | L2 item 3 (`FakeMidiInput` vs touch) | pass (2026-10-28), once MIDI was granted and `USB device` picked on `/dev/spine`; before that the Field didn't answer |
+| `[phone]` screen lock mid-drill | Lock the phone mid-drill: the loop stops; unlock, `start`: it resumes with the time left, and the attempt is logged once | L2 item 4 (state machine) | fail (2026-10-28): after unlock, `start` gave no audio; `stop` then `start` did. Whether the attempt was logged once was not reported |
+| `[ear]` touch voice | Touch keys sound, without clicks, at a level that sits with the backing; Field keys don't double | S1b item 5 (which events are voiced) | pass (2026-10-28) |
+| `[ear]` backing per progression | Each A lesson's progression sounds right for its key and style (styles other than `chillhop-rhodes` share its drums) | L1 item 2 (every progression loads) | pass (2026-10-28) |
+| `[phone]` export | `export` on the phone copies the summary (or shows the box) and downloads the `.md` | L3 item 2 (`sessionMarkdown`) | pass (2026-10-28) |
+| `[ear]` silent first `start` | Carried from the Phase 1 exit gate: after a fresh load with the Field plugged in, is the first `start` silent? | none | reproduced (2026-10-28): not on this try, but the same fault shows in items 1, 2 and 4 |
+| `[phone]` touch tap offsets | Re-measure touch on `/dev/spine`'s taps panel now that touch keys sound and add the row; the agent then copies it into `TAP_OFFSETS` (S1b's test fails until the two match) | S1b item 3 | done (2026-10-28): median −29.4 ms, IQR 36.0 ms, in **Tap offsets** and `TAP_OFFSETS` |
+| `[phone]` A0 pad vs keys | Run A0 tapping the (silent) pad, then again tapping the (sounding) keys, and compare the two medians; if they differ by more than 10 ms the owner decides whether the pad gets its own entry. Until then `touch` is one entry | none | skipped by the owner (2026-10-28): `touch` stays one entry |
+| `[ear]` A1's bass on the phone | A1 (drums and bass only), unplugged: the bass line is audible on the phone's speaker | none | pass (2026-10-28) |
+| `[field]` restarts with clock out (V6) | With clock out on, A0's stage changes and A4's pair changes restart the transport: note whether the Field lurches or drifts at each restart | none: V6 is stubbed | "seems fine" (2026-10-28); whether clock out stayed on in Module 1 was not confirmed, so V6 stays stubbed |
+| `[field]` connect from Module 1 | `connect midi` under the gate, pick the port that lights up when you play: Field keys answer the drill | S1b item 7 (labels by message count) | probably passes (2026-10-28, "i think this works"); see the same-path row, where MIDI needed `/dev/spine` first |
 
 ## Placeholders
 

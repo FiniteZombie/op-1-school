@@ -25,13 +25,13 @@ export type TapOffsets = Readonly<Record<TapSource, TapMeasurement | null>>;
  */
 export const TAP_OFFSETS: TapOffsets = {
   midi: { medianMs: -5.7, iqrMs: 46.7 },
-  touch: { medianMs: -43.2, iqrMs: 46.5 },
+  touch: { medianMs: -29.4, iqrMs: 36.0 },
 };
 
 /** The narrowest half-width a window gets, however tight the spread (the owner's rule). */
 export const TAP_TOLERANCE_FLOOR_MS = 20;
 
-/** Absorbs float error so a tap exactly on a window edge (`−43.2 + 46.5`) reads `on`. */
+/** Absorbs float error so a tap exactly on a window edge (`−29.4 + 36.0`) reads `on`. */
 const EDGE_EPSILON_MS = 1e-9;
 
 export interface TapWindow {

@@ -45,7 +45,8 @@ One message, in this order, leading each section with what needs them.
    phase.
 5. **Checks only they can do**: `[phone]`, `[field]`, `[ear]`, with what each
    fake twin showed. Flag the ones a later phase depends on (the spine's
-   timing on the phone, the Field following clock).
+   timing on the phone, the Field following clock), and propose dropping
+   the rest: the owner wants as few of these as possible.
 6. **The process retro**, short: how it went, then the recommendations grouped
    by the file they'd change (the tags in the retro's Friction section). For each, do it now, defer it, or drop it, and why. Weigh the
    lines every future agent reads against what it saves: a one-off slip the

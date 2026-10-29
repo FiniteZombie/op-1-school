@@ -4,6 +4,8 @@
  * Strings marked `placeholder` are not settled: neutral stand-ins until the
  * owner decides.
  */
+import type { ModuleId } from '../types/modules';
+
 export const COPY = {
   navTitle: 'op-1-school',
   home: 'modules arrive in phase 2',
@@ -16,6 +18,24 @@ export const COPY = {
   calibrated: '✓',
   needsCalibration: 'needs calibration',
   powerWarning: 'the field may charge from this phone',
+  /** Each module's nav name (its `module.ts` `title`), including modules not built yet. */
+  moduleTitles: {
+    runner: 'sesh',
+    'progression-trainer': 'chords',
+    'sample-flip': 'flip',
+    'pocket-dojo': 'pocket',
+    'kit-compiler': 'kits',
+    'dev-spine': 'dev spine',
+  } satisfies Record<ModuleId, string>,
+  /** Each module's nav icon (its `module.ts` `icon`); on a phone the nav shows only these. */
+  moduleIcons: {
+    runner: '▶️',
+    'progression-trainer': '🎹',
+    'sample-flip': '🔀',
+    'pocket-dojo': '🎯',
+    'kit-compiler': '🥁',
+    'dev-spine': '∿',
+  } satisfies Record<ModuleId, string>,
 
   /** placeholder: the theme toggle names the theme it switches to. */
   themeToggle: { dark: 'light', light: 'dark' },

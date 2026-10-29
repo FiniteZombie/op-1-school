@@ -10,6 +10,10 @@ read plans, often unattended ([`/step`](../.claude/skills/step/SKILL.md),
 [`/run-steps`](../.claude/skills/run-steps/SKILL.md)), so write them so an
 agent can build and check each row without asking.
 
+A new plan starts from the last plan's open **Carried forward** bullets and
+its retro's **Review**: each one becomes a row, a pre-flight question, or a
+line saying what it waits for.
+
 ## Steps or lanes
 
 - **Steps** run one at a time, in order, each on top of the last. The spine
@@ -57,8 +61,14 @@ GitHub Pages, and runs `/dev/spine?dev` on the phone and the Field.
 - **Tag items only a person can check**: `[phone]` (the Android phone in hand:
   its Chrome, touch, latency, wake lock), `[field]` (the OP-1 Field attached),
   `[ear]` (listening: clicks, swing, a sound that's right). They go straight to
-  the owner's list. Give each a fake twin where one exists (`FakeMidiPort`, a
-  fake `ClockBridge`, touch input).
+  the owner's list, a table whose last column is `Result`. Give each a fake
+  twin where one exists (`FakeMidiPort`, a fake `ClockBridge`, touch input).
+- **Keep the owner's list short.** A long list gets put off for days. Before
+  a row goes on it, try a fake twin, a number the app shows (`/dev/spine`'s
+  report, a meter, a counter), or one ordinary session that covers several
+  rows. Keep a row only for what a person must judge or a VERIFY item needs,
+  and never one that needs musical skill the owner is still learning (tapping
+  on the beat to prove the window): measure that instead.
 - **A check names the row that builds what it checks.** An integration item
   never checks something no row builds, and a lane's browser check never
   needs another lane's module: that check goes in the integration row.

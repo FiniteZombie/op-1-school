@@ -30,12 +30,13 @@ in `src/types/modules.ts`:
 ```ts
 import { lazy } from 'react';
 import type { ModuleDefinition } from '../../types/modules';
+import { COPY } from '../../ui/copy';
 
 export const module: ModuleDefinition = {
   id: 'progression-trainer', // one of MODULE_IDS
   route: '/progression-trainer', // relative to Vite's base, starts with /
-  title: '…',
-  icon: '…', // a one-character string
+  title: COPY.moduleTitles['progression-trainer'], // the owner's name, from src/ui/copy.ts
+  icon: COPY.moduleIcons['progression-trainer'], // one character or emoji, from src/ui/copy.ts
   component: lazy(() => import('./View')), // a view takes no props
   phase: 2,
   // devOnly: true, // hidden from the nav and the route, unless the URL has ?dev

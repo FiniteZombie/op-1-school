@@ -1,11 +1,9 @@
 // placeholder: every string here is a stand-in until the owner sets Module 1's
-// copy. Most come from the plan's Placeholders list (phase-2-fan-out.md); the
+// copy. Most come from the plan's Placeholders list (archive/phase-2-fan-out.md); the
 // ones marked "not in the plan's list" are this lane's own.
 import type { DrillForm } from '../../types/drills';
 
 export const LABELS = {
-  title: 'progressions',
-  icon: '1',
   level: 'level',
   progression: 'progression',
   start: 'start',
