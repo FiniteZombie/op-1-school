@@ -104,6 +104,8 @@ export interface ProbeReport {
   /** A string, saying why, when the probe has no MIDI access. */
   ports: ProbePort[] | string;
   recent: RecentMessage[];
+  /** The diagnostics log's formatted lines, oldest first. */
+  log?: string[];
 }
 
 /** One input's message counts, e.g. `messages 120: note 4, clock 110, …`. */
@@ -138,5 +140,6 @@ export function formatProbeReport(r: ProbeReport): string {
   }
   out.push('', '[recent, without clock and active sensing]');
   out.push(...(r.recent.length === 0 ? ['none'] : r.recent.map((m) => `${m.perfTs.toFixed(1)} ${m.port} ${m.hex}`)));
+  if (r.log) out.push('', '[log, oldest first]', ...(r.log.length === 0 ? ['none'] : r.log));
   return out.join('\n');
 }

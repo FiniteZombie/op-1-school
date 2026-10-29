@@ -14,6 +14,8 @@
  * - The theme follows `settings.theme`.
  * - The touch voice (`NoteVoice`, plan decision 8) sounds `touch` notes once
  *   audio runs, and releases them when audio stops running.
+ * - The diagnostics log watches the context, transport and MIDI bridge
+ *   (`watchSpine`), and logs each gate tap.
  *
  * Nothing here is disposed: the spine lives as long as the page.
  */
@@ -31,9 +33,11 @@ import {
 import { WebMidiBridge, type MidiBridge } from '../input/MidiBridge';
 import { NoteBus } from '../input/NoteInput';
 import { TouchInput } from '../input/TouchInput';
+import { diagnostics } from '../state/diagnostics';
 import { portMemory, settings as appSettings, type SettingsStore } from '../state/settings';
 import type { Unsubscribe } from '../types/music';
 import { audioStateOf, type AudioState } from './audioGateLogic';
+import { watchSpine } from './diagnosticsCapture';
 import { applyTheme } from './theme';
 
 /** How often the clock re-samples its correlation once audio runs (SPEC §3.1). */
@@ -101,6 +105,7 @@ export function createSpine(): Spine {
   }
 
   toneContext.on('statechange', updateAudioState);
+  watchSpine({ toneContext, transport, midi });
 
   const voice = new NoteVoice(bus, () => audioState === 'running');
   audioListeners.add(() => {
@@ -110,6 +115,7 @@ export function createSpine(): Spine {
   const audio: AudioGateController = {
     state: () => audioState,
     async start() {
+      diagnostics.add('audio', `gate tap, context ${toneContext.state}`);
       await initAudio();
       clock.refresh();
       refreshTimer ??= setInterval(() => clock.refresh(), CLOCK_REFRESH_MS);

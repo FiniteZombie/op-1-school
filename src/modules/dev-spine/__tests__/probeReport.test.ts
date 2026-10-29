@@ -90,4 +90,12 @@ describe('formatProbeReport', () => {
     expect(text).toContain('[ports]\nmidi not granted');
     expect(text).toContain('[recent, without clock and active sensing]\nnone');
   });
+
+  it('ends with the diagnostics log when given one', () => {
+    const base = { at: 'now', userAgent: 'ua', sections: [], ports: 'midi not granted', recent: [] };
+    expect(formatProbeReport({ ...base, log: ['+1.000 s page visible'] })).toMatch(
+      /\nnone\n\n\[log, oldest first\]\n\+1\.000 s page visible$/,
+    );
+    expect(formatProbeReport({ ...base, log: [] })).toMatch(/\[log, oldest first\]\nnone$/);
+  });
 });

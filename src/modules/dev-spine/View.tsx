@@ -6,7 +6,8 @@
  * as heard, `tapOffsets.ts`); MIDI access, ports, clock out and follow;
  * decision 7's clock readout; decision 8's MIDI timing; the probe (what
  * every MIDI input delivers, and a `copy report` button that puts the whole
- * page's state on the clipboard as text); the database check; and a log of
+ * page's state and the diagnostics log on the clipboard as text); the
+ * database check; and a log of
  * raw `NoteEvent`s.
  *
  * The page owns one `ToneBackingSynth`, disposed on unmount, and stops the
@@ -27,6 +28,7 @@ import {
 import { getAudioContext } from '../../audio/TransportEngine';
 import { ToneBackingSynth, transportConfigFor, type PartMask } from '../../audio/VirtualPushSynth';
 import { openAppDb, type AppDB } from '../../state/db';
+import { diagnostics, formatEntry } from '../../state/diagnostics';
 import { chordName, loadProgression } from '../../theory';
 import { AudioGate } from '../../ui/AudioGate';
 import { Encoder } from '../../ui/Encoder';
@@ -307,6 +309,7 @@ export default function DevSpineView() {
       at: new Date().toISOString(),
       userAgent: navigator.userAgent,
       sections: [
+        ['build', [['commit', __APP_COMMIT__]]],
         ['audio', [['gate', audioState], ['context state', ctx.state], ['sampleRate', String(ctx.sampleRate)], ...clockRows(clock.snapshot())]],
         [
           'transport',
@@ -342,6 +345,7 @@ export default function DevSpineView() {
             ? PROBE_LABELS.probeFailed(probe.message)
             : PROBE_LABELS.probeOff,
       recent: probe.kind === 'open' ? probe.probe.recent() : [],
+      log: diagnostics.snapshot().map(formatEntry),
     });
   }
 

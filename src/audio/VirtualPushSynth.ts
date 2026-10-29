@@ -16,6 +16,9 @@
  *   them and is safe to call twice.
  * - A master gain is 0 while the transport is stopped, so notes already
  *   handed to Tone inside the lookahead are silent after a stop.
+ * - Every live instance is in `liveBackingProbes()`, so the diagnostics
+ *   heartbeat (`src/ui/diagnosticsCapture.ts`) reads the part levels and
+ *   chord voices of whichever synth is playing.
  */
 import * as Tone from 'tone';
 import type { ChordSlot, Progression, Unsubscribe } from '../types/music';
@@ -48,6 +51,21 @@ export interface VirtualPushSynth {
   dispose(): void;
 }
 
+/** What the diagnostics heartbeat reads from a live synth. */
+export interface BackingProbe {
+  /** Each part's level now, in dB (`-Infinity` for silence), after its mask gain. */
+  levels(): Record<BackingPart, number>;
+  /** The chord `PolySynth`'s sounding voices (it drops notes past `maxPolyphony`). */
+  chordVoices(): number;
+}
+
+const live = new Set<BackingProbe>();
+
+/** Every `ToneBackingSynth` not yet disposed. */
+export function liveBackingProbes(): BackingProbe[] {
+  return [...live];
+}
+
 /** Fade for mask changes and stops, so held notes don't click. */
 const RAMP_SEC = 0.01;
 const PARTS: readonly BackingPart[] = ['drums', 'bass', 'chords'];
@@ -63,7 +81,7 @@ const CHORD_VELOCITY = 0.45;
  * `VirtualPushSynth` on Tone: `MembraneSynth` kick, `NoiseSynth` snare and
  * closed hat, `MonoSynth` bass, `PolySynth(FMSynth)` chords.
  */
-export class ToneBackingSynth implements VirtualPushSynth {
+export class ToneBackingSynth implements VirtualPushSynth, BackingProbe {
   private prepared: PreparedProgression | null = null;
   private pattern: DrumPattern | null = null;
   private mask: PartMask = { drums: true, bass: true, chords: true };
@@ -73,6 +91,7 @@ export class ToneBackingSynth implements VirtualPushSynth {
 
   private readonly master: Tone.Gain;
   private readonly partGains: Record<BackingPart, Tone.Gain>;
+  private readonly meters: Record<BackingPart, Tone.Meter>;
   private readonly kick: Tone.MembraneSynth;
   private readonly snare: Tone.NoiseSynth;
   private readonly hat: Tone.NoiseSynth;
@@ -90,6 +109,12 @@ export class ToneBackingSynth implements VirtualPushSynth {
       bass: new Tone.Gain(1).connect(this.master),
       chords: new Tone.Gain(1).connect(this.master),
     };
+    this.meters = {
+      drums: new Tone.Meter({ smoothing: 0 }),
+      bass: new Tone.Meter({ smoothing: 0 }),
+      chords: new Tone.Meter({ smoothing: 0 }),
+    };
+    for (const part of PARTS) this.partGains[part].connect(this.meters[part]);
 
     this.kick = new Tone.MembraneSynth({
       pitchDecay: 0.04,
@@ -136,6 +161,7 @@ export class ToneBackingSynth implements VirtualPushSynth {
       transport.onStateChange(this.handleStateChange),
     ];
     if (transport.state() === 'started') this.handleStateChange({ state: 'started', audioTime: Tone.now() });
+    live.add(this);
   }
 
   load(p: Progression): void {
@@ -159,9 +185,19 @@ export class ToneBackingSynth implements VirtualPushSynth {
     return chordChangeTimesFor(this.transport, this.prepared);
   }
 
+  levels(): Record<BackingPart, number> {
+    const db = (part: BackingPart) => this.meters[part].getValue() as number;
+    return { drums: db('drums'), bass: db('bass'), chords: db('chords') };
+  }
+
+  chordVoices(): number {
+    return this.chords.activeVoices;
+  }
+
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    live.delete(this);
     for (const unsubscribe of this.unsubscribes) unsubscribe();
     this.chords.releaseAll();
     for (const node of [
@@ -172,6 +208,7 @@ export class ToneBackingSynth implements VirtualPushSynth {
       this.hatFilter,
       this.bass,
       this.chords,
+      ...PARTS.map((p) => this.meters[p]),
       ...PARTS.map((p) => this.partGains[p]),
       this.master,
     ]) {

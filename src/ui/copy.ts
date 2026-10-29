@@ -27,4 +27,18 @@ export const COPY = {
   pageError: 'something broke on this page',
   /** placeholder: the StatusBar's BPM. */
   bpm: (bpm: number) => `${Math.round(bpm)} bpm`,
+  /** placeholder: the bug button (in the nav) and its box. */
+  bug: {
+    button: 'bug',
+    heading: 'report a bug',
+    publicNote: 'reports on github are public: leave out anything personal',
+    field: 'what went wrong?',
+    copy: 'copy',
+    github: 'open on github',
+    close: 'close',
+    copied: 'copied',
+    copyFailed: 'copy failed: select the text below',
+    cut: 'cut to fit github: copy has the full report',
+    details: 'what gets sent',
+  },
 } as const;

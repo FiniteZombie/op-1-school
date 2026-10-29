@@ -3,18 +3,21 @@
  * and the routed page; everything but the nav sits in an `ErrorBoundary`,
  * so a render error leaves the nav working. The nav sits at the bottom under 700 px of viewport
  * width and at the side from 700 px (`nav:` in tokens.css); its title links
- * home, then one entry per visible module (registry order), then the theme
- * toggle. Routes come from the registry (decision 9's router), `/` is the
+ * home, then one entry per visible module (registry order), then the bug
+ * button and the theme toggle. Each route change goes into the diagnostics
+ * log. Routes come from the registry (decision 9's router), `/` is the
  * Runner once it's registered, and the shell provides the visible modules to
  * `useAvailableModules()` (decision 10); `devOnly`
  * modules, nav entry and route, need `?dev`; anything else shows
  * `no page here`.
  */
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { modules } from '../modules/registry';
 import type { ModuleDefinition } from '../types/modules';
 import { AvailableModulesProvider } from './availableModules';
+import { BugReport } from './BugReport';
 import { COPY } from './copy';
+import { logRoute } from './diagnosticsCapture';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Link, useLocation } from './navigation';
 import { PowerWarning } from './PowerWarning';
@@ -58,6 +61,9 @@ export function AppShell() {
   const { path, dev } = useLocation();
   const entries = visibleModules(modules, dev);
   const available = useMemo(() => availableFrom(modules, dev), [dev]);
+  // useLocation re-renders on every navigation, query changes included.
+  const route = `${path}${window.location.search}`;
+  useEffect(() => logRoute(route), [route]);
 
   return (
     <AvailableModulesProvider modules={available}>
@@ -72,7 +78,10 @@ export function AppShell() {
           {entries.map((m) => (
             <NavEntry key={m.id} module={m} active={path === m.route} />
           ))}
-          <ThemeToggle className="ml-auto shrink-0 nav:mt-auto nav:ml-0" />
+          <div className="ml-auto flex shrink-0 items-center gap-1 nav:mt-auto nav:ml-0 nav:flex-col nav:items-stretch">
+            <BugReport page={route} />
+            <ThemeToggle className="shrink-0" />
+          </div>
         </nav>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <ErrorBoundary resetKey={path}>

@@ -21,6 +21,9 @@ Open plans:
 - [`phase-2-fan-out.md`](.agents/plans/phase-2-fan-out.md): SPEC §6.2, the
   curriculum, Module 1 (Progression Trainer) and the Runner, as two spine
   steps, three lanes, an integration step and the owner's exit gate.
+- [`bug-report.md`](.agents/plans/bug-report.md): a diagnostics log in the
+  spine and a bug button on every page that sends it, by clipboard or as a
+  prefilled GitHub issue.
 
 Phase 1, the spine, is done
 ([archived](.agents/plans/archive/phase-1-spine.md)).
@@ -134,6 +137,14 @@ Push back before breaking one.
   in as a `BackingLike`, so they're tested on the fake transport and clock;
   the view only wires the real `ToneBackingSynth` in. A new drill module
   follows the same pattern in its own directory (it can't import Module 1's).
+- The diagnostics log is `diagnostics` in `src/state/diagnostics.ts`, fed by
+  `src/ui/diagnosticsCapture.ts`: console errors and warnings, the context,
+  transport, a 1 s heartbeat (levels from `liveBackingProbes()`), MIDI, page
+  and route changes. Modules are captured without doing anything; keep log
+  text ASCII and free of anything personal (reports are public). The nav's
+  bug button sends it, as GitHub issues labelled `bug-report` on
+  `FiniteZombie/op-1-school`; an agent may comment on and close the ones it
+  fixes. The browser pane refuses clipboard writes, so check `copy` in Chrome.
 - The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
   `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest
   Android row per input). `tapWindow.test.ts` parses that table and fails when
