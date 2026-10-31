@@ -26,7 +26,7 @@ which shape it was, and the fix is its own change when the owner asks.
 | Row | Name | Kind | Model | Branch | Status | Commit |
 | --- | --- | --- | --- | --- | --- | --- |
 | S1 | Diagnostics log and bug button | step | Opus 5.5 | `main` | done 2026-10-28 | `55c6e1b` |
-| G | One real report from the phone (**attended**) | step | — | `main` | done 2026-10-31 | |
+| G | One real report from the phone (**attended**) | step | — | `main` | done 2026-10-31 | `a2e87c1` |
 
 ### Carried forward
 
@@ -35,9 +35,9 @@ which shape it was, and the fix is its own change when the owner asks.
   (about 1.3 times longer). Fine at today's sizes; untested near
   `MAX_ISSUE_URL`. The phone is signed in.
 - **G → later:** the GitHub MCP token reads issues but can't comment on or
-  close them (`403 Resource not accessible by personal access token`), so
-  Pre-flight answer 3 doesn't work yet: the owner closes fixed issues, or
-  gives the token issue write.
+  close them (`403 Resource not accessible by personal access token`), so a
+  fix closes its issue through `Fixes #<n>` in the commit message
+  (Pre-flight answer 3).
 - **S1 → the owner:** placeholders in `COPY.bug` (`src/ui/copy.ts`) and
   `REPORT_TEXT` (`src/ui/bugReportText.ts`): the `bug` button and all the
   box's wording, the issue title rule, the report's fixed lines.
@@ -151,8 +151,8 @@ plan picks up only the silent start, as diagnostics.
     ids; route queries hold only lesson and drill ids. A console error could
     still carry anything, so the box shows the full text before it's sent.
 11. **Answers to the brief's questions** are in **Pre-flight answers**
-    below: the button in the nav, nothing kept on the phone, and a later
-    agent may close the issues it fixes.
+    below: the button in the nav, nothing kept on the phone, and a fix's
+    commit closes its issue.
 
 ## S1 — Diagnostics log and bug button
 
@@ -248,8 +248,9 @@ The owner, 2026-10-28:
    bar on the phone, the side bar from 700 px), on every page, `/dev/spine`
    included.
 2. **Kept on the phone:** no. `copy` covers offline; no IndexedDB change.
-3. **Closing issues:** a later agent may comment on a `bug-report` issue and
-   close it itself once its fix is committed.
+3. **Closing issues:** a fix's commit message says `Fixes #<n>`, and GitHub
+   closes the issue when `main` is pushed. The GitHub MCP token can't write
+   issues; the owner closes a report that names no fault.
 4. **The label:** `bug-report` doesn't exist on the repo, and GitHub drops
    `labels=` for a missing label. The owner said to create it, but the
    GitHub MCP tools have no label write and `gh` isn't installed, so the

@@ -19,14 +19,12 @@ between.
 Phase 1, the spine
 ([archived](.agents/plans/archive/phase-1-spine.md)), and Phase 2, the
 curriculum, Module 1 and the Runner
-([archived](.agents/plans/archive/phase-2-fan-out.md)), are done. Phase 3
-(SPEC §6.3) has no plan yet.
+([archived](.agents/plans/archive/phase-2-fan-out.md)), are done, and so is
+the diagnostics log and bug button
+([archived](.agents/plans/archive/bug-report.md)). Phase 3 (SPEC §6.3) has no
+plan yet.
 
-Open plans:
-
-- [`bug-report.md`](.agents/plans/bug-report.md): a diagnostics log in the
-  spine and a bug button on every page that sends it, by clipboard or as a
-  prefilled GitHub issue.
+No plan is open.
 
 Plans live in `.agents/plans/`, one per phase or spike; retros in
 `.agents/retros/`. Name each open plan here with a link and what it's for,
@@ -143,8 +141,10 @@ Push back before breaking one.
   and route changes. Modules are captured without doing anything; keep log
   text ASCII and free of anything personal (reports are public). The nav's
   bug button sends it, as GitHub issues labelled `bug-report` on
-  `FiniteZombie/op-1-school`; an agent may comment on and close the ones it
-  fixes. The browser pane refuses clipboard writes, so check `copy` in Chrome.
+  `FiniteZombie/op-1-school`. A fix's commit message says `Fixes #<n>`, and
+  GitHub closes the issue when `main` is pushed (the GitHub MCP token can't
+  write issues). The browser pane refuses clipboard writes, so check `copy`
+  in Chrome.
 - The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
   `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest
   Android row per input). `tapWindow.test.ts` parses that table and fails when

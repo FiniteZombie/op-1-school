@@ -1,6 +1,6 @@
 # Bug report plan — retro (2026-10-31)
 
-**Status:** not yet reviewed with the owner.
+**Status:** reviewed with the owner on 2026-10-31.
 
 An attended plan, two rows: S1 (the diagnostics log and bug button, done
 2026-10-28, `55c6e1b`) and G (one real report from the phone, done
@@ -92,3 +92,38 @@ keep-testing-short note asked.
 2. Phase 3's plan picks up the open ends: the silent start (when a report
    shows it), `openAppDb()` and `versionchange`, V6 with clock out inside
    Module 1, and drum patterns for the other three styles.
+
+---
+
+## Review
+
+With the owner, 2026-10-31. The owner took every suggestion as written.
+
+- **Decision kept:** issue #1 is closed as a passed test.
+- **Closing issues:** the GitHub MCP token stays read-only. A fix's commit
+  message says `Fixes #<n>`, and GitHub closes the issue when `main` is
+  pushed, which also links the fix from the issue; no token write, no `gh`.
+  Rejected: giving the token issue write (a wider token for what the push
+  already does), and dropping agent closing. The owner closes a report that
+  names no fault, like #1.
+- **Placeholders** in `COPY.bug` and `REPORT_TEXT` stay; the owner asks for
+  changes later.
+- **Spine requests:** none.
+- **The owner's checks:** close #1, and push `main` (`a2e87c1`, docs only).
+  The cut near `MAX_ISSUE_URL` through GitHub's login redirect is dropped as
+  a check: the phone is signed in.
+- **Open ends for Phase 3's plan** (`/write-plan` starts here): the silent
+  start, once a report shows which shape it is; `openAppDb()` and
+  `versionchange`; V6 with clock out inside Module 1; drum patterns for the
+  three styles other than `chillhop-rhodes`.
+
+| # | Recommendation | Outcome |
+| --- | --- | --- |
+| 1 | Token issue write, or drop agent closing | Done, a third way: `Fixes #<n>` in the fix's commit. `AGENTS.md` **Repo conventions** (the diagnostics bullet), and the plan's Pre-flight answer 3, decision 11 and **Carried forward** |
+| 2 | Phase 3's plan picks up the open ends | Deferred to `/write-plan`: listed above |
+| — | [tools] the browser pane refuses clipboard writes | Already in `AGENTS.md` (S1) |
+| — | [plan] Done when 4's BPM | Dropped: one-off, fixed in the row during S1 |
+| — | [tools] `cat > file` waiting on stdin | Dropped: one-off, caught |
+| — | [tools] another session's edit reloaded the pane | Dropped: S1 caught it and redid the check |
+| — | The plan's G commit cell was blank | Filled: `a2e87c1` |
+| — | The plan is done | Archived to `.agents/plans/archive/bug-report.md`; `AGENTS.md` **Where we are** and the brief's link updated |
