@@ -83,14 +83,11 @@ Push back before breaking one.
 
 ## Repo conventions
 
-- Vite's `base` is `/op-1-school/`, the repo name.
 - `npm run check` runs typecheck (`tsc -b`, every project), Vitest, then the
   build; it must exit 0 before a step is done. CI runs the same on Node 24.
-- Type projects: `tsconfig.app.json` (`src`, browser types),
-  `tsconfig.test.json` (`src/**/__tests__`, adds Node types) and
-  `tsconfig.node.json` (the Vite and Vitest configs). App code that imports
-  `node:*` fails typecheck on purpose.
-- Tests are `src/**/__tests__/**/*.test.ts`, in Vitest's node environment.
+- App code that imports `node:*` fails typecheck on purpose:
+  `tsconfig.app.json` has browser types only; `tsconfig.test.json` adds Node
+  types for `src/**/__tests__`.
 - `src/modules/__tests__/importRule.test.ts` enforces the import rule: a
   module imports only the spine, its own directory and `src/curriculum/`;
   only `src/ui/AppShell.tsx` imports `src/modules/registry.ts`.
@@ -157,6 +154,5 @@ Push back before breaking one.
 - `docs/` holds owner docs; `.agents/` holds agent notes. Every change updates
   the docs it affects in the same commit, written as what's true now, with no
   "was X, now Y".
-- LF line endings everywhere (`.gitattributes`, `.editorconfig`).
 - Before your final message, stop any dev server or browser you started, and
   nothing else. Say what you stopped.
