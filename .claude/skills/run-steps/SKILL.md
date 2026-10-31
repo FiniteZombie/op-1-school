@@ -112,8 +112,9 @@ from there (.agents/windows-tool-pitfalls.md).
 5. **The plan** (steps): the row is done, the next is **Next**, the previous
    hash is backfilled, Carried forward is updated.
 6. **Spot-check one item yourself**: the Done-when item that matters most and
-   has a check you can run. If none has, say so in the retro: that's a
-   plan-writing finding.
+   has a check you can run. Just that one: the report already ran the rest,
+   and every check you repeat is billed at your full context. If none has,
+   say so in the retro: that's a plan-writing finding.
 7. **Nothing left running** that the subagent started.
 
 **One fix round.** If a check fails, `SendMessage` the same subagent what

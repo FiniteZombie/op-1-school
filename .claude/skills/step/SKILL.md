@@ -100,7 +100,9 @@ message). If an orchestrator spawned you, also read
      should see or hear ("tap the lowest F: it lights, and the log shows a
      touch `on` event"). Say how to reach the state it needs from a fresh
      load ("on `/dev/spine` turn on clock out, then tap `[1]`"), and say what
-     each name is the first time (A1, a nav icon, a panel);
+     each name is the first time (A1, a nav icon, a panel). Name only what
+     you've seen on screen or in settings yourself, never a readout you
+     expect to be there;
    - the VERIFY items you hit and what you stubbed;
    - what's known to be rough, cut or untested;
    - what to tell you if a check fails: for one on a device, the `copy report`
