@@ -145,7 +145,7 @@ Push back before breaking one.
   bug button sends it, as GitHub issues labelled `bug-report` on
   `FiniteZombie/op-1-school`. A fix's commit message says `Fixes #<n>`, and
   GitHub closes the issue when `main` is pushed (the GitHub MCP token can't
-  write issues). The browser pane refuses clipboard writes, so check `copy`
+  write issues, and `gh` isn't installed: read GitHub through the MCP). The browser pane refuses clipboard writes, so check `copy`
   in Chrome.
 - The tap window is `tapVerdict` in `src/audio/tapWindow.ts`, fed by
   `TAP_OFFSETS`, a copy of `docs/HARDWARE_NOTES.md` **Tap offsets** (latest

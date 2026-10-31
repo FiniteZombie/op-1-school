@@ -228,7 +228,7 @@ The researcher worked from search excerpts; it opened few pages in full.
 
 ### Outcome
 
-The owner took every call but `gh`, 2026-10-31. The next meta review starts
+The owner took every call, 2026-10-31. The next meta review starts
 by checking whether these moved the numbers: fix rounds out of retro
 windows, the orchestrator's peak, the start-of-session baseline.
 
@@ -239,7 +239,7 @@ windows, the orchestrator's peak, the start-of-session baseline.
 | 3 | meta: start sessions at medium; high only for `/write-plan`, grills and `/retro`; set effort when opening a session [habit] | Done: the owner's habit; for `/harvest` |
 | 4 | meta: look at the start-of-session load with `/doctor` and `/context`, then hide skills that don't belong here [settings] | Owner: runs both in a fresh `claude` terminal in this repo, then decides; hiding is a global setting unless done per project |
 | 5 | meta: a second session that writes gets its own worktree [habit] | Done: the owner's habit; for `/harvest` |
-| 6 | meta: say `gh` isn't installed [AGENTS.md] | Open: the owner is weighing installing it, which would make this moot |
+| 6 | meta: say `gh` isn't installed [AGENTS.md] | Done: `AGENTS.md` **Repo conventions**, the diagnostics bullet. The owner holds off installing `gh`: its login token would reach every repo on the account, which the Review's read-only token call rejected |
 | 7 | meta: an owner test step names only what the agent has seen [skill] | Done: `step` step 8 |
 | 8 | meta: the grill sorts its items into "needs you" and "fine either way" [skill] | Deferred: see whether accept-all repeats on Phase 3's plan |
 | — | meta: trim `AGENTS.md` | Dropped: it holds the non-standard rules the study says help |
