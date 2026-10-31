@@ -25,18 +25,19 @@ which shape it was, and the fix is its own change when the owner asks.
 
 | Row | Name | Kind | Model | Branch | Status | Commit |
 | --- | --- | --- | --- | --- | --- | --- |
-| S1 | Diagnostics log and bug button | step | Opus 5.5 | `main` | done 2026-10-28 | |
-| G | One real report from the phone (**attended**) | step | — | `main` | **Next** | |
+| S1 | Diagnostics log and bug button | step | Opus 5.5 | `main` | done 2026-10-28 | `55c6e1b` |
+| G | One real report from the phone (**attended**) | step | — | `main` | done 2026-10-31 | |
 
 ### Carried forward
 
-- **S1 → G:** the owner creates the `bug-report` label before filing
-  (Pre-flight answer 4); without it GitHub files the issue unlabelled, and a
-  later agent's label filter misses it.
 - **S1 → later:** a GitHub session that isn't signed in sends the owner
   through the login page, whose `return_to` re-encodes the whole issue URL
   (about 1.3 times longer). Fine at today's sizes; untested near
   `MAX_ISSUE_URL`. The phone is signed in.
+- **G → later:** the GitHub MCP token reads issues but can't comment on or
+  close them (`403 Resource not accessible by personal access token`), so
+  Pre-flight answer 3 doesn't work yet: the owner closes fixed issues, or
+  gives the token issue write.
 - **S1 → the owner:** placeholders in `COPY.bug` (`src/ui/copy.ts`) and
   `REPORT_TEXT` (`src/ui/bugReportText.ts`): the `bug` button and all the
   box's wording, the issue title rule, the report's fixed lines.
@@ -51,6 +52,10 @@ which shape it was, and the fix is its own change when the owner asks.
   check reads 6 sixteenths a heartbeat there (fixed in the row).
 - S1: a `cat > file` with no input, left at the start of a Bash command,
   waited on stdin until the tool's 2-minute timeout.
+- G: the owner's report came in one pass, three days after S1, and needed
+  no follow-up questions: the log answered what the agent checks.
+- G: closing issue #1 through the GitHub MCP failed with a 403 (the token
+  has no issue write); `gh` isn't installed. It's left for the owner to close.
 - S1: another session edited `src/ui/copy.ts` (the nav's module names and
   icons) while S1 ran; Vite reloaded the pane mid-check, and S1 redid it.
 
@@ -225,7 +230,7 @@ The owner, after pushing `main` (GitHub Pages deploys it) and creating the
 
 | # | Check | Result |
 | --- | --- | --- |
-| 1 | `[phone]` On the phone, open the app from GitHub Pages, tap the audio gate, start a Module 1 drill for a few seconds, tap the bug button, type one line, tap `open on github` and submit the issue. | |
+| 1 | `[phone]` On the phone, open the app from GitHub Pages, tap the audio gate, start a Module 1 drill for a few seconds, tap the bug button, type one line, tap `open on github` and submit the issue. | done 2026-10-31: [#1](https://github.com/FiniteZombie/op-1-school/issues/1); agent's check PASS (label on, commit `68e673c` = deployed `main`, 15 heartbeats from an A0 drill at 100 BPM) |
 
 Then an agent reads the issue (GitHub MCP `list_issues`, label
 `bug-report`) and checks it: the label is on it, the header's commit matches
