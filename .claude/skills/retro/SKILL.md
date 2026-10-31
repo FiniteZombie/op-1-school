@@ -69,7 +69,8 @@ End by asking for their answers, and whether to act on the recommendations.
    (done and where, partly, deferred, or dropped, with why). The next retro
    starts from this table, so be specific.
 6. **Set the Status line** to `reviewed with the owner on <date>`. If that
-   finished the plan, archive it
+   finished the plan, backfill its last row's commit (no later row will) and
+   archive it
    ([writing-a-plan.md, When a plan is done](../../../.agents/writing-a-plan.md#when-a-plan-is-done)).
 7. **Don't commit** unless asked. Clean up what you started, and end with what
    changed, plus a **How to test this yourself** for anything that runs.

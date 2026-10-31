@@ -39,6 +39,7 @@ which one.**
 | "Do the next step", or any named step or lane (including as a `/run-steps` subagent) | the **`/step`** skill |
 | Orchestrating a plan's steps or lanes | the **`/run-steps`** skill |
 | Going over a retro with the owner | the **`/retro`** skill |
+| Writing a new plan (a phase or a spike) | the **`/write-plan`** skill |
 | Writing or changing a plan, a step, a lane or a "Done when" list | [`.agents/writing-a-plan.md`](.agents/writing-a-plan.md) |
 | Any audio, MIDI, clock or input-timing code | SPEC §3, all of it |
 | Anything touching OP-1 Field behaviour or file formats | SPEC §2 and §8, then [`docs/HARDWARE_NOTES.md`](docs/HARDWARE_NOTES.md) |
@@ -118,7 +119,8 @@ Push back before breaking one.
   light value each; dark is a `dark` class on `<html>`), never raw hexes.
 - Dev server: the `dev` configuration in `.claude/launch.json` (`npm run dev`,
   port 5173). The app is at `http://localhost:5173/op-1-school/`. Parallel
-  lanes use `dev-l2` (5174) and `dev-l3` (5175): another port is another
+  lanes start Vite from their worktree on 5174 and 5175 (the `step` skill
+  says how): another port is another
   origin with its own IndexedDB, so a check that reads it first runs
   `indexedDB.deleteDatabase('op-1-school')` and reloads. The app doesn't
   close its connection on `versionchange`, so the delete waits (`blocked`)

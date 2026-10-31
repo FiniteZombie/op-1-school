@@ -5,8 +5,9 @@ when" list.** `AGENTS.md` sends you here and doesn't repeat it.
 
 One plan per SPEC phase or spike, in `.agents/plans/<slug>.md` (for example
 `phase-1-spine.md`). The spec is the design; a plan says how one phase gets
-built and where it stands, and wins over the spec where they differ. Agents
-read plans, often unattended ([`/step`](../.claude/skills/step/SKILL.md),
+built and where it stands, and wins over the spec where they differ.
+[`/write-plan`](../.claude/skills/write-plan/SKILL.md) writes one and gets it
+grilled. Agents read plans, often unattended ([`/step`](../.claude/skills/step/SKILL.md),
 [`/run-steps`](../.claude/skills/run-steps/SKILL.md)), so write them so an
 agent can build and check each row without asking.
 
@@ -107,7 +108,7 @@ GitHub Pages, and runs `/dev/spine?dev` on the phone and the Field.
   empty `### Process notes` list (what attended rows found wrong with the
   process; the retro reads it).
 - The phase's exit criteria (from the spec) are the plan's last Done-when list.
-- A `/run-steps` pre-flight adds a **Pre-flight answers** section. It wins over
+- `/write-plan`'s grill adds a **Pre-flight answers** section. It wins over
   the row text where they differ, but an answer that overrides a numbered
   decision or a row edits that text too, and a later edit to either keeps
   them in agreement.

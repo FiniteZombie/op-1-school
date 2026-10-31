@@ -24,6 +24,10 @@ message). If an orchestrator spawned you, also read
    - the plan's **Carried forward** list;
    - for a lane, its owned paths and `docs/MODULE_CONTRACT.md`.
 
+   On a plan's first row, if it has no **Pre-flight answers**, it was never
+   grilled: say so and suggest `/write-plan`, and go ahead if the owner says
+   to.
+
    Then rename this session so the sidebar says what's being built: call
    `set_session_title` (load it with ToolSearch, `session_id: "self"`) with
    the row's commit-style name, like `Spine 3: theory`. If the tool isn't
@@ -64,7 +68,7 @@ message). If an orchestrator spawned you, also read
      screenshot frame isn't CSS pixels), and name the role
      (`find 'button "skip"'`). If Vite serves a stale module after two quick
      edits, touch the file. In a lane's worktree `preview_start` serves the
-     main checkout, so start `npx vite --port <lane port> --strictPort` from
+     main checkout, so start `npx vite --port <5174 or 5175> --strictPort` from
      the worktree in the background, and kill it by PID when you're done:
      stopping the task can leave it listening.
    - `[phone]`, `[field]` and `[ear]` items are the owner's. Write their test
@@ -110,6 +114,7 @@ you, follow the steps above with these changes. Your prompt's overrides win.
 - **Skip `set_session_title`.**
 - **Never commit**, not even the backfill. Write the previous hash into the
   status table if your prompt gives one.
+- **No retro**, even on the plan's last row: the orchestrator writes it.
 - **A lane edits nothing outside its owned paths**, not the plan, the VERIFY
   log or `AGENTS.md`: parallel lanes would conflict on them. Put your status,
   Carried forward bullets, VERIFY log entries, process notes and any doc

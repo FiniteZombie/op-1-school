@@ -1,6 +1,6 @@
 ---
 name: run-steps
-description: Orchestrate an op-1-school plan's remaining rows unattended - pre-flight the plan with the owner, then one fresh subagent per step (in order) or per lane (in parallel, one worktree each), check and commit each, merge lanes in order on the plan branch, and finish with a retro in .agents/retros/. Use whenever the user invokes /run-steps, or asks to "run the fan-out", "orchestrate phase 2", "run the rest of the plan overnight", or similar.
+description: Orchestrate an op-1-school plan's remaining rows unattended - check the plan was grilled and the machine is clean, then one fresh subagent per step (in order) or per lane (in parallel, one worktree each), check and commit each, merge lanes in order on the plan branch, and finish with a retro in .agents/retros/. Use whenever the user invokes /run-steps, or asks to "run the fan-out", "orchestrate phase 2", "run the rest of the plan overnight", or similar.
 ---
 
 # Run steps
@@ -10,74 +10,46 @@ goes to a fresh subagent, and you check, commit, merge and write it up. Their
 request: **$ARGUMENTS** (if that's blank, it's in their message). It names the
 plan, and maybe which rows or where to stop. If it doesn't name the plan, ask
 (**Where we are** in `AGENTS.md` lists the open ones). Without rows named,
-it's every open row up to the plan's first **attended** row.
+it's every open row up to the plan's first **attended** row. If the next open
+row is attended, there's nothing to run: say so and point the owner at
+`/step`.
 
-Read the [`step` skill](../step/SKILL.md) (what each subagent does, including
-its subagent mode) and
-[`.agents/writing-a-plan.md`](../../../.agents/writing-a-plan.md) (what the
-grill checks against).
+Read the [`step` skill](../step/SKILL.md): what each subagent does, including
+its subagent mode.
 
-## Phase 0: pre-flight (the owner is still here)
+## Phase 0: before the run (the owner is still here)
 
 1. **The latest retro.** Read the newest file in `.agents/retros/`. If its
    **Status** says it wasn't reviewed, say so and suggest `/retro` first.
    Otherwise carry anything still open in its **Review** into this run.
-2. **The machine.** `git status` is clean, you're on `main`, the last plan's
+2. **The plan was grilled.** It has a **Pre-flight answers** section. If it
+   doesn't, say so and stop: [`/write-plan`](../write-plan/SKILL.md) grills it
+   and asks the owner.
+3. **The machine.** `git status` is clean, you're on `main`, the last plan's
    branch is merged (`git branch --no-merged main` doesn't list it),
    `npm run check` passes, and no dev server is running. If not, say so and
-   stop. **Resuming a plan** that already has **Pre-flight answers**: stay on
-   its branch, skip the `main` and merged checks and steps 3–5, and re-read
-   its check notes for this machine (a cloud container has no Field and no
-   phone; its browser is headless Chromium, see the `step` skill).
-3. **Grill the plan.** Spawn one fresh read-only subagent to read the plan,
-   the SPEC sections it cites, `AGENTS.md`, `docs/MODULE_CONTRACT.md` and
-   `.agents/writing-a-plan.md`, and list:
-   - contradictions inside a row or between rows;
-   - behaviour the plan doesn't define (failure and empty cases, what happens
-     to an earlier row's stub);
-   - creative calls it doesn't make (copy, a label, a look, a name);
-   - Done-when items with no check an agent can run, and items that should be
-     tagged `[phone]`, `[field]` or `[ear]`;
-   - VERIFY items a row would have to guess at;
-   - for lanes: owned paths that overlap, a lane that needs another lane's
-     output, a shared file no lane owns, and anything a lane needs from the
-     spine that the spine doesn't have yet;
-   - anything that breaks a load-bearing rule.
-4. **Ask the owner, once.** Show the list grouped as above, each with your
-   suggested answer. Creative calls default to placeholders under override
-   (b): list them, but the owner only answers the ones they care about. For lanes, also
-   ask whether to push the branches and open PRs at the end, or keep it all
-   local.
-5. **Branch, and write the answers into the plan.** `git switch -c
-   <plan-slug>` from `main`, then add a `## Pre-flight answers (<date>)`
-   section to the plan: the owner's calls, the
-   technical answers you settled, then check notes, each note saying which
-   machine it holds for. Say that it wins over anything that reads
-   differently. Fix plain mistakes in the row text; when an answer overrides a
-   numbered decision or a row's text, edit that text to agree; and when an
-   answer renames something, fix every mention of the old name
-   (`git grep -n '<old>' -- <plan>` hits only the answers afterwards).
-6. **Recommend a model and effort.** You can't change your own, so recommend
+   stop. **Resuming a plan** whose branch is still unmerged: stay on it and
+   skip the `main` and merged checks. If its branch was merged (a run, then
+   `/retro` and an attended row on `main`), Phase 1 restarts it from `main`. Re-read the answers' check notes for this
+   machine (a cloud container has no Field and no phone; its browser is
+   headless Chromium, see the `step` skill).
+4. **Recommend a model and effort.** You can't change your own, so recommend
    and wait for the owner to switch and say go. Subagents inherit your effort;
-   pass each one a `model`. A row's plan names one; to change it, say why
-   here and record the owner's pick in the answers. Without one:
-   - **Opus 5.5:** spine work, anything touching clocks, timing, MIDI, theory
-     or file formats.
-   - **Sonnet 5.5:** content, UI wiring, rows whose text is near code-level.
-     If one fix round doesn't fix a Sonnet row, redo it on Opus.
-   - **Fable 5.1:** not tried here yet. Ask the owner before recommending it,
-     and write down what you learn.
-   - **High effort** only when the grill left a lot undefined; otherwise the
-     plan and the answers carry the thinking and medium is enough.
+   pass each one the `model` its row names. To change one, say why here and
+   record the owner's pick in the answers. **High effort** only when the
+   answers left a lot undefined; otherwise the plan carries the thinking and
+   medium is enough.
 
 ## Phase 1: the run
 
-1. **Commit the pre-flight answers** on the plan branch as
-   `Plan: <plan> pre-flight answers`. Note the time.
+1. **Branch.** `git switch -c <plan-slug>` from `main`, unless you're
+   resuming on it; if it exists and is merged, `git switch -C <plan-slug>
+   main`. A model change from Phase 0 goes into the first row's
+   commit. Note the time.
 2. **Steps:** one fresh subagent per step, in order, never two at once, all on
    the plan branch. Check each (below) and commit it before the next.
-3. **Lanes:** create each lane's worktree yourself from the last step's
-   commit, `git worktree add -b <plan-slug>-<lane>
+3. **Lanes:** create each lane's worktree yourself from the plan branch's
+   `HEAD` (the last step's commit, if any), `git worktree add -b <plan-slug>-<lane>
    .claude/worktrees/<plan-slug>-<lane> <commit>`, and confirm the commit is
    its `HEAD`. Don't use the Agent tool's `isolation: "worktree"`: it cuts
    from `origin/main`, not the plan branch. Then spawn every lane's subagent
@@ -175,7 +147,8 @@ plan branch, what's pushed (nothing, unless the owner said so).>
 - What you checked after each row, including the item you spot-checked.
 
 ## Pre-flight
-What the grill found, what the owner answered, what was left as placeholders.
+Which of the plan's Pre-flight answers the run leaned on, and any that turned
+out wrong or missing.
 
 ## Decisions the plan didn't cover
 | Row | Decision | Why |
@@ -228,8 +201,8 @@ make them; the owner picks in `/retro`.
 
 ## Finishing
 
-- **Don't merge to `main`.** Push and open PRs only if the owner said so in
-  pre-flight; then use `.github/pull_request_template.md`. The owner merges
+- **Don't merge to `main`.** Push and open PRs only if the plan's Pre-flight
+  answers say so; then use `.github/pull_request_template.md`. The owner merges
   the plan branch after `/retro`, and the next run won't start until they
   have.
 - **Clean up** what you and your subagents started.
